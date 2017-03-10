@@ -1,6 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props, Terminated}
 
 object Greeter {
 
@@ -15,6 +15,16 @@ class Greeter extends Actor {
     case Greeter.Greet =>
       println("Hello World!")
       sender() ! Greeter.Done
+  }
+}
+
+class Terminator(ref: ActorRef) extends Actor with ActorLogging {
+  context watch ref
+
+  def receive: Receive = {
+    case Terminated(_) =>
+      log.info("{} has terminated, shutting down system", ref.path)
+      context.system.terminate()
   }
 }
 
@@ -35,5 +45,6 @@ class HelloWorld extends Actor {
 
 object HelloWorld extends App {
   val system = ActorSystem("formin")
-  system.actorOf(Props[HelloWorld], "helloworld")
+  val greeter = system.actorOf(Props[HelloWorld], "helloworld")
+  system.actorOf(Props(classOf[Terminator], greeter))
 }
