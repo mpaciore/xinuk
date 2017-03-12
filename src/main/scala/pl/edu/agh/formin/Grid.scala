@@ -19,11 +19,11 @@ sealed trait SignalSource extends TakenCell {
 }
 
 case class ForaminiferaCell(effectiveSignal: Double, sourceTimeToLive: Int) extends SignalSource {
-  override def signalSource: Double = -1d
+  override val signalSource: Double = -1d
 }
 
 case class AlgaeCell(effectiveSignal: Double, sourceTimeToLive: Int) extends SignalSource {
-  override def signalSource: Double = 1d
+  override val signalSource: Double = 1d
 }
 
 case class NeighbourCell(effectiveSignal: Double, neighbourOf: SignalSource) extends TakenCell
