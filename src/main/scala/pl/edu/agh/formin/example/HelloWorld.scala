@@ -1,4 +1,4 @@
-package pl.edu.agh.formin
+package pl.edu.agh.formin.example
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props, Terminated}
 
