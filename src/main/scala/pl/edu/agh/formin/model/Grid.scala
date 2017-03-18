@@ -1,31 +1,47 @@
 package pl.edu.agh.formin.model
 
-case class Grid(cells: Array[Array[GridCell]]) extends AnyVal
+final case class Grid(cells: Array[Array[Cell]]) extends AnyVal
 
 object Grid {
-  def apply(n: Int): Grid = Grid(Array.ofDim[GridCell](n, n))
+  def empty(n: Int): Grid = {
+    require(n > 3, "Insufficient grid size, no cells would be empty.")
+    val values = Array.tabulate[Cell](n, n) {
+      case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
+      case _ => EmptyCell()
+    }
+    Grid(values)
+  }
 }
 
-sealed trait GridCell {
-  def effectiveSignal: Double
+final case class Signal(value: Double) extends AnyVal
+
+object Signal {
+  val Zero = Signal(0d)
 }
 
-sealed trait TakenCell extends GridCell
+final case class Energy(value: Double) extends AnyVal
 
-sealed trait SignalSource extends TakenCell {
-  def signalSource: Double
-
-  def sourceTimeToLive: Int
+sealed trait Cell extends Any {
+  def smell: Array[Array[Signal]]
 }
 
-case class ForaminiferaCell(effectiveSignal: Double, sourceTimeToLive: Int) extends SignalSource {
-  override val signalSource: Double = -1d
+object Cell {
+  final val Size = 3
+
+  def emptySignal: Array[Array[Signal]] = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-case class AlgaeCell(effectiveSignal: Double, sourceTimeToLive: Int) extends SignalSource {
-  override val signalSource: Double = 1d
+sealed trait HasEnergy {
+  self: Cell =>
+  def energy: Energy
 }
 
-case class NeighbourCell(effectiveSignal: Double, neighbourOf: SignalSource) extends TakenCell
+final case class ForaminiferaCell(energy: Energy, smell: Array[Array[Signal]]) extends Cell with HasEnergy
 
-case class EmptyCell(effectiveSignal: Double) extends GridCell
+final case class AlgaeCell(energy: Energy, smell: Array[Array[Signal]]) extends Cell with HasEnergy
+
+case object Obstacle extends Cell {
+  override def smell: Array[Array[Signal]] = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
+}
+
+final case class EmptyCell(smell: Array[Array[Signal]] = Cell.emptySignal) extends AnyVal with Cell
