@@ -14,6 +14,7 @@ lazy val Version = new {
   lazy val AvsCommons = "1.19.10"
   lazy val ScalaTest = "3.0.1"
   lazy val ScalaLogging = "3.5.0"
+  lazy val Ficus = "1.4.0"
 }
 
 dependencyOverrides ++= Set(
@@ -27,6 +28,7 @@ libraryDependencies ++= Seq(
   "com.google.guava" % "guava" % Version.Guava,
   "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
   "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
+  "com.iheart" %% "ficus" % Version.Ficus,
   "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
   "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test
 )
