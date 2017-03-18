@@ -1,4 +1,4 @@
-package pl.edu.agh.formin
+package pl.edu.agh.formin.model
 
 case class Grid(cells: Array[Array[GridCell]]) extends AnyVal
 
