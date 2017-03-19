@@ -37,10 +37,10 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     case StartSimulation(iterations) =>
       this.iterations = iterations
       log.info("Simulation started, iterations={}", iterations)
-      startIteration(0)
+      startIteration(1)
       context.become(started)
     case GetState =>
-      sender() ! State.Stopped(status)
+      sender() ! State.Stopped
   }
 
   def started: Receive = {
@@ -61,7 +61,12 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       sender() ! State.Running(status)
     case StopSimulation =>
       log.info("Simulation stopped.")
-      context.become(stopped)
+      context.become(finished)
+  }
+
+  def finished: Receive = {
+    case GetState =>
+      sender() ! State.Finished(status)
   }
 }
 
@@ -73,7 +78,7 @@ object SchedulerActor {
 
   case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
 
-  case class IterationFinished(i: Long) extends AnyVal
+  private case class IterationFinished(i: Long) extends AnyVal
 
   case object StopSimulation
 
@@ -81,9 +86,11 @@ object SchedulerActor {
 
   object State {
 
-    case class Stopped(status: Map[Long, IterationStatus]) extends State
+    case object Stopped extends State
 
     case class Running(status: Map[Long, IterationStatus]) extends State
+
+    case class Finished(status: Map[Long, IterationStatus]) extends State
 
   }
 
@@ -104,6 +111,19 @@ case class IterationStatus private() {
     worker2grid.size
   }
 
+  def canEqual(other: Any): Boolean = other.isInstanceOf[IterationStatus]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: IterationStatus =>
+      (that canEqual this) &&
+        worker2grid == that.worker2grid
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(worker2grid)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object IterationStatus {
