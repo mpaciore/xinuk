@@ -5,7 +5,7 @@ import java.{lang => jl}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import com.google.common.cache.CacheBuilder
-import pl.edu.agh.formin.SchedulerActor.{IterationFinished, IterationPartFinished, StartSimulation, StopSimulation}
+import pl.edu.agh.formin.SchedulerActor._
 import pl.edu.agh.formin.model.Grid
 
 import scala.collection.mutable
@@ -23,17 +23,20 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   override def receive: Receive = stopped
 
+  private def status: Map[Long, IterationStatus] = {
+    iteration2status.map { case (iteration, status) => (iteration: Long, status) }(scala.collection.breakOut)
+  }
+
   def stopped: Receive = {
     case StartSimulation(iterations) =>
       this.iterations = iterations
       log.info("Simulation started, iterations={}", iterations)
       context.become(started)
+    case GetState =>
+      sender() ! State.Stopped(status)
   }
 
   def started: Receive = {
-    case StopSimulation =>
-      log.info("Simulation stopped.")
-      context.become(stopped)
     case IterationPartFinished(iteration, status) =>
       iteration2status.getOpt(iteration - 1).foreach(_.remove(status.worker))
       iteration2status.getOpt(iteration) match {
@@ -49,6 +52,12 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       val nextIteration = i + 1
       iteration2status.update(nextIteration, IterationStatus.empty())
       workers.foreach(_ ! WorkerActor.StartIteration(nextIteration))
+    case GetState =>
+      sender() ! State.Running(status)
+    case StopSimulation =>
+      log.info("Simulation stopped.")
+      context.become(stopped)
+
   }
 }
 
@@ -56,11 +65,23 @@ object SchedulerActor {
 
   case class StartSimulation(iterations: Long) extends AnyVal
 
+  case object GetState
+
   case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
 
   case class IterationFinished(i: Long) extends AnyVal
 
   case object StopSimulation
+
+  sealed trait State
+
+  object State {
+
+    case class Stopped(status: Map[Long, IterationStatus]) extends State
+
+    case class Running(status: Map[Long, IterationStatus]) extends State
+
+  }
 
 }
 
