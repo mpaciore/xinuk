@@ -5,6 +5,7 @@ import java.{util => ju}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, IterationPartFinished, StartSimulation, StopSimulation}
+import pl.edu.agh.formin.model.Grid
 
 import scala.collection.mutable
 
