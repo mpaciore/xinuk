@@ -11,6 +11,7 @@ import pl.edu.agh.formin.model.Grid
 import scala.collection.mutable
 
 class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging {
+  require(workers.nonEmpty, "Workers cannot be empty")
 
   //todo: this could benefit from being totally unsynchronized, but was a fast way to get a bounded map
   private val iteration2status: mutable.Map[jl.Long, IterationStatus] =
@@ -27,10 +28,16 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     iteration2status.map { case (iteration, status) => (iteration: Long, status) }(scala.collection.breakOut)
   }
 
+  private def startIteration(n: Long): Unit = {
+    iteration2status.update(n, IterationStatus.empty())
+    workers.foreach(_ ! WorkerActor.StartIteration(n))
+  }
+
   def stopped: Receive = {
     case StartSimulation(iterations) =>
       this.iterations = iterations
       log.info("Simulation started, iterations={}", iterations)
+      startIteration(0)
       context.become(started)
     case GetState =>
       sender() ! State.Stopped(status)
@@ -49,15 +56,12 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     case IterationFinished(i) if i == iterations =>
       self ! StopSimulation
     case IterationFinished(i) =>
-      val nextIteration = i + 1
-      iteration2status.update(nextIteration, IterationStatus.empty())
-      workers.foreach(_ ! WorkerActor.StartIteration(nextIteration))
+      startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
     case StopSimulation =>
       log.info("Simulation stopped.")
       context.become(stopped)
-
   }
 }
 
