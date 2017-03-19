@@ -36,9 +36,13 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
   def stopped: Receive = {
     case StartSimulation(iterations) =>
       this.iterations = iterations
-      log.info("Simulation started, iterations={}", iterations)
-      startIteration(1)
-      context.become(started)
+      if (iterations <= 0) {
+        context.become(finished)
+      } else {
+        log.info("Simulation started, iterations={}", iterations)
+        startIteration(1)
+        context.become(started)
+      }
     case GetState =>
       sender() ! State.Stopped
   }

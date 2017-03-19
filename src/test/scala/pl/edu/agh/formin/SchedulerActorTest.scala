@@ -58,6 +58,35 @@ class SchedulerActorTest
     afterSecondWorker.status.keySet should contain only(1L, 2L)
   }
 
+  it should "be in finished state" in {
+    val worker = TestProbe("worker1")
+
+    val nonSense = system.actorOf(Props(classOf[SchedulerActor], Vector(worker.ref)))
+    nonSense ! StartSimulation(-1)
+    nonSense ! GetState
+    expectMsg(SchedulerActor.State.Finished(Map.empty))
+
+    val zero = system.actorOf(Props(classOf[SchedulerActor], Vector(worker.ref)))
+    zero ! StartSimulation(0)
+    zero ! GetState
+    expectMsg(SchedulerActor.State.Finished(Map.empty))
+
+    val worker1 = TestProbe("worker1")
+    val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(worker1.ref)))
+    scheduler ! StartSimulation(1)
+
+    val iterationStatus = IterationStatus.empty()
+    worker1.expectMsg(WorkerActor.StartIteration(1))
+    val simulationStatus = SimulationStatus(WorkerId(1), Grid.empty(10))
+    worker1.send(scheduler, SchedulerActor.IterationPartFinished(1, simulationStatus))
+    iterationStatus.add(simulationStatus)
+
+    eventually {
+      scheduler ! GetState
+      expectMsg(SchedulerActor.State.Finished(Map(1L -> iterationStatus)))
+    }
+  }
+
   it should "provide iteration state" in {
     val worker1 = TestProbe("worker1")
     val worker2 = TestProbe("worker2")
