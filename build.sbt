@@ -15,6 +15,8 @@ lazy val Version = new {
   lazy val ScalaTest = "3.0.1"
   lazy val ScalaLogging = "3.5.0"
   lazy val Ficus = "1.4.0"
+  lazy val ScalaSwing = "1.0+"
+  lazy val JFreeChart = "1.0.19"
 }
 
 dependencyOverrides ++= Set(
@@ -30,6 +32,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
   "com.iheart" %% "ficus" % Version.Ficus,
   "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
-  "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test
+  "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+  "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+  "org.jfree" % "jfreechart" % Version.JFreeChart
 )
 

@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder
 import pl.edu.agh.formin.SchedulerActor._
 import pl.edu.agh.formin.model.Grid
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging {
@@ -21,6 +22,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       .build[jl.Long, IterationStatus]().asMap().asScala
 
   private var iterations: Long = _
+
+  private var registered : Set[ActorRef] = Set()
 
   override def receive: Receive = stopped
 
@@ -57,9 +60,15 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
         case Opt.Empty =>
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
       }
+    case Register =>
+        registered+=sender()
     case IterationFinished(i) if i == iterations =>
+      val lastFinishedInteration = status.get(status.size - 1)
+      for(user <- registered) user ! lastFinishedInteration
       self ! StopSimulation
     case IterationFinished(i) =>
+      val lastFinishedInteration = status.get(status.size - 1)
+      for(user <- registered) user ! lastFinishedInteration
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
@@ -77,6 +86,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 object SchedulerActor {
 
   case class StartSimulation(iterations: Long) extends AnyVal
+
+  case object Register
 
   case object GetState
 
@@ -113,6 +124,10 @@ case class IterationStatus private() {
 
   def size: Int = {
     worker2grid.size
+  }
+
+  def getGridForWorker(id: WorkerId): Unit = {
+    worker2grid.get(id)
   }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[IterationStatus]
