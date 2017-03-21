@@ -5,6 +5,7 @@ import java.{lang => jl}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import com.google.common.cache.CacheBuilder
+import pl.edu.agh.formin.Gui.NewIteration
 import pl.edu.agh.formin.SchedulerActor._
 import pl.edu.agh.formin.model.Grid
 
@@ -63,12 +64,12 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     case Register =>
         registered+=sender()
     case IterationFinished(i) if i == iterations =>
-      val lastFinishedInteration = status.get(status.size - 1)
-      for(user <- registered) user ! lastFinishedInteration
+      val lastFinishedInteration = status.get(status.size - 1).get
+      for(user <- registered) user ! NewIteration(lastFinishedInteration)
       self ! StopSimulation
     case IterationFinished(i) =>
-      val lastFinishedInteration = status.get(status.size - 1)
-      for(user <- registered) user ! lastFinishedInteration
+      val lastFinishedInteration = status.get(status.size - 1).get
+      for(user <- registered) user ! NewIteration(lastFinishedInteration)
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
@@ -112,6 +113,10 @@ object SchedulerActor {
 }
 
 case class IterationStatus private() {
+  def getGridForWorker(id: WorkerId): Grid = {
+    worker2grid(id)
+  }
+
   private val worker2grid = mutable.HashMap[WorkerId, Grid]()
 
   def add(status: SimulationStatus): Unit = {
@@ -124,10 +129,6 @@ case class IterationStatus private() {
 
   def size: Int = {
     worker2grid.size
-  }
-
-  def getGridForWorker(id: WorkerId): Unit = {
-    worker2grid.get(id)
   }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[IterationStatus]
