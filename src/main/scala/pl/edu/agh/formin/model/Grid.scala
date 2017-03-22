@@ -1,6 +1,9 @@
 package pl.edu.agh.formin.model
 
 final case class Grid(cells: Array[Array[Cell]]) {
+
+  import Grid._
+
   private val cellSignalFun: (Int) => (Int) => Option[Array[Array[Signal]]] = {
     cells.map(_.lift).lift.andThen {
       case Some(rowFunction) => rowFunction.andThen(_.map(_.smell))
@@ -8,7 +11,15 @@ final case class Grid(cells: Array[Array[Cell]]) {
     }
   }
 
-  def propagatedSignal(x: Int, y: Int): Array[Array[Signal]] = ???
+  def propagatedSignal(x: Int, y: Int): Array[Array[Signal]] = {
+    val current = cells(x)(y).smell
+    val newSignal = Cell.emptySignal
+    SubcellCoordinates.foreach {
+      case (i, j) if i == 0 && j == 0 =>
+      case (i, j) =>
+    }
+    newSignal
+  }
 }
 
 object Grid {
@@ -19,6 +30,11 @@ object Grid {
       case _ => EmptyCell()
     }
     Grid(values)
+  }
+
+  val SubcellCoordinates: Vector[(Int, Int)] = {
+    val pos = Vector(0, 1, 2)
+    pos.flatMap(i => pos.map(j => (i, j)))
   }
 }
 
