@@ -67,7 +67,7 @@ case class GuiGrid (initialState : Grid) extends SimpleSwingApplication {
   }
 
   def top = new MainFrame {
-    title = "Ising model"
+    title = "Formin model"
     minimumSize = new Dimension(1050, 700)
     background = bgcolor
 
@@ -89,6 +89,7 @@ case class GuiGrid (initialState : Grid) extends SimpleSwingApplication {
     for (x <- 0 until dim;
          y <- 0 until dim)
       pc.set(x, y, newGrid.cells(x)(y))
+    pc.repaint()
   }
 
   class ParticleCanvas private(dim: Int) extends Label {
