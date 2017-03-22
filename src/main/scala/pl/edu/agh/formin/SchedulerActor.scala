@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import com.google.common.cache.CacheBuilder
 import pl.edu.agh.formin.SchedulerActor._
+import pl.edu.agh.formin.gui.GuiActor.NewIteration
 import pl.edu.agh.formin.model.Grid
 
 import scala.collection.mutable
@@ -21,6 +22,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       .build[jl.Long, IterationStatus]().asMap().asScala
 
   private var iterations: Long = _
+
+  private val registered: mutable.Set[ActorRef] = mutable.Set.empty
 
   override def receive: Receive = stopped
 
@@ -57,15 +60,24 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
         case Opt.Empty =>
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
       }
+    case Register =>
+      registered += sender()
     case IterationFinished(i) if i == iterations =>
+      notifyListeners(i)
       self ! StopSimulation
     case IterationFinished(i) =>
+      notifyListeners(i)
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
     case StopSimulation =>
       log.info("Simulation stopped.")
       context.become(finished)
+  }
+
+  private def notifyListeners(iteration: Long): Unit = {
+    val finishedIterationStatus = status(iteration)
+    registered.foreach(_ ! NewIteration(finishedIterationStatus))
   }
 
   def finished: Receive = {
@@ -77,6 +89,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 object SchedulerActor {
 
   case class StartSimulation(iterations: Long) extends AnyVal
+
+  case object Register
 
   case object GetState
 
@@ -101,6 +115,10 @@ object SchedulerActor {
 }
 
 case class IterationStatus private() {
+  def getGridForWorker(id: WorkerId): Option[Grid] = {
+    worker2grid.get(id)
+  }
+
   private val worker2grid = mutable.HashMap[WorkerId, Grid]()
 
   def add(status: SimulationStatus): Unit = {
