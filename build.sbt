@@ -15,7 +15,7 @@ lazy val Version = new {
   lazy val ScalaTest = "3.0.1"
   lazy val ScalaLogging = "3.5.0"
   lazy val Ficus = "1.4.0"
-  lazy val ScalaSwing = "1.0+"
+  lazy val ScalaSwing = "2.0.0"
   lazy val JFreeChart = "1.0.19"
 }
 

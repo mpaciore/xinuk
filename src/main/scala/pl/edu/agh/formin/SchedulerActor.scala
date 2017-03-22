@@ -5,9 +5,10 @@ import java.{lang => jl}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import com.google.common.cache.CacheBuilder
-import pl.edu.agh.formin.GuiActor.NewIteration
 import pl.edu.agh.formin.SchedulerActor._
+import pl.edu.agh.formin.gui.GuiActor.NewIteration
 import pl.edu.agh.formin.model.Grid
+
 import scala.collection.mutable
 
 class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging {
@@ -22,7 +23,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   private var iterations: Long = _
 
-  private var registered : Set[ActorRef] = Set()
+  private val registered: mutable.Set[ActorRef] = mutable.Set.empty
 
   override def receive: Receive = stopped
 
@@ -60,7 +61,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
       }
     case Register =>
-        registered+=sender()
+      registered += sender()
     case IterationFinished(i) if i == iterations =>
       notifyListeners(i)
       self ! StopSimulation
