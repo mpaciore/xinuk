@@ -22,24 +22,26 @@ SC - spawn chance, SC ∈ [0,1] && SC ∈ R
 FAR - foraminifera-algae ratio; FAR ∈ N.
 FSSV - foraminifera start signal value; FSSV ∈ [0,1] && FSSV ∈ R.
 ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
+MSV - minimal signal value; MSV ∈ [0,1] && MSV ∈ R
  */
 
 final case class ForminConfig private(
-                   foraminiferaStartEnergy: Energy,
-                   foraminiferaReproductionCost: Energy,
-                   foraminiferaReproductionThreshold: Energy,
-                   foraminiferaLifeActivityCost: Energy,
-                   algaeReproductionFrequency: Int,
-                   algaeEnergeticCapacity: Energy,
-                   signalSpeedRatio: Int,
-                   //diffractionFactor: Double,
-                   attenuationFactor: Double,
-                   signalSuppresionFactor: Double,
-                   gridSize: Int,
-                   spawnChance: Double,
-                   foraminiferaAlgaeRatio: Double,
-                   foraminiferaInitialSignal: Signal,
-                   algaeInitialSignal: Signal
+                                       foraminiferaStartEnergy: Energy,
+                                       foraminiferaReproductionCost: Energy,
+                                       foraminiferaReproductionThreshold: Energy,
+                                       foraminiferaLifeActivityCost: Energy,
+                                       algaeReproductionFrequency: Int,
+                                       algaeEnergeticCapacity: Energy,
+                                       signalSpeedRatio: Int,
+                                       //diffractionFactor: Double,
+                                       attenuationFactor: Double,
+                                       signalSuppresionFactor: Double,
+                                       gridSize: Int,
+                                       spawnChance: Double,
+                                       foraminiferaAlgaeRatio: Double,
+                                       foraminiferaInitialSignal: Signal,
+                                       algaeInitialSignal: Signal,
+                                       minimalSignalValue: Signal
                  )
 
 object ForminConfig {
