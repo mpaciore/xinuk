@@ -1,13 +1,13 @@
-package pl.edu.agh.formin
+package pl.edu.agh.formin.gui
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
 import javax.swing.{ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
-import pl.edu.agh.formin.GuiActor._
 import pl.edu.agh.formin.SchedulerActor.Register
 import pl.edu.agh.formin.model._
+import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
@@ -16,11 +16,13 @@ import scala.util.Try
 
 class GuiActor(scheduler: ActorRef, worker: WorkerId, dimension: Int) extends Actor with ActorLogging {
 
+  import GuiActor._
+
   override def receive: Receive = started
 
   private lazy val gui: GuiGrid = new GuiGrid(dimension)
 
-  override def preStart = {
+  override def preStart: Unit = {
     scheduler ! Register
     log.info("GUI started")
   }
@@ -37,12 +39,10 @@ class GuiActor(scheduler: ActorRef, worker: WorkerId, dimension: Int) extends Ac
 }
 
 object GuiActor {
-
   case class NewIteration(state: IterationStatus) extends AnyVal
-
 }
 
-class GuiGrid(dimension: Int) extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
