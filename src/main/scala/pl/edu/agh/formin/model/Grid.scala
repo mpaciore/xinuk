@@ -1,6 +1,15 @@
 package pl.edu.agh.formin.model
 
-final case class Grid(cells: Array[Array[Cell]]) extends AnyVal
+final case class Grid(cells: Array[Array[Cell]]) {
+  private val cellSignalFun: (Int) => (Int) => Option[Array[Array[Signal]]] = {
+    cells.map(_.lift).lift.andThen {
+      case Some(rowFunction) => rowFunction.andThen(_.map(_.smell))
+      case None => _: Int => None
+    }
+  }
+
+  def propagatedSignal(x: Int, y: Int): Array[Array[Signal]] = ???
+}
 
 object Grid {
   def empty(n: Int): Grid = {
