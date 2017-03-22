@@ -5,11 +5,9 @@ import java.{lang => jl}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import com.google.common.cache.CacheBuilder
-import pl.edu.agh.formin.Gui.NewIteration
+import pl.edu.agh.formin.GuiActor.NewIteration
 import pl.edu.agh.formin.SchedulerActor._
 import pl.edu.agh.formin.model.Grid
-
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging {
@@ -64,18 +62,21 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     case Register =>
         registered+=sender()
     case IterationFinished(i) if i == iterations =>
-      val lastFinishedInteration = status.get(status.size - 1).get
-      for(user <- registered) user ! NewIteration(lastFinishedInteration)
+      notifyListeners(i)
       self ! StopSimulation
     case IterationFinished(i) =>
-      val lastFinishedInteration = status.get(status.size - 1).get
-      for(user <- registered) user ! NewIteration(lastFinishedInteration)
+      notifyListeners(i)
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
     case StopSimulation =>
       log.info("Simulation stopped.")
       context.become(finished)
+  }
+
+  private def notifyListeners(iteration: Long): Unit = {
+    val finishedIterationStatus = status(iteration)
+    registered.foreach(_ ! NewIteration(finishedIterationStatus))
   }
 
   def finished: Receive = {
@@ -113,8 +114,8 @@ object SchedulerActor {
 }
 
 case class IterationStatus private() {
-  def getGridForWorker(id: WorkerId): Grid = {
-    worker2grid(id)
+  def getGridForWorker(id: WorkerId): Option[Grid] = {
+    worker2grid.get(id)
   }
 
   private val worker2grid = mutable.HashMap[WorkerId, Grid]()
