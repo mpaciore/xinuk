@@ -16,6 +16,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   override def receive: Receive = stopped
 
+  private def propagateSignal(): Unit = {
+
+  }
+
   def stopped: Receive = {
     case StartIteration(1) =>
       val empty = EmptyCell()

@@ -18,20 +18,25 @@ final case class Grid(cells: Array[Array[Cell]]) {
       cellSignalFun(x + i - 1)(y + j - 1)
     }
 
-    val current = cells(x)(y).smell
-    val addends = SubcellCoordinates.map {
-      case (i, j) if i == 1 || j == 1 =>
-        destinationCellSignal(i, j).map(signal =>
-          signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)
-        )
-      case (i, j) =>
-        destinationCellSignal(i, j).map(_.apply(i)(j))
+    val current = cells(x)(y)
+    val currentSmell = current.smell
+    current match {
+      case Obstacle => currentSmell
+      case _ =>
+        val addends = SubcellCoordinates.map {
+          case (i, j) if i == 1 || j == 1 =>
+            destinationCellSignal(i, j).map(signal =>
+              signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)
+            )
+          case (i, j) =>
+            destinationCellSignal(i, j).map(_.apply(i)(j))
+        }
+        addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
+          val (i, j) = SubcellCoordinates(index)
+          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
+          (cell, index + 1)
+        }._1
     }
-    addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
-      val (i, j) = SubcellCoordinates(index)
-      cell(i)(j) = current(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
-      (cell, index + 1)
-    }._1
   }
 }
 
