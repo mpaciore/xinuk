@@ -2,7 +2,6 @@ package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
 
-
 final case class Grid(cells: Array[Array[Cell]]) {
 
   import Grid._
@@ -91,8 +90,8 @@ case object Obstacle extends Cell {
 
 final case class EmptyCell(smell: Array[Array[Signal]] = Cell.emptySignal) extends AnyVal with Cell {
 
-  private def smellWithSignal(added: Signal)(implicit config: ForminConfig): Array[Array[Signal]] = {
-    Array.tabulate(config.gridSize, config.gridSize)((i, j) => smell(i)(j) + added)
+  private def smellWithSignal(added: Signal): Array[Array[Signal]] = {
+    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
   }
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {

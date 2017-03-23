@@ -48,6 +48,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       }
     case GetState =>
       sender() ! State.Stopped
+    case Register =>
+      registered += sender()
   }
 
   def started: Receive = {

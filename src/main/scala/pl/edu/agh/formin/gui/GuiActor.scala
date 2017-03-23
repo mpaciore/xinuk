@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
 import javax.swing.{ImageIcon, UIManager}
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.Register
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -15,7 +15,7 @@ import scala.swing.TabbedPane.Page
 import scala.swing._
 import scala.util.Try
 
-class GuiActor(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
+class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
 
   import GuiActor._
 
@@ -41,6 +41,10 @@ class GuiActor(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminCon
 
 object GuiActor {
   case class NewIteration(state: IterationStatus) extends AnyVal
+
+  def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(scheduler, worker))
+  }
 }
 
 private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
@@ -92,6 +96,8 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
       img.setRGB(0, 0, dimension, dimension, rgbArray, 0, dimension)
     }
   }
+
+  main(Array.empty)
 
 }
 

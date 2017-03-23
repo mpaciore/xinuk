@@ -1,13 +1,14 @@
 package pl.edu.agh.formin
 
-import akka.actor.Actor
+import akka.actor.{Actor, Props}
+import pl.edu.agh.formin.SchedulerActor.IterationPartFinished
 import pl.edu.agh.formin.WorkerActor.StartIteration
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.{EmptyCell, Grid}
 
 import scala.util.Random
 
-class WorkerActor(id: WorkerId)(implicit config: ForminConfig) extends Actor {
+class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor {
 
   private val grid = Grid.empty
 
@@ -29,7 +30,7 @@ class WorkerActor(id: WorkerId)(implicit config: ForminConfig) extends Actor {
         }
       }
       //smell x signalspeedratio
-      //scheduler ! part finished
+      sender() ! IterationPartFinished(1, SimulationStatus(id, grid))
       context.become(started)
   }
 
@@ -42,6 +43,9 @@ object WorkerActor {
 
   case class StartIteration(i: Long) extends AnyVal
 
+  def props(id: WorkerId)(implicit config: ForminConfig): Props = {
+    Props(new WorkerActor(id))
+  }
 }
 
 
