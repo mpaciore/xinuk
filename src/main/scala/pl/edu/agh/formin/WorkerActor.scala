@@ -22,6 +22,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       for {
         x <- 0 until config.gridSize
         y <- 0 until config.gridSize
+        if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
       } {
         if (random.nextDouble() < config.spawnChance) {
           grid.cells(x)(y) =

@@ -56,7 +56,7 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
 
   def top = new MainFrame {
     title = "Formin model"
-    minimumSize = new Dimension(1050, 700)
+    minimumSize = new Dimension(1200, 800)
     background = bgcolor
 
     val canvas = new BorderPanel {
@@ -78,22 +78,32 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
   }
 
   private class ParticleCanvas(dimension: Int) extends Label {
+    private val factor = 40
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
     private val obstacleColor = new swing.Color(0, 0, 0).getRGB
     private val emptyColor = new swing.Color(255, 255, 255).getRGB
-    private val img = new BufferedImage(dimension, dimension, BufferedImage.TYPE_INT_ARGB)
+    private val img = new BufferedImage(dimension * factor, dimension * factor, BufferedImage.TYPE_INT_ARGB)
 
     icon = new ImageIcon(img)
 
     def set(cells: Array[Array[Cell]]): Unit = {
-      val rgbArray = cells.flatMap(_.map {
+      val rgbArray = cells.map(_.map {
         case AlgaeCell(_) => algaeColor
         case ForaminiferaCell(_, _) => forminColor
         case Obstacle => obstacleColor
         case EmptyCell(_) => emptyColor
       })
-      img.setRGB(0, 0, dimension, dimension, rgbArray, 0, dimension)
+
+      for {
+        x <- cells.indices
+        y <- cells.indices
+      } {
+        val startX = x * factor
+        val startY = y * factor
+        //todo optimize (array gen)
+        img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
+      }
     }
   }
 
