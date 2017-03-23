@@ -13,16 +13,16 @@ final case class Grid(cells: Array[Array[Cell]]) {
     }
   }
 
-  def propagatedSignal(x: Int, y: Int)(implicit config: ForminConfig): Array[Array[Signal]] = {
+  def propagatedSignal(x: Int, y: Int)(implicit config: ForminConfig): Cell = {
     @inline def destinationCellSignal(i: Int, j: Int): Option[Array[Array[Signal]]] = {
       cellSignalFun(x + i - 1)(y + j - 1)
     }
 
     val current = cells(x)(y)
-    val currentSmell = current.smell
     current match {
-      case Obstacle => currentSmell
-      case _ =>
+      case Obstacle => current
+      case smelling: SmellMedium[_] =>
+        val currentSmell = current.smell
         val addends = SubcellCoordinates.map {
           case (i, j) if i == 1 || j == 1 =>
             destinationCellSignal(i, j).map(signal =>
@@ -31,11 +31,12 @@ final case class Grid(cells: Array[Array[Cell]]) {
           case (i, j) =>
             destinationCellSignal(i, j).map(_.apply(i)(j))
         }
-        addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
+        val (newSmell, _) = addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
           cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
           (cell, index + 1)
-        }._1
+        }
+        smelling.withSmell(newSmell)
     }
   }
 }
@@ -80,20 +81,38 @@ object Cell {
   def emptySignal: Array[Array[Signal]] = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
+sealed trait SmellMedium[T <: Cell with SmellMedium[T]] {
+  self: T =>
+  type Self >: self.type <: T
+
+  def withSmell(smell: Array[Array[Signal]]): Self
+}
+
 sealed trait HasEnergy {
   self: Cell =>
   def energy: Energy
 }
 
-final case class ForaminiferaCell(energy: Energy, smell: Array[Array[Signal]]) extends Cell with HasEnergy
+final case class ForaminiferaCell(energy: Energy, smell: Array[Array[Signal]]) extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
+  type Self = ForaminiferaCell
 
-final case class AlgaeCell(smell: Array[Array[Signal]]) extends Cell
+  override def withSmell(smell: Array[Array[Signal]]) = copy(smell = smell)
+}
+
+final case class AlgaeCell(smell: Array[Array[Signal]]) extends Cell with SmellMedium[AlgaeCell] {
+  type Self = AlgaeCell
+
+  override def withSmell(smell: Array[Array[Signal]]) = copy(smell = smell)
+}
 
 case object Obstacle extends Cell {
   override def smell: Array[Array[Signal]] = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-final case class EmptyCell(smell: Array[Array[Signal]] = Cell.emptySignal) extends AnyVal with Cell {
+final case class EmptyCell(smell: Array[Array[Signal]] = Cell.emptySignal) extends Cell with SmellMedium[EmptyCell] {
+  type Self = EmptyCell
+
+  override def withSmell(smell: Array[Array[Signal]]) = copy(smell = smell)
 
   private def smellWithSignal(added: Signal): Array[Array[Signal]] = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)

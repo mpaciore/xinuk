@@ -10,14 +10,19 @@ import scala.util.Random
 
 class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor {
 
-  private val grid = Grid.empty
+  private var grid = Grid.empty
 
   private val random = new Random(System.nanoTime())
 
   override def receive: Receive = stopped
 
   private def propagateSignal(): Unit = {
-
+    (0 until config.signalSpeedRatio).foreach { _ =>
+      val cells = Array.tabulate(config.gridSize, config.gridSize)((x, y) =>
+        grid.propagatedSignal(x, y)
+      )
+      grid = Grid(cells)
+    }
   }
 
   def stopped: Receive = {
@@ -34,7 +39,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             else empty.withAlgae
         }
       }
-      //smell x signalspeedratio
+      propagateSignal()
       sender() ! IterationPartFinished(1, SimulationStatus(id, grid))
       context.become(started)
   }
