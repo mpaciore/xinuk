@@ -1,5 +1,9 @@
 package pl.edu.agh.formin.model
 
+import pl.edu.agh.formin.config.ForminConfig
+
+import scala.collection.immutable.Seq
+
 final case class Grid(cells: Array[Array[Cell]]) {
 
   import Grid._
@@ -11,14 +15,24 @@ final case class Grid(cells: Array[Array[Cell]]) {
     }
   }
 
-  def propagatedSignal(x: Int, y: Int): Array[Array[Signal]] = {
-    val current = cells(x)(y).smell
-    val newSignal = Cell.emptySignal
-    SubcellCoordinates.foreach {
-      case (i, j) if i == 0 && j == 0 =>
-      case (i, j) =>
+  def propagatedSignal(x: Int, y: Int)(implicit config: ForminConfig): Array[Array[Signal]] = {
+    @inline def destinationCellSignal(i: Int, j: Int): Option[Array[Array[Signal]]] = {
+      cellSignalFun(x + i - 1)(y + j - 1)
     }
-    newSignal
+
+    val current = cells(x)(y).smell
+    val addends = SubcellCoordinates.map {
+      case (i, j) if i == 1 || j == 1 =>
+        destinationCellSignal(i, j).map(signal =>
+          signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)
+        )
+      case (i, j) => destinationCellSignal(i, j).map(_.apply(i)(j))
+    }
+    addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
+      val (i, j) = SubcellCoordinates(index)
+      cell(i)(j) = current(i)(j) + signalOpt.getOrElse(Signal.Zero)
+      (cell, index + 1)
+    }._1
   }
 }
 
@@ -34,11 +48,15 @@ object Grid {
 
   val SubcellCoordinates: Vector[(Int, Int)] = {
     val pos = Vector(0, 1, 2)
-    pos.flatMap(i => pos.map(j => (i, j)))
+    pos.flatMap(i => pos.map(j => (i, j))).filter { case (i, j) => !(i == 1 && j == 1) }
   }
+
+  val SubcellCoordinatesWithIndices: Seq[((Int, Int), Int)] = SubcellCoordinates.zipWithIndex
 }
 
-final case class Signal(value: Double) extends AnyVal
+final case class Signal(value: Double) extends AnyVal {
+  def +(other: Signal) = Signal(value + other.value)
+}
 
 object Signal {
   val Zero = Signal(0d)
