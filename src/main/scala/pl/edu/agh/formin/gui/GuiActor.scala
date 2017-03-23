@@ -6,6 +6,7 @@ import javax.swing.{ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import pl.edu.agh.formin.SchedulerActor.Register
+import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
@@ -14,13 +15,13 @@ import scala.swing.TabbedPane.Page
 import scala.swing._
 import scala.util.Try
 
-class GuiActor(scheduler: ActorRef, worker: WorkerId, dimension: Int) extends Actor with ActorLogging {
+class GuiActor(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
 
   import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(dimension)
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)
 
   override def preStart: Unit = {
     scheduler ! Register
@@ -83,7 +84,7 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
 
     def set(cells: Array[Array[Cell]]): Unit = {
       val rgbArray = cells.flatMap(_.map {
-        case AlgaeCell(_, _) => algaeColor
+        case AlgaeCell(_) => algaeColor
         case ForaminiferaCell(_, _) => forminColor
         case Obstacle => obstacleColor
         case EmptyCell(_) => emptyColor
