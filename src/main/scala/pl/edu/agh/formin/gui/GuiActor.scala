@@ -1,5 +1,4 @@
 package pl.edu.agh.formin.gui
-
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
 import javax.swing.{ImageIcon, UIManager}
@@ -12,6 +11,7 @@ import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
+import scala.swing.Table.AbstractRenderer
 import scala.swing._
 import scala.util.Try
 
@@ -40,6 +40,7 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
 }
 
 object GuiActor {
+
   case class NewIteration(state: IterationStatus) extends AnyVal
 
   def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
@@ -54,6 +55,53 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
   private val bgcolor = new Color(220, 220, 220)
   private val pc = new ParticleCanvas(dimension)
 
+
+  private val tb = new Table(dimension * 3, dimension * 3) {
+
+    private val algaeColor = new swing.Color(9, 108, 16)
+    private val forminColor = new swing.Color(81, 71, 8)
+    private val obstacleColor = new swing.Color(0, 0, 0)
+    private val emptyColor = new swing.Color(255, 255, 255)
+
+    var tcr = new MRenderer(new Array[Array[Cell]](dimension))
+
+    class MRenderer(cells: Array[Array[Cell]])  extends AbstractRenderer(new MyRenderer) {
+      override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
+        component.prepare(row, column, cells)
+      }
+    }
+
+    class MyRenderer extends Label {
+      def prepare(row : Int, column : Int, cells: Array[Array[Cell]]) {
+        cells(column/3)(row/3) match {
+          case AlgaeCell(_) => background = algaeColor
+          case ForaminiferaCell(_, _) => background =  forminColor
+          case Obstacle => background =  obstacleColor
+          case EmptyCell(_) => background =  emptyColor
+        }
+
+        text = cells(column/3)(row/3).smell(column%3)(row%3).value.toString
+      }
+    }
+
+    def set(cells: Array[Array[Cell]]): Unit = {
+      tcr = new MRenderer(cells)
+      for{
+        x <- 0 until dimension
+        y <- 0 until dimension
+        cx <- 0 until 3
+        cy <- 0 until 3
+      } {
+        model.setValueAt(cells(x)(y).smell(cx)(cy).value,y*3+cy,x*3+cx)
+      }
+    }
+
+    override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int) = {
+      tcr.componentFor(this,false,false,0,row,col)
+    }
+  }
+
+
   def top = new MainFrame {
     title = "Formin model"
     minimumSize = new Dimension(1200, 800)
@@ -63,17 +111,30 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
       background = bgcolor
       layout(pc) = Center
     }
+
+    val table = new BorderPanel {
+      background = bgcolor
+      layout(tb) = Center
+    }
+
     val simPanel = new BorderPanel {
       background = bgcolor
       layout(canvas) = Center
     }
+    val sigPanel = new BorderPanel {
+      background = bgcolor
+      layout(table) = Center
+    }
     contents = new TabbedPane {
       pages += new Page("Simulation", simPanel)
+      pages += new Page("Signal", sigPanel)
     }
   }
 
   def setNewValues(newGrid: Grid): Unit = {
     pc.set(newGrid.cells)
+    tb.set(newGrid.cells)
+    tb.repaint()
     pc.repaint()
   }
 
