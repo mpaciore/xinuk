@@ -63,15 +63,15 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     private val obstacleColor = new swing.Color(0, 0, 0)
     private val emptyColor = new swing.Color(255, 255, 255)
 
-    var tcr = new MRenderer(new Array[Array[Cell]](dimension))
+    var renderer = new CellRenderer(new Array[Array[Cell]](dimension))
 
-    class MRenderer(cells: Array[Array[Cell]])  extends AbstractRenderer(new MyRenderer) {
+    class CellRenderer(cells: Array[Array[Cell]])  extends AbstractRenderer(new CellLabel) {
       override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
         component.prepare(row, column, cells)
       }
     }
 
-    class MyRenderer extends Label {
+    class CellLabel extends Label {
       def prepare(row : Int, column : Int, cells: Array[Array[Cell]]) {
         cells(column/3)(row/3) match {
           case AlgaeCell(_) => background = algaeColor
@@ -85,19 +85,11 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     }
 
     def set(cells: Array[Array[Cell]]): Unit = {
-      tcr = new MRenderer(cells)
-      for{
-        x <- 0 until dimension
-        y <- 0 until dimension
-        cx <- 0 until 3
-        cy <- 0 until 3
-      } {
-        model.setValueAt(cells(x)(y).smell(cx)(cy).value,y*3+cy,x*3+cx)
-      }
+      renderer = new CellRenderer(cells)
     }
 
     override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
-      tcr.componentFor(this,isSelected = false,hasFocus = false,0,row,col)
+      renderer.componentFor(this,isSelected = false,hasFocus = false,0,row,col)
     }
   }
 
