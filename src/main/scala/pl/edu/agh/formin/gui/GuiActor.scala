@@ -96,8 +96,8 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
       }
     }
 
-    override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int) = {
-      tcr.componentFor(this,false,false,0,row,col)
+    override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
+      tcr.componentFor(this,isSelected = false,hasFocus = false,0,row,col)
     }
   }
 
