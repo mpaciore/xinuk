@@ -1,4 +1,5 @@
 package pl.edu.agh.formin.gui
+
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
 import javax.swing.{ImageIcon, UIManager}
@@ -55,44 +56,7 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
   private val bgcolor = new Color(220, 220, 220)
   private val pc = new ParticleCanvas(dimension)
 
-
-  private val tb = new Table(dimension * 3, dimension * 3) {
-
-    private val algaeColor = new swing.Color(9, 108, 16)
-    private val forminColor = new swing.Color(81, 71, 8)
-    private val obstacleColor = new swing.Color(0, 0, 0)
-    private val emptyColor = new swing.Color(255, 255, 255)
-
-    var renderer = new CellRenderer(new Array[Array[Cell]](dimension))
-
-    class CellRenderer(cells: Array[Array[Cell]])  extends AbstractRenderer(new CellLabel) {
-      override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
-        component.prepare(row, column, cells)
-      }
-    }
-
-    class CellLabel extends Label {
-      def prepare(row : Int, column : Int, cells: Array[Array[Cell]]) {
-        cells(column/3)(row/3) match {
-          case AlgaeCell(_) => background = algaeColor
-          case ForaminiferaCell(_, _) => background =  forminColor
-          case Obstacle => background =  obstacleColor
-          case EmptyCell(_) => background =  emptyColor
-        }
-
-        text = cells(column/3)(row/3).smell(column%3)(row%3).value.toString
-      }
-    }
-
-    def set(cells: Array[Array[Cell]]): Unit = {
-      renderer = new CellRenderer(cells)
-    }
-
-    override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
-      renderer.componentFor(this,isSelected = false,hasFocus = false,0,row,col)
-    }
-  }
-
+  private val tb = new SignalTable(dimension)
 
   def top = new MainFrame {
     title = "Formin model"
@@ -128,6 +92,42 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     tb.set(newGrid.cells)
     tb.repaint()
     pc.repaint()
+  }
+
+  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) {
+    private val algaeColor = new swing.Color(9, 108, 16)
+    private val forminColor = new swing.Color(81, 71, 8)
+    private val obstacleColor = new swing.Color(0, 0, 0)
+    private val emptyColor = new swing.Color(255, 255, 255)
+
+    var renderer = new CellRenderer(new Array[Array[Cell]](dimension))
+
+    class CellRenderer(cells: Array[Array[Cell]]) extends AbstractRenderer(new CellLabel) {
+      override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
+        component.prepare(row, column, cells)
+      }
+    }
+
+    class CellLabel extends Label {
+      def prepare(row: Int, column: Int, cells: Array[Array[Cell]]) {
+        cells(column / 3)(row / 3) match {
+          case AlgaeCell(_) => background = algaeColor
+          case ForaminiferaCell(_, _) => background = forminColor
+          case Obstacle => background = obstacleColor
+          case EmptyCell(_) => background = emptyColor
+        }
+
+        text = cells(column / 3)(row / 3).smell(column % 3)(row % 3).value.toString
+      }
+    }
+
+    def set(cells: Array[Array[Cell]]): Unit = {
+      renderer = new CellRenderer(cells)
+    }
+
+    override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
+      renderer.componentFor(this, isSelected = false, hasFocus = false, 0, row, col)
+    }
   }
 
   private class ParticleCanvas(dimension: Int) extends Label {
