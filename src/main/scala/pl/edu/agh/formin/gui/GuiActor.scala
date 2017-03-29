@@ -99,22 +99,21 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
     private val emptyColor = new swing.Color(255, 255, 255)
-
-    var renderer = new CellRenderer(new Array[Array[Cell]](dimension))
-
-    class CellRenderer(cells: Array[Array[Cell]]) extends AbstractRenderer(new CellLabel) {
+    private val renderer = new AbstractRenderer(new CellLabel) {
       override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
-        component.prepare(row, column, cells)
+        component.prepare(row, column)
       }
     }
 
+    var cells: Array[Array[Cell]] = _
+
     class CellLabel extends Label {
-      def prepare(row: Int, column: Int, cells: Array[Array[Cell]]) {
-        cells(column / 3)(row / 3) match {
-          case AlgaeCell(_) => background = algaeColor
-          case ForaminiferaCell(_, _) => background = forminColor
-          case Obstacle => background = obstacleColor
-          case EmptyCell(_) => background = emptyColor
+      def prepare(row: Int, column: Int) {
+        background = cells(column / 3)(row / 3) match {
+          case AlgaeCell(_) => algaeColor
+          case ForaminiferaCell(_, _) => forminColor
+          case Obstacle => obstacleColor
+          case EmptyCell(_) => emptyColor
         }
 
         text = cells(column / 3)(row / 3).smell(column % 3)(row % 3).value.toString
@@ -122,12 +121,14 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     }
 
     def set(cells: Array[Array[Cell]]): Unit = {
-      renderer = new CellRenderer(cells)
+      this.cells = cells
+      this.repaint()
     }
 
     override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
       renderer.componentFor(this, isSelected = false, hasFocus = false, 0, row, col)
     }
+
   }
 
   private class ParticleCanvas(dimension: Int) extends Label {
