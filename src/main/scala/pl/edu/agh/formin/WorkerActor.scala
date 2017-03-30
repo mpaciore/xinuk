@@ -46,6 +46,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   def started: Receive = {
     case StartIteration(i) =>
+      propagateSignal()
+      sender() ! IterationPartFinished(i, SimulationStatus(id, grid))
   }
 }
 

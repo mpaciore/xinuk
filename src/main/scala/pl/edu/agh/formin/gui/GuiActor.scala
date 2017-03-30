@@ -5,7 +5,7 @@ import java.awt.{Color, Dimension}
 import javax.swing.{BorderFactory, ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import pl.edu.agh.formin.SchedulerActor.Register
+import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
@@ -14,6 +14,7 @@ import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
 import scala.swing.Table.AbstractRenderer
 import scala.swing._
+import scala.swing.event.ButtonClicked
 import scala.util.Try
 
 class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig)
@@ -23,7 +24,9 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)(iteration =>
+    scheduler ! IterationFinished(iteration)
+  )
 
   override def preStart: Unit = {
     scheduler ! Register
@@ -50,7 +53,7 @@ object GuiActor {
   }
 }
 
-private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
@@ -58,11 +61,24 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
   private val pc = new ParticleCanvas(dimension)
   private val tb = new SignalTable(dimension)
   private val iterationLabel = new Label {
+    private var _iteration: Long = _
+
+    def iteration: Long = _iteration
     def setIteration(iteration: Long): Unit = {
+      _iteration = iteration
       text = s"Iteration: $iteration"
     }
 
     border = BorderFactory.createEmptyBorder(50, 20, 50, 20)
+  }
+  private val nextIterationButton = new Button("Next iteration") {
+    border = BorderFactory.createEmptyBorder(100, 20, 20, 20)
+  }
+  listenTo(nextIterationButton)
+  reactions += {
+    case ButtonClicked(`nextIterationButton`) =>
+      nextIterationButton.enabled = false
+      onNextIterationClicked(iterationLabel.iteration)
   }
 
   def top = new MainFrame {
@@ -97,6 +113,7 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
 
       val statusPanel = new BorderPanel {
         layout(iterationLabel) = North
+        layout(nextIterationButton) = Center
       }
 
       layout(contentPane) = Center
@@ -110,6 +127,7 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
     pc.set(newGrid.cells)
     tb.set(newGrid.cells)
     iterationLabel.setIteration(iteration)
+    nextIterationButton.enabled = true
   }
 
   private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) {
