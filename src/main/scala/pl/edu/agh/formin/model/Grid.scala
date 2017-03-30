@@ -57,7 +57,15 @@ object Grid {
 
   val SubcellCoordinates: Vector[(Int, Int)] = {
     val pos = Vector(0, 1, 2)
-    pos.flatMap(i => pos.map(j => (i, j))).filter { case (i, j) => !(i == 1 && j == 1) }
+    pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
+  }
+
+  def neighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
+    val pos = Vector(-1, 0, 1)
+    pos.flatMap(i => pos.collect {
+      case j if !(i == 0 && j == 0) => (x + i, y + j)
+    }
+    )
   }
 
 }

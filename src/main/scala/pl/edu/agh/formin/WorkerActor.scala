@@ -1,10 +1,11 @@
 package pl.edu.agh.formin
 
 import akka.actor.{Actor, Props}
+import com.avsystem.commons.SharedExtensions._
 import pl.edu.agh.formin.SchedulerActor.IterationPartFinished
 import pl.edu.agh.formin.WorkerActor.StartIteration
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.{EmptyCell, Grid}
+import pl.edu.agh.formin.model._
 
 import scala.util.Random
 
@@ -23,6 +24,52 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       )
       grid = Grid(cells)
     }
+  }
+
+  private def makeMoves(iteration: Long): Unit = {
+    val newGrid = Grid.empty
+
+    def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
+      grid.cells(i)(j) match {
+        case EmptyCell(_) => true
+        case _ => false
+      }
+    }
+
+    def emptyCellsAround(x: Int, y: Int): Vector[(Int, Int, EmptyCell)] = {
+      Grid.neighbourCoordinates(x, y).flatMap {
+        case (i, j) =>
+          grid.cells(i)(j).opt.collect { case cell: EmptyCell if isEmptyIn(newGrid)(i, j) =>
+            (i, j, cell)
+          }
+      }
+    }
+
+    for {
+      x <- 0 until config.gridSize
+      y <- 0 until config.gridSize
+    } {
+      val current = grid.cells(x)(y)
+      current match {
+        case Obstacle =>
+        case cell: EmptyCell =>
+          if (isEmptyIn(newGrid)(x, y)) {
+            newGrid.cells(x)(y) = cell
+          }
+        case cell: AlgaeCell =>
+          if (iteration % config.algaeReproductionFrequency == 0) {
+            val emptyCells = emptyCellsAround(x, y)
+            if (emptyCells.nonEmpty) {
+              val (newAlgaeX, newAlgaeY, oldCell) = emptyCells(random.nextInt(emptyCells.size))
+              newGrid.cells(newAlgaeX)(newAlgaeY) = oldCell.withAlgae
+            }
+          }
+          newGrid.cells(x)(y) = cell
+        case cell: ForaminiferaCell =>
+          newGrid.cells(x)(y) = cell
+      }
+    }
+    grid = newGrid
   }
 
   def stopped: Receive = {
@@ -47,6 +94,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   def started: Receive = {
     case StartIteration(i) =>
       propagateSignal()
+      makeMoves(i)
       sender() ! IterationPartFinished(i, SimulationStatus(id, grid))
   }
 }

@@ -34,6 +34,6 @@ object Simulation extends App with LazyLogging {
   private val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(worker)))
   private val gui = system.actorOf(GuiActor.props(scheduler, workerId))
 
-  scheduler ! SchedulerActor.StartSimulation(10)
+  scheduler ! SchedulerActor.StartSimulation(20)
 
 }

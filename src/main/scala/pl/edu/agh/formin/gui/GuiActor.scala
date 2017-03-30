@@ -1,8 +1,7 @@
 package pl.edu.agh.formin.gui
 
-import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
-import javax.swing.{BorderFactory, ImageIcon, UIManager}
+import javax.swing.{BorderFactory, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
@@ -58,7 +57,6 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val pc = new ParticleCanvas(dimension)
   private val tb = new SignalTable(dimension)
   private val iterationLabel = new Label {
     private var _iteration: Long = _
@@ -87,14 +85,6 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
     background = bgcolor
 
     val mainPanel = new BorderPanel {
-      val simulationPanel = new BorderPanel {
-        val canvas = new BorderPanel {
-          background = bgcolor
-          layout(pc) = Center
-        }
-        background = bgcolor
-        layout(canvas) = Center
-      }
 
       val signalPanel = new BorderPanel {
         val table = new BorderPanel {
@@ -107,7 +97,6 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
 
       val contentPane = new TabbedPane {
-        pages += new Page("Simulation", simulationPanel)
         pages += new Page("Signal", signalPanel)
       }
 
@@ -124,7 +113,6 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
   }
 
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
-    pc.set(newGrid.cells)
     tb.set(newGrid.cells)
     iterationLabel.setIteration(iteration)
     nextIterationButton.enabled = true
@@ -165,37 +153,6 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
       renderer.componentFor(this, isSelected = false, hasFocus = false, 0, row, col)
     }
 
-  }
-
-  private class ParticleCanvas(dimension: Int) extends Label {
-    private val factor = 40
-    private val algaeColor = new swing.Color(9, 108, 16).getRGB
-    private val forminColor = new swing.Color(81, 71, 8).getRGB
-    private val obstacleColor = new swing.Color(0, 0, 0).getRGB
-    private val emptyColor = new swing.Color(255, 255, 255).getRGB
-    private val img = new BufferedImage(dimension * factor, dimension * factor, BufferedImage.TYPE_INT_ARGB)
-
-    icon = new ImageIcon(img)
-
-    def set(cells: Array[Array[Cell]]): Unit = {
-      val rgbArray = cells.map(_.map {
-        case AlgaeCell(_) => algaeColor
-        case ForaminiferaCell(_, _) => forminColor
-        case Obstacle => obstacleColor
-        case EmptyCell(_) => emptyColor
-      })
-
-      for {
-        x <- cells.indices
-        y <- cells.indices
-      } {
-        val startX = x * factor
-        val startY = y * factor
-        img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
-      }
-    }
-
-    this.repaint()
   }
 
   main(Array.empty)
