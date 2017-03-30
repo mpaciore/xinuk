@@ -61,7 +61,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
           if (currentIterationStatus.size == workers.size) {
             notifyListeners(iteration)
             //todo if headless
-            Thread.sleep(60)
+            Thread.sleep(300)
             self ! IterationFinished(iteration)
           }
         case Opt.Empty =>
