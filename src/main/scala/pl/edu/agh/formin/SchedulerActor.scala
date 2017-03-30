@@ -58,17 +58,20 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       iteration2status.getOpt(iteration) match {
         case Opt(currentIterationStatus) =>
           currentIterationStatus.add(status)
-          if (currentIterationStatus.size == workers.size) self ! IterationFinished(iteration)
+          if (currentIterationStatus.size == workers.size) {
+            notifyListeners(iteration)
+            //todo if headless
+            Thread.sleep(300)
+            self ! IterationFinished(iteration)
+          }
         case Opt.Empty =>
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
       }
     case Register =>
       registered += sender()
     case IterationFinished(i) if i == iterations =>
-      notifyListeners(i)
       self ! StopSimulation
     case IterationFinished(i) =>
-      notifyListeners(i)
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
@@ -79,7 +82,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   private def notifyListeners(iteration: Long): Unit = {
     val finishedIterationStatus = status(iteration)
-    registered.foreach(_ ! NewIteration(finishedIterationStatus))
+    registered.foreach(_ ! NewIteration(finishedIterationStatus, iteration))
   }
 
   def finished: Receive = {
@@ -98,7 +101,7 @@ object SchedulerActor {
 
   case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
 
-  private case class IterationFinished(i: Long) extends AnyVal
+  case class IterationFinished(i: Long) extends AnyVal
 
   case object StopSimulation
 
