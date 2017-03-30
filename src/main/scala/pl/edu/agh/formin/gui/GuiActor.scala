@@ -2,7 +2,7 @@ package pl.edu.agh.formin.gui
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
-import javax.swing.{ImageIcon, UIManager}
+import javax.swing.{BorderFactory, ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.Register
@@ -16,7 +16,8 @@ import scala.swing.Table.AbstractRenderer
 import scala.swing._
 import scala.util.Try
 
-class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
+class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig)
+  extends Actor with ActorLogging {
 
   import GuiActor._
 
@@ -30,10 +31,10 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
   }
 
   def started: Receive = {
-    case NewIteration(state) =>
+    case NewIteration(state, iteration) =>
       state.getGridForWorker(worker) match {
         case Some(grid) =>
-          gui.setNewValues(grid)
+          gui.setNewValues(grid, iteration)
         case None =>
           log.error("Worker {} grid status unavailable", worker.value)
       }
@@ -42,7 +43,7 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
 
 object GuiActor {
 
-  case class NewIteration(state: IterationStatus) extends AnyVal
+  case class NewIteration(state: IterationStatus, iteration: Long)
 
   def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new GuiActor(scheduler, worker))
@@ -55,43 +56,60 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
 
   private val bgcolor = new Color(220, 220, 220)
   private val pc = new ParticleCanvas(dimension)
-
   private val tb = new SignalTable(dimension)
+  private val iterationLabel = new Label {
+    def setIteration(iteration: Long): Unit = {
+      text = s"Iteration: $iteration"
+    }
+
+    border = BorderFactory.createEmptyBorder(50, 20, 50, 20)
+  }
 
   def top = new MainFrame {
     title = "Formin model"
     minimumSize = new Dimension(1200, 800)
     background = bgcolor
 
-    val canvas = new BorderPanel {
-      background = bgcolor
-      layout(pc) = Center
+    val mainPanel = new BorderPanel {
+      val simulationPanel = new BorderPanel {
+        val canvas = new BorderPanel {
+          background = bgcolor
+          layout(pc) = Center
+        }
+        background = bgcolor
+        layout(canvas) = Center
+      }
+
+      val signalPanel = new BorderPanel {
+        val table = new BorderPanel {
+          background = bgcolor
+          layout(tb) = Center
+        }
+        background = bgcolor
+        layout(table) = Center
+      }
+
+
+      val contentPane = new TabbedPane {
+        pages += new Page("Simulation", simulationPanel)
+        pages += new Page("Signal", signalPanel)
+      }
+
+      val statusPanel = new BorderPanel {
+        layout(iterationLabel) = North
+      }
+
+      layout(contentPane) = Center
+      layout(statusPanel) = East
     }
 
-    val table = new BorderPanel {
-      background = bgcolor
-      layout(tb) = Center
-    }
-
-    val simPanel = new BorderPanel {
-      background = bgcolor
-      layout(canvas) = Center
-    }
-    val sigPanel = new BorderPanel {
-      background = bgcolor
-      layout(table) = Center
-    }
-    contents = new TabbedPane {
-      pages += new Page("Simulation", simPanel)
-      pages += new Page("Signal", sigPanel)
-    }
+    contents = mainPanel
   }
 
-  def setNewValues(newGrid: Grid): Unit = {
+  def setNewValues(newGrid: Grid, iteration: Long): Unit = {
     pc.set(newGrid.cells)
     tb.set(newGrid.cells)
-    tb.repaint()
-    pc.repaint()
+    iterationLabel.setIteration(iteration)
   }
 
   private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) {
@@ -155,10 +173,11 @@ private[gui] class GuiGrid(dimension: Int) extends SimpleSwingApplication {
       } {
         val startX = x * factor
         val startY = y * factor
-        //todo optimize (array gen)
         img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
       }
     }
+
+    this.repaint()
   }
 
   main(Array.empty)

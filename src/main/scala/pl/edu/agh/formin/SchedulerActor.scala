@@ -79,7 +79,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   private def notifyListeners(iteration: Long): Unit = {
     val finishedIterationStatus = status(iteration)
-    registered.foreach(_ ! NewIteration(finishedIterationStatus))
+    registered.foreach(_ ! NewIteration(finishedIterationStatus, iteration))
   }
 
   def finished: Receive = {
