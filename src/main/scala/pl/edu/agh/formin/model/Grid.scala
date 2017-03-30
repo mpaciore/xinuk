@@ -70,10 +70,12 @@ object Grid {
 
 }
 
-final case class Signal(value: Double) extends AnyVal {
+final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
   def +(other: Signal) = Signal(value + other.value)
 
   def *(factor: Double) = Signal(value * factor)
+
+  override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
 }
 
 object Signal {
@@ -82,6 +84,10 @@ object Signal {
 
 final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
   override def compare(that: Energy): Int = Ordering.Double.compare(value, that.value)
+
+  def -(other: Energy): Energy = Energy(value - other.value)
+
+  def +(other: Energy): Energy = Energy(value + other.value)
 }
 
 sealed trait Cell extends Any {
@@ -98,6 +104,9 @@ sealed trait SmellMedium[T <: Cell with SmellMedium[T]] {
   self: T =>
   type Self >: self.type <: T
 
+  protected final def smellWithSignal(added: Signal): SmellArray = {
+    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
+  }
   def withSmell(smell: SmellArray): Self
 }
 
@@ -106,30 +115,38 @@ sealed trait HasEnergy {
   def energy: Energy
 }
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray) extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
+sealed trait ForaminiferaAcessible {
+  self: Cell =>
+  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell
+}
+
+final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
+  extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
   type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellArray) = copy(smell = smell)
 }
 
-final case class AlgaeCell(smell: SmellArray) extends Cell with SmellMedium[AlgaeCell] {
+final case class AlgaeCell(smell: SmellArray)
+  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible {
   type Self = AlgaeCell
 
   override def withSmell(smell: SmellArray) = copy(smell = smell)
+
+  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
+    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWithSignal(config.foraminiferaInitialSignal))
+  }
 }
 
 case object Obstacle extends Cell {
   override def smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-final case class EmptyCell(smell: SmellArray = Cell.emptySignal) extends Cell with SmellMedium[EmptyCell] {
+final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
+  extends Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
   type Self = EmptyCell
 
   override def withSmell(smell: SmellArray) = copy(smell = smell)
-
-  private def smellWithSignal(added: Signal): SmellArray = {
-    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
-  }
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
     ForaminiferaCell(energy, smellWithSignal(config.foraminiferaInitialSignal))

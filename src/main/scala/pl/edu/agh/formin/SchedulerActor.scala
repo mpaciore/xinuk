@@ -61,7 +61,8 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
           if (currentIterationStatus.size == workers.size) {
             notifyListeners(iteration)
             //todo if headless
-            //self ! IterationFinished(iteration)
+            Thread.sleep(60)
+            self ! IterationFinished(iteration)
           }
         case Opt.Empty =>
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)

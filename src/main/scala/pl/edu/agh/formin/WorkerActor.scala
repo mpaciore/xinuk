@@ -2,6 +2,7 @@ package pl.edu.agh.formin
 
 import akka.actor.{Actor, Props}
 import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.SchedulerActor.IterationPartFinished
 import pl.edu.agh.formin.WorkerActor.StartIteration
 import pl.edu.agh.formin.config.ForminConfig
@@ -36,17 +37,14 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
 
-    def emptyCellsAround(x: Int, y: Int): Vector[(Int, Int, EmptyCell)] = {
-      Grid.neighbourCoordinates(x, y).flatMap {
-        case (i, j) =>
-          grid.cells(i)(j).opt.collect { case cell: EmptyCell if isEmptyIn(newGrid)(i, j) =>
-            (i, j, cell)
-          }
-      }
-    }
-
     def reproduce(x: Int, y: Int)(creator: EmptyCell => Cell): Unit = {
-      val emptyCells = emptyCellsAround(x, y)
+      val emptyCells =
+        Grid.neighbourCoordinates(x, y).flatMap {
+          case (i, j) =>
+            grid.cells(i)(j).opt.collect { case cell: EmptyCell if isEmptyIn(newGrid)(i, j) =>
+              (i, j, cell)
+            }
+        }
       if (emptyCells.nonEmpty) {
         val (newAlgaeX, newAlgaeY, oldCell) = emptyCells(random.nextInt(emptyCells.size))
         newGrid.cells(newAlgaeX)(newAlgaeY) = creator(oldCell)
@@ -68,12 +66,38 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (iteration % config.algaeReproductionFrequency == 0) {
             reproduce(x, y)(_.withAlgae)
           }
-          newGrid.cells(x)(y) = cell
-        case cell: ForaminiferaCell =>
-          if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y)(_.withForaminifera(cell.energy))
+          if (isEmptyIn(newGrid)(x, y)) {
+            newGrid.cells(x)(y) = cell
           }
-          newGrid.cells(x)(y) = cell
+        case cell: ForaminiferaCell =>
+          if (cell.energy < config.foraminiferaLifeActivityCost) {
+            newGrid.cells(x)(y) = EmptyCell(cell.smell)
+          } else if (cell.energy > config.foraminiferaReproductionThreshold) {
+            reproduce(x, y)(_.withForaminifera(cell.energy))
+            newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
+          } else {
+            val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
+            val destinationCoords =
+              Grid.SubcellCoordinates
+                .map { case (i, j) => cell.smell(i)(j) }
+                .zipWithIndex
+                .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
+                .map { case (_, idx) => neighbourCoordinates(idx) }
+
+            destinationCoords
+              .map { case (i, j) => (i, j, grid.cells(i)(j)) }
+              .collectFirstOpt {
+                case (i, j, destination: ForaminiferaAcessible) =>
+                  (i, j, destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost))
+              } match {
+              case Opt((i, j, newCell)) =>
+                newGrid.cells(i)(j) = newCell
+                newGrid.cells(x)(y) = EmptyCell(cell.smell)
+              case Opt.Empty =>
+                newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost)
+            }
+          }
+
       }
     }
     grid = newGrid
