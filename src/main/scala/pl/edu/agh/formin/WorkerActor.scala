@@ -45,6 +45,14 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
 
+    def reproduce(x: Int, y: Int)(creator: EmptyCell => Cell): Unit = {
+      val emptyCells = emptyCellsAround(x, y)
+      if (emptyCells.nonEmpty) {
+        val (newAlgaeX, newAlgaeY, oldCell) = emptyCells(random.nextInt(emptyCells.size))
+        newGrid.cells(newAlgaeX)(newAlgaeY) = creator(oldCell)
+      }
+    }
+
     for {
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
@@ -58,14 +66,13 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            val emptyCells = emptyCellsAround(x, y)
-            if (emptyCells.nonEmpty) {
-              val (newAlgaeX, newAlgaeY, oldCell) = emptyCells(random.nextInt(emptyCells.size))
-              newGrid.cells(newAlgaeX)(newAlgaeY) = oldCell.withAlgae
-            }
+            reproduce(x, y)(_.withAlgae)
           }
           newGrid.cells(x)(y) = cell
         case cell: ForaminiferaCell =>
+          if (cell.energy > config.foraminiferaReproductionThreshold) {
+            reproduce(x, y)(_.withForaminifera(cell.energy))
+          }
           newGrid.cells(x)(y) = cell
       }
     }

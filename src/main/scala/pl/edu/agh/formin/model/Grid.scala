@@ -80,7 +80,9 @@ object Signal {
   val Zero = Signal(0d)
 }
 
-final case class Energy(value: Double) extends AnyVal
+final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
+  override def compare(that: Energy): Int = Ordering.Double.compare(value, that.value)
+}
 
 sealed trait Cell extends Any {
   def smell: SmellArray
