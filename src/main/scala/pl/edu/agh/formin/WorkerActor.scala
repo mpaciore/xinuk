@@ -55,9 +55,9 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
     } {
-      val current = grid.cells(x)(y)
-      current match {
+      grid.cells(x)(y) match {
         case Obstacle =>
+          newGrid.cells(x)(y) = Obstacle
         case cell: EmptyCell =>
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
@@ -85,19 +85,16 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
                 .map { case (_, idx) => neighbourCoordinates(idx) }
 
             destinationCoords
+              .iterator
               .map { case (i, j) => (i, j, grid.cells(i)(j)) }
-              .collectFirstOpt {
-                case (i, j, destination: ForaminiferaAcessible) =>
-                  (i, j, destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost))
-              } match {
-              case Opt((i, j, newCell)) =>
-                newGrid.cells(i)(j) = newCell
+              .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
+              case Opt((i, j, destinationCell)) =>
+                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)
                 newGrid.cells(x)(y) = EmptyCell(cell.smell)
               case Opt.Empty =>
                 newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost)
             }
           }
-
       }
     }
     grid = newGrid
