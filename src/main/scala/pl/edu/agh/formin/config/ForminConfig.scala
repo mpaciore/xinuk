@@ -15,14 +15,12 @@ ARF - algae reproduction frequency; ARF ∈ N.
 AEC - algae energetic capacity; AEC ∈ [0,1] && AEC ∈ R.
 SSR - signal speed ratio; SSR ∈ N. Foraminifera speed is 1.
 DFF - diffraction factor; DFF ∈ [0,1] && DFF ∈ R.
-ATF - attenuation factor; ATF ∈ [0,1] && ATF ∈ R.
 SPF - global suppression factor of the signal; SPF ∈ [0,1] && SPF ∈ R.
 GS - grid size; GS ∈ N, where map size is GSxGS.
 SC - spawn chance, SC ∈ [0,1] && SC ∈ R
-FAR - foraminifera-algae ratio; FAR ∈ N.
+FSC - foraminifera spawn chance; FAR ∈ N.
 FSSV - foraminifera start signal value; FSSV ∈ [0,1] && FSSV ∈ R.
 ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
-MSV - minimal signal value; MSV ∈ [0,1] && MSV ∈ R
  */
 
 final case class ForminConfig private(
@@ -34,14 +32,12 @@ final case class ForminConfig private(
                                        algaeEnergeticCapacity: Energy,
                                        signalSpeedRatio: Int,
                                        //diffractionFactor: Double,
-                                       attenuationFactor: Double,
                                        signalSuppresionFactor: Double,
                                        gridSize: Int,
                                        spawnChance: Double,
-                                       foraminiferaAlgaeRatio: Double,
+                                       foraminiferaSpawnChance: Double,
                                        foraminiferaInitialSignal: Signal,
-                                       algaeInitialSignal: Signal,
-                                       minimalSignalValue: Signal
+                                       algaeInitialSignal: Signal
                  )
 
 object ForminConfig {
