@@ -7,7 +7,6 @@ import javax.swing.{BorderFactory, ImageIcon, UIManager}
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.gui.GuiType.Basic
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
@@ -18,14 +17,14 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 import scala.util.Try
 
-class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig)
+class GuiActor private(scheduler: ActorRef, worker: WorkerId, guiType : GuiType)(implicit config: ForminConfig)
   extends Actor with ActorLogging {
 
   import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, GuiType.Basic) (iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType) (iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -49,8 +48,8 @@ object GuiActor {
 
   case class NewIteration(state: IterationStatus, iteration: Long)
 
-  def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(scheduler, worker))
+  def props(scheduler: ActorRef, worker: WorkerId, guiType : GuiType)(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(scheduler, worker, guiType))
   }
 }
 

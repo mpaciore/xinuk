@@ -6,7 +6,7 @@ import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.gui.GuiActor
+import pl.edu.agh.formin.gui.{GuiActor, GuiType}
 
 import scala.util.{Failure, Success, Try}
 
@@ -30,10 +30,12 @@ object Simulation extends App with LazyLogging {
 
   private val system = ActorSystem("formin")
   private val workerId = WorkerId(1)
+  private val guiType = GuiType.Basic
   private val worker = system.actorOf(WorkerActor.props(workerId))
   private val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(worker)))
-  private val gui = system.actorOf(GuiActor.props(scheduler, workerId))
+  private val gui = system.actorOf(GuiActor.props(scheduler, workerId, guiType))
 
   scheduler ! SchedulerActor.StartSimulation(1000000)
 
 }
+
