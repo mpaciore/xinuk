@@ -85,7 +85,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
                 .map { case (_, idx) => neighbourCoordinates(idx) }
 
             destinationCoords
-              .iterator
+             //.iterator
               .map { case (i, j) => (i, j, grid.cells(i)(j)) }
               .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
               case Opt((i, j, destinationCell)) =>

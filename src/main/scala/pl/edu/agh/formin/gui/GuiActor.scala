@@ -1,7 +1,8 @@
 package pl.edu.agh.formin.gui
 
+import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
-import javax.swing.{BorderFactory, UIManager}
+import javax.swing.{BorderFactory, ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
@@ -62,6 +63,7 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
     private var _iteration: Long = _
 
     def iteration: Long = _iteration
+
     def setIteration(iteration: Long): Unit = {
       _iteration = iteration
       text = s"Iteration: $iteration"
@@ -81,7 +83,7 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
   def top = new MainFrame {
     title = "Formin model"
-    minimumSize = new Dimension(1200, 800)
+    //minimumSize = new Dimension(1200, 800)
     background = bgcolor
 
     val mainPanel = new BorderPanel {
@@ -153,6 +155,37 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
       renderer.componentFor(this, isSelected = false, hasFocus = false, 0, row, col)
     }
 
+  }
+
+  private class ParticleCanvas(dimension: Int) extends Label {
+    private val factor = 40
+    private val algaeColor = new swing.Color(9, 108, 16).getRGB
+    private val forminColor = new swing.Color(81, 71, 8).getRGB
+    private val obstacleColor = new swing.Color(0, 0, 0).getRGB
+    private val emptyColor = new swing.Color(255, 255, 255).getRGB
+    private val img = new BufferedImage(dimension * factor, dimension * factor, BufferedImage.TYPE_INT_ARGB)
+
+    icon = new ImageIcon(img)
+
+    def set(cells: Array[Array[Cell]]): Unit = {
+      val rgbArray = cells.map(_.map {
+        case AlgaeCell(_) => algaeColor
+        case ForaminiferaCell(_, _) => forminColor
+        case Obstacle => obstacleColor
+        case EmptyCell(_) => emptyColor
+      })
+
+      for {
+        x <- cells.indices
+        y <- cells.indices
+      } {
+        val startX = x * factor
+        val startY = y * factor
+        img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
+      }
+    }
+
+    this.repaint()
   }
 
   main(Array.empty)
