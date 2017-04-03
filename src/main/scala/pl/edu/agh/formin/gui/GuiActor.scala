@@ -7,6 +7,7 @@ import javax.swing.{BorderFactory, ImageIcon, UIManager}
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.gui.GuiType.Basic
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
@@ -24,7 +25,7 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)(iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, GuiType.Basic) (iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -53,12 +54,17 @@ object GuiActor {
   }
 }
 
-private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val tb = new SignalTable(dimension)
+  private val k = false
+  private val tb = guiType match {
+    case GuiType.None => new ParticleCanvas(0)
+    case GuiType.Basic => new ParticleCanvas(dimension)
+    case GuiType.Signal => new SignalTable(dimension)
+  }
   private val iterationLabel = new Label {
     private var _iteration: Long = _
 
@@ -83,7 +89,7 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
   def top = new MainFrame {
     title = "Formin model"
-    //minimumSize = new Dimension(1200, 800)
+    minimumSize = new Dimension(1200, 800)
     background = bgcolor
 
     val mainPanel = new BorderPanel {
@@ -116,11 +122,16 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
     tb.set(newGrid.cells)
+    tb.repaint()
     iterationLabel.setIteration(iteration)
     nextIterationButton.enabled = true
   }
 
-  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) {
+  sealed trait VisualizationSetter {
+    def set(cells: Array[Array[Cell]]): Unit
+  }
+
+  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) with VisualizationSetter {
     private val algaeColor = new swing.Color(9, 108, 16)
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
@@ -157,8 +168,8 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
   }
 
-  private class ParticleCanvas(dimension: Int) extends Label {
-    private val factor = 40
+  private class ParticleCanvas(dimension: Int) extends Label with VisualizationSetter {
+    private val factor = 5
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
     private val obstacleColor = new swing.Color(0, 0, 0).getRGB
@@ -185,11 +196,18 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
       }
     }
 
-    this.repaint()
   }
 
   main(Array.empty)
 
+}
+
+sealed trait GuiType
+
+object GuiType {
+  case object None extends GuiType
+  case object Basic extends GuiType
+  case object Signal extends GuiType
 }
 
 
