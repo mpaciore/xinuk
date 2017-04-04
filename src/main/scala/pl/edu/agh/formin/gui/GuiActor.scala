@@ -149,11 +149,11 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
       x <- cells.indices
       y <- cells.indices
     } {
-        cells(x)(y) match {
-          case AlgaeCell(_) => algaeCounter = algaeCounter+1
-          case ForaminiferaCell(_, _) => forminCounter = forminCounter+1
-          case _=>
-        }
+      cells(x)(y) match {
+        case AlgaeCell(_) => algaeCounter = algaeCounter + 1
+        case ForaminiferaCell(_, _) => forminCounter = forminCounter + 1
+        case _ =>
+      }
     }
     xs = xs :+ (System.currentTimeMillis() - startTime) / 1000d
     ys1 = ys1 :+ forminCounter.toLong
@@ -179,15 +179,22 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
     var cells: Array[Array[Cell]] = _
 
     class CellLabel extends Label {
+
       def prepare(row: Int, column: Int) {
+        text = cells(column / 3)(row / 3).smell(column % 3)(row % 3).value.toString
         background = cells(column / 3)(row / 3) match {
           case AlgaeCell(_) => algaeColor
-          case ForaminiferaCell(_, _) => forminColor
+          case ForaminiferaCell(energy, _) => if (row % 3 == 1 && column % 3 == 1) {
+            text = energy.value.toString
+            new swing.Color(255, (0 + 255 * energy.value / 2).toInt, (0 + 255 * energy.value / 2).toInt)
+          } else {
+            forminColor
+          }
           case Obstacle => obstacleColor
           case EmptyCell(_) => emptyColor
         }
 
-        text = cells(column / 3)(row / 3).smell(column % 3)(row % 3).value.toString
+
       }
     }
 
