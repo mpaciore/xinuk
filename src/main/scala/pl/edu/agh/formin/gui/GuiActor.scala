@@ -5,6 +5,9 @@ import java.awt.{Color, Dimension}
 import javax.swing.{BorderFactory, ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import org.jfree.chart.{ChartFactory, ChartPanel}
+import org.jfree.chart.plot.PlotOrientation
+import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -64,6 +67,11 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
     case GuiType.Basic => new ParticleCanvas(dimension)
     case GuiType.Signal => new SignalTable(dimension)
   }
+
+  private val chartPanel = new BorderPanel {
+    background = bgcolor
+  }
+  private val chartPage = new Page("Plot", chartPanel)
   private val iterationLabel = new Label {
     private var _iteration: Long = _
 
@@ -105,6 +113,7 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
 
       val contentPane = new TabbedPane {
         pages += new Page("Signal", signalPanel)
+        pages += chartPage
       }
 
       val statusPanel = new BorderPanel {
@@ -195,6 +204,24 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
       }
     }
 
+  }
+
+  def plot(): Unit = {
+    val dataset = new XYSeriesCollection()
+    val s1 = new XYSeries("Algae")
+    val s2 = new XYSeries("Formin")
+    /*for (i <- xs.indices) {
+      s1.add(xs(i), ys1(i))
+      s2.add(xs(i), ys2(i))
+    }*/
+    dataset.addSeries(s1)
+    dataset.addSeries(s2)
+    val chart = ChartFactory.createXYLineChart("Positive & negative charges vs time", "Time[s]", "Number of charges", dataset, PlotOrientation.VERTICAL, true, true, false)
+    val panel = new ChartPanel(chart)
+    chartPanel.layout(swing.Component.wrap(panel)) = Center
+  }
+  trait Evaluable {
+    def value: Double
   }
 
   main(Array.empty)
