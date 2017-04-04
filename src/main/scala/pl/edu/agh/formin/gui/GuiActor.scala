@@ -20,14 +20,14 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 import scala.util.Try
 
-class GuiActor private(scheduler: ActorRef, worker: WorkerId, guiType : GuiType)(implicit config: ForminConfig)
+class GuiActor private(scheduler: ActorRef, worker: WorkerId, guiType: GuiType)(implicit config: ForminConfig)
   extends Actor with ActorLogging {
 
   import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType) (iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)(iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -51,16 +51,20 @@ object GuiActor {
 
   case class NewIteration(state: IterationStatus, iteration: Long)
 
-  def props(scheduler: ActorRef, worker: WorkerId, guiType : GuiType)(implicit config: ForminConfig): Props = {
+  def props(scheduler: ActorRef, worker: WorkerId, guiType: GuiType)(implicit config: ForminConfig): Props = {
     Props(new GuiActor(scheduler, worker, guiType))
   }
 }
 
-private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
+  private var xs = Seq.empty[Double]
+  private var ys1 = Seq.empty[Long]
+  private var ys2 = Seq.empty[Long]
+  private var startTime = System.currentTimeMillis()
   private val k = false
   private val tb = guiType match {
     case GuiType.None => new ParticleCanvas(0)
@@ -131,8 +135,30 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
     tb.set(newGrid.cells)
     tb.repaint()
+    updateForminAlgaeCount(newGrid.cells)
+    plot()
     iterationLabel.setIteration(iteration)
     nextIterationButton.enabled = true
+  }
+
+  def updateForminAlgaeCount(cells: Array[Array[Cell]]): Unit = {
+    var forminCounter = 0
+    var algaeCounter = 0
+
+    for {
+      x <- cells.indices
+      y <- cells.indices
+    } {
+        cells(x)(y) match {
+          case AlgaeCell(_) => algaeCounter = algaeCounter+1
+          case ForaminiferaCell(_, _) => forminCounter = forminCounter+1
+          case _=>
+        }
+    }
+    xs = xs :+ (System.currentTimeMillis() - startTime) / 1000d
+    ys1 = ys1 :+ forminCounter.toLong
+    ys2 = ys2 :+ algaeCounter.toLong
+
   }
 
   sealed trait VisualizationSetter {
@@ -210,16 +236,17 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
     val dataset = new XYSeriesCollection()
     val s1 = new XYSeries("Algae")
     val s2 = new XYSeries("Formin")
-    /*for (i <- xs.indices) {
+    for (i <- xs.indices) {
       s1.add(xs(i), ys1(i))
       s2.add(xs(i), ys2(i))
-    }*/
+    }
     dataset.addSeries(s1)
     dataset.addSeries(s2)
-    val chart = ChartFactory.createXYLineChart("Positive & negative charges vs time", "Time[s]", "Number of charges", dataset, PlotOrientation.VERTICAL, true, true, false)
+    val chart = ChartFactory.createXYLineChart("Formin vs Algae occurences in time", "Time[s]", "Number of occurrences", dataset, PlotOrientation.VERTICAL, true, true, false)
     val panel = new ChartPanel(chart)
     chartPanel.layout(swing.Component.wrap(panel)) = Center
   }
+
   trait Evaluable {
     def value: Double
   }
@@ -231,9 +258,13 @@ private[gui] class GuiGrid(dimension: Int, guiType : GuiType)(onNextIterationCli
 sealed trait GuiType
 
 object GuiType {
+
   case object None extends GuiType
+
   case object Basic extends GuiType
+
   case object Signal extends GuiType
+
 }
 
 
