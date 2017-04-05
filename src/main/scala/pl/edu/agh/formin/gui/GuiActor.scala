@@ -9,7 +9,7 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
-import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
@@ -22,14 +22,14 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 import scala.util.Try
 
-class GuiActor private(scheduler: ActorRef, worker: WorkerId, guiType: GuiType)(implicit config: ForminConfig)
+class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig)
   extends Actor with ActorLogging {
 
   import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)(iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, config.guiType)(iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -54,8 +54,8 @@ object GuiActor {
 
   case class NewIteration(state: IterationStatus, iteration: Long)
 
-  def props(scheduler: ActorRef, worker: WorkerId, guiType: GuiType)(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(scheduler, worker, guiType))
+  def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(scheduler, worker))
   }
 }
 
@@ -165,7 +165,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
     def set(cells: CellArray): Unit
   }
 
-  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) with CellArraySettable {
+  private class SignalTable(dimension: Int) extends Table(Cell.Size * dimension, Cell.Size * dimension) with CellArraySettable {
     private val algaeColor = new swing.Color(9, 108, 16)
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
@@ -259,17 +259,4 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   main(Array.empty)
 
 }
-
-sealed trait GuiType
-
-object GuiType {
-
-  case object None extends GuiType
-
-  case object Basic extends GuiType
-
-  case object Signal extends GuiType
-
-}
-
 

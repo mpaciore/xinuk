@@ -5,7 +5,7 @@ import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{FlatSpecLike, Matchers}
 import pl.edu.agh.formin.SchedulerActor.{GetState, StartSimulation}
-import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.{Energy, Grid, Signal}
 
 class SchedulerActorTest
@@ -25,7 +25,8 @@ class SchedulerActorTest
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
     foraminiferaInitialSignal = Signal(-1),
-    algaeInitialSignal = Signal(1)
+    algaeInitialSignal = Signal(1),
+    guiType = GuiType.None
   )
 
   "A SchedulerActor" should "be in stopped state" in {
