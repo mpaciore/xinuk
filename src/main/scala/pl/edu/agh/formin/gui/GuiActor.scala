@@ -5,8 +5,8 @@ import java.awt.{Color, Dimension}
 import javax.swing.{BorderFactory, ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
@@ -134,7 +134,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
     tb.set(newGrid.cells)
-    tb.repaint()
     updateForminAlgaeCount(newGrid.cells)
     plot()
     iterationLabel.setIteration(iteration)
@@ -210,6 +209,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   }
 
   private class ParticleCanvas(dimension: Int) extends Label with VisualizationSetter {
+    //todo config
     private val factor = 5
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
@@ -235,8 +235,8 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
         val startY = y * factor
         img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
       }
+      this.repaint()
     }
-
   }
 
   def plot(): Unit = {
