@@ -13,6 +13,7 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
+import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
 import scala.swing.Table.AbstractRenderer
@@ -37,6 +38,7 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId, guiType: GuiType)(
   }
 
   def started: Receive = {
+    //todo add counts
     case NewIteration(state, iteration) =>
       state.getGridForWorker(worker) match {
         case Some(grid) =>
@@ -61,12 +63,10 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private var xs = Seq.empty[Double]
-  private var ys1 = Seq.empty[Long]
-  private var ys2 = Seq.empty[Long]
-  private var startTime = System.currentTimeMillis()
-  private val k = false
-  private val tb = guiType match {
+  private val iterations = mutable.ListBuffer.empty[Long]
+  private val forminSeries = mutable.ListBuffer.empty[Long]
+  private val algaeSeries = mutable.ListBuffer.empty[Long]
+  private val cellView = guiType match {
     case GuiType.None => new ParticleCanvas(0)
     case GuiType.Basic => new ParticleCanvas(dimension)
     case GuiType.Signal => new SignalTable(dimension)
@@ -105,18 +105,18 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
     val mainPanel = new BorderPanel {
 
-      val signalPanel = new BorderPanel {
-        val table = new BorderPanel {
+      val cellPanel = new BorderPanel {
+        val view = new BorderPanel {
           background = bgcolor
-          layout(tb) = Center
+          layout(cellView) = Center
         }
         background = bgcolor
-        layout(table) = Center
+        layout(view) = Center
       }
 
 
       val contentPane = new TabbedPane {
-        pages += new Page("Signal", signalPanel)
+        pages += new Page("Cells", cellPanel)
         pages += chartPage
       }
 
@@ -133,14 +133,14 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   }
 
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
-    tb.set(newGrid.cells)
-    updateForminAlgaeCount(newGrid.cells)
+    cellView.set(newGrid.cells)
+    updateForminAlgaeCount(newGrid.cells, iteration)
     plot()
     iterationLabel.setIteration(iteration)
     nextIterationButton.enabled = true
   }
 
-  def updateForminAlgaeCount(cells: Array[Array[Cell]]): Unit = {
+  def updateForminAlgaeCount(cells: Array[Array[Cell]], iteration: Long): Unit = {
     var forminCounter = 0
     var algaeCounter = 0
 
@@ -149,22 +149,22 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
       y <- cells.indices
     } {
       cells(x)(y) match {
-        case AlgaeCell(_) => algaeCounter = algaeCounter + 1
-        case ForaminiferaCell(_, _) => forminCounter = forminCounter + 1
+        case AlgaeCell(_) => algaeCounter += 1
+        case ForaminiferaCell(_, _) => forminCounter += 1
         case _ =>
       }
     }
-    xs = xs :+ (System.currentTimeMillis() - startTime) / 1000d
-    ys1 = ys1 :+ forminCounter.toLong
-    ys2 = ys2 :+ algaeCounter.toLong
+    iterations += iteration
+    forminSeries += forminCounter.toLong
+    algaeSeries += algaeCounter.toLong
 
   }
 
-  sealed trait VisualizationSetter {
+  sealed trait CellArraySettable {
     def set(cells: Array[Array[Cell]]): Unit
   }
 
-  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) with VisualizationSetter {
+  private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) with CellArraySettable {
     private val algaeColor = new swing.Color(9, 108, 16)
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
@@ -180,20 +180,19 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
     class CellLabel extends Label {
 
       def prepare(row: Int, column: Int) {
-        text = cells(column / 3)(row / 3).smell(column % 3)(row % 3).value.toString
-        background = cells(column / 3)(row / 3) match {
+        text = cells(column / Cell.Size)(row / Cell.Size).smell(column % Cell.Size)(row % Cell.Size).value.toString
+        background = cells(column / Cell.Size)(row / Cell.Size) match {
           case AlgaeCell(_) => algaeColor
-          case ForaminiferaCell(energy, _) => if (row % 3 == 1 && column % 3 == 1) {
-            text = energy.value.toString
-            new swing.Color(255, (0 + 255 * energy.value / 2).toInt, (0 + 255 * energy.value / 2).toInt)
-          } else {
-            forminColor
-          }
+          case ForaminiferaCell(energy, _) =>
+            if (row % Cell.Size == 1 && column % Cell.Size == 1) {
+              text = energy.value.toString
+              new swing.Color(255, (0 + 255 * energy.value / 2).toInt, (0 + 255 * energy.value / 2).toInt)
+            } else {
+              forminColor
+            }
           case Obstacle => obstacleColor
           case EmptyCell(_) => emptyColor
         }
-
-
       }
     }
 
@@ -208,7 +207,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
   }
 
-  private class ParticleCanvas(dimension: Int) extends Label with VisualizationSetter {
+  private class ParticleCanvas(dimension: Int) extends Label with CellArraySettable {
     //todo config
     private val factor = 5
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
@@ -241,21 +240,19 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
   def plot(): Unit = {
     val dataset = new XYSeriesCollection()
-    val s1 = new XYSeries("Algae")
-    val s2 = new XYSeries("Formin")
-    for (i <- xs.indices) {
-      s1.add(xs(i), ys1(i))
-      s2.add(xs(i), ys2(i))
+    val foraminiferaXYSeries = new XYSeries("Foraminifera")
+    val algaeXYSeries = new XYSeries("Algae")
+    for (i <- iterations.indices) {
+      foraminiferaXYSeries.add(iterations(i), forminSeries(i))
+      algaeXYSeries.add(iterations(i), algaeSeries(i))
     }
-    dataset.addSeries(s1)
-    dataset.addSeries(s2)
-    val chart = ChartFactory.createXYLineChart("Formin vs Algae occurences in time", "Time[s]", "Number of occurrences", dataset, PlotOrientation.VERTICAL, true, true, false)
+    dataset.addSeries(foraminiferaXYSeries)
+    dataset.addSeries(algaeXYSeries)
+    val chart = ChartFactory.createXYLineChart(
+      "Foraminifera and algae population size per iteration", "Iteration", "Population size", dataset, PlotOrientation.VERTICAL, true, true, false
+    )
     val panel = new ChartPanel(chart)
     chartPanel.layout(swing.Component.wrap(panel)) = Center
-  }
-
-  trait Evaluable {
-    def value: Double
   }
 
   main(Array.empty)
