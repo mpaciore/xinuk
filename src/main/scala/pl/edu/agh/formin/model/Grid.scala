@@ -1,9 +1,9 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.Grid.SmellArray
+import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
 
-final case class Grid(cells: Array[Array[Cell]]) {
+final case class Grid(cells: CellArray) {
 
   import Grid._
 
@@ -43,6 +43,7 @@ final case class Grid(cells: Array[Array[Cell]]) {
 }
 
 object Grid {
+  type CellArray = Array[Array[Cell]]
   type SmellArray = Array[Array[Signal]]
 
   //todo reduce new grid creation - it should be possible with just 2

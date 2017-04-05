@@ -10,6 +10,7 @@ import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
 import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
@@ -140,7 +141,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
     nextIterationButton.enabled = true
   }
 
-  def updateForminAlgaeCount(cells: Array[Array[Cell]], iteration: Long): Unit = {
+  def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
     var forminCounter = 0
     var algaeCounter = 0
 
@@ -161,7 +162,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   }
 
   sealed trait CellArraySettable {
-    def set(cells: Array[Array[Cell]]): Unit
+    def set(cells: CellArray): Unit
   }
 
   private class SignalTable(dimension: Int) extends Table(3 * dimension, 3 * dimension) with CellArraySettable {
@@ -175,7 +176,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
       }
     }
 
-    var cells: Array[Array[Cell]] = _
+    var cells: CellArray = _
 
     class CellLabel extends Label {
 
@@ -196,7 +197,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
       }
     }
 
-    def set(cells: Array[Array[Cell]]): Unit = {
+    def set(cells: CellArray): Unit = {
       this.cells = cells
       this.repaint()
     }
@@ -218,7 +219,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
     icon = new ImageIcon(img)
 
-    def set(cells: Array[Array[Cell]]): Unit = {
+    def set(cells: CellArray): Unit = {
       val rgbArray = cells.map(_.map {
         case AlgaeCell(_) => algaeColor
         case ForaminiferaCell(_, _) => forminColor
