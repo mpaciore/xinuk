@@ -78,16 +78,18 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
-            val destinationCoords =
+            val destinations =
               Grid.SubcellCoordinates
                 .map { case (i, j) => cell.smell(i)(j) }
                 .zipWithIndex
                 .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-                .map { case (_, idx) => neighbourCoordinates(idx) }
+                .iterator
+                .map { case (_, idx) =>
+                  val (i, j) = neighbourCoordinates(idx)
+                  (i, j, grid.cells(i)(j))
+                }
 
-            destinationCoords
-             .iterator
-              .map { case (i, j) => (i, j, grid.cells(i)(j)) }
+            destinations
               .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
               case Opt((i, j, destinationCell)) =>
                 newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)
