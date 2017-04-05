@@ -29,7 +29,7 @@ class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: F
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, config.guiType)(iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)(iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -59,7 +59,8 @@ object GuiActor {
   }
 }
 
-private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClicked: Long => Unit) extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)(implicit config: ForminConfig)
+  extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
@@ -67,9 +68,11 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
   private val iterations = mutable.ListBuffer.empty[Long]
   private val forminSeries = mutable.ListBuffer.empty[Long]
   private val algaeSeries = mutable.ListBuffer.empty[Long]
-  private val cellView = guiType match {
-    case GuiType.None => new ParticleCanvas(0)
-    case GuiType.Basic => new ParticleCanvas(dimension)
+  private val cellView = config.guiType match {
+    case GuiType.None => new CellArraySettable {
+      override def set(cells: CellArray): Unit = {}
+    }
+    case GuiType.Basic => new ParticleCanvas(dimension, config.guiCellSize)
     case GuiType.Signal => new SignalTable(dimension)
   }
 
@@ -161,7 +164,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
   }
 
-  sealed trait CellArraySettable {
+  sealed trait CellArraySettable extends Component {
     def set(cells: CellArray): Unit
   }
 
@@ -208,14 +211,12 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
 
   }
 
-  private class ParticleCanvas(dimension: Int) extends Label with CellArraySettable {
-    //todo config
-    private val factor = 5
+  private class ParticleCanvas(dimension: Int, guiCellSize: Int) extends Label with CellArraySettable {
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
     private val obstacleColor = new swing.Color(0, 0, 0).getRGB
     private val emptyColor = new swing.Color(255, 255, 255).getRGB
-    private val img = new BufferedImage(dimension * factor, dimension * factor, BufferedImage.TYPE_INT_ARGB)
+    private val img = new BufferedImage(dimension * guiCellSize, dimension * guiCellSize, BufferedImage.TYPE_INT_ARGB)
 
     icon = new ImageIcon(img)
 
@@ -231,9 +232,9 @@ private[gui] class GuiGrid(dimension: Int, guiType: GuiType)(onNextIterationClic
         x <- cells.indices
         y <- cells.indices
       } {
-        val startX = x * factor
-        val startY = y * factor
-        img.setRGB(startX, startY, factor, factor, Array.fill(factor * factor)(rgbArray(x)(y)), 0, factor)
+        val startX = x * guiCellSize
+        val startY = y * guiCellSize
+        img.setRGB(startX, startY, guiCellSize, guiCellSize, Array.fill(guiCellSize * guiCellSize)(rgbArray(x)(y)), 0, guiCellSize)
       }
       this.repaint()
     }

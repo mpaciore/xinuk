@@ -39,7 +39,8 @@ final case class ForminConfig private(
                                        foraminiferaSpawnChance: Double,
                                        foraminiferaInitialSignal: Signal,
                                        algaeInitialSignal: Signal,
-                                       guiType: GuiType
+                                       guiType: GuiType,
+                                       guiCellSize: Int
                  )
 
 object ForminConfig {
