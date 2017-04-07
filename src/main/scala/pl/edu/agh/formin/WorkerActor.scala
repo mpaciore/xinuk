@@ -91,7 +91,15 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
                 }
 
             destinations
-              .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
+              .collectFirstOpt {
+                case (i, j, destination: AlgaeCell) => (i, j, destination)
+                case (i, j, destination: EmptyCell) =>
+                  val effectiveDestination = newGrid.cells(i)(j) match {
+                    case newAlgae: AlgaeCell => newAlgae
+                    case _ => destination
+                  }
+                  (i, j, effectiveDestination)
+              } match {
               case Opt((i, j, destinationCell)) =>
                 newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)
                 newGrid.cells(x)(y) = EmptyCell(cell.smell)
