@@ -77,6 +77,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             reproduce(x, y) { case accessible: ForaminiferaAcessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
+            //moving
             val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
             val destinations =
               Grid.SubcellCoordinates
