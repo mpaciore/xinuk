@@ -54,6 +54,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   def started: Receive = {
     case IterationPartFinished(iteration, status) =>
+      iteration2status.getOpt(iteration - 1).foreach(_.remove(status.worker))
       iteration2status.getOpt(iteration) match {
         case Opt(currentIterationStatus) =>
           currentIterationStatus.add(status)
@@ -130,6 +131,10 @@ case class IterationStatus private() {
 
   def add(status: SimulationStatus): Unit = {
     worker2grid += status.worker -> status.grid
+  }
+
+  def remove(id: WorkerId): Unit = {
+    worker2grid.remove(id)
   }
 
   def size: Int = {
