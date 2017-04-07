@@ -1,6 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, ActorLogging, Props}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.SchedulerActor.IterationPartFinished
@@ -10,7 +10,7 @@ import pl.edu.agh.formin.model._
 
 import scala.util.Random
 
-class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor {
+class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
 
   private var grid = Grid.empty
 
@@ -37,17 +37,18 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: EmptyCell => Cell): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
       val emptyCells =
         Grid.neighbourCoordinates(x, y).flatMap {
           case (i, j) =>
-            grid.cells(i)(j).opt.collect { case cell: EmptyCell if isEmptyIn(newGrid)(i, j) =>
-              (i, j, cell)
-            }
+            grid.cells(i)(j).opt
+              .filter(_ => creator.isDefinedAt(newGrid.cells(i)(j))) //use the same availability criteria on new grid
+              .collect(creator)
+              .map((i, j, _))
         }
       if (emptyCells.nonEmpty) {
-        val (newAlgaeX, newAlgaeY, oldCell) = emptyCells(random.nextInt(emptyCells.size))
-        newGrid.cells(newAlgaeX)(newAlgaeY) = creator(oldCell)
+        val (newAlgaeX, newAlgaeY, newCell) = emptyCells(random.nextInt(emptyCells.size))
+        newGrid.cells(newAlgaeX)(newAlgaeY) = newCell
       }
     }
 
@@ -64,7 +65,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y)(_.withAlgae)
+            reproduce(x, y) { case empty: EmptyCell => empty.withAlgae }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
@@ -73,20 +74,22 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y)(_.withForaminifera(cell.energy))
+            reproduce(x, y) { case accessible: ForaminiferaAcessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
-            val destinationCoords =
+            val destinations =
               Grid.SubcellCoordinates
                 .map { case (i, j) => cell.smell(i)(j) }
                 .zipWithIndex
                 .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-                .map { case (_, idx) => neighbourCoordinates(idx) }
+                .iterator
+                .map { case (_, idx) =>
+                  val (i, j) = neighbourCoordinates(idx)
+                  (i, j, grid.cells(i)(j))
+                }
 
-            destinationCoords
-             .iterator
-              .map { case (i, j) => (i, j, grid.cells(i)(j)) }
+            destinations
               .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
               case Opt((i, j, destinationCell)) =>
                 newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)

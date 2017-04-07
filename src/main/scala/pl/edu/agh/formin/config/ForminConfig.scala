@@ -1,5 +1,6 @@
 package pl.edu.agh.formin.config
 
+import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.formin.model.{Energy, Signal}
@@ -37,19 +38,27 @@ final case class ForminConfig private(
                                        spawnChance: Double,
                                        foraminiferaSpawnChance: Double,
                                        foraminiferaInitialSignal: Signal,
-                                       algaeInitialSignal: Signal
+                                       algaeInitialSignal: Signal,
+                                       guiType: GuiType,
+                                       guiCellSize: Int
                  )
 
 object ForminConfig {
-  private implicit def energyReader = new ValueReader[Energy] {
+  private implicit val energyReader = new ValueReader[Energy] {
     override def read(config: Config, path: String): Energy = {
       Energy(config.getNumber(path).doubleValue())
     }
   }
 
-  private implicit def signalReader = new ValueReader[Signal] {
+  private implicit val signalReader = new ValueReader[Signal] {
     override def read(config: Config, path: String): Signal = {
       Signal(config.getNumber(path).doubleValue())
+    }
+  }
+
+  private implicit val guiTypeReader = new ValueReader[GuiType] {
+    override def read(config: Config, path: String): GuiType = {
+      GuiType.byName(config.getString(path))
     }
   }
 
@@ -58,4 +67,23 @@ object ForminConfig {
     import net.ceedubs.ficus.readers.ArbitraryTypeReader._
     Try(config.as[ForminConfig]("config"))
   }
+}
+
+sealed trait GuiType extends NamedEnum
+
+object GuiType extends NamedEnumCompanion[GuiType] {
+
+  case object None extends GuiType {
+    override val name: String = "none"
+  }
+
+  case object Basic extends GuiType {
+    override def name: String = "basic"
+  }
+
+  case object Signal extends GuiType {
+    override def name: String = "signal"
+  }
+
+  override val values: List[GuiType] = caseObjects
 }

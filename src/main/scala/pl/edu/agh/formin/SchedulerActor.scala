@@ -61,7 +61,7 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
           if (currentIterationStatus.size == workers.size) {
             notifyListeners(iteration)
             //todo if headless
-            Thread.sleep(300)
+            //Thread.sleep(10)
             self ! IterationFinished(iteration)
           }
         case Opt.Empty =>
@@ -72,6 +72,9 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     case IterationFinished(i) if i == iterations =>
       self ! StopSimulation
     case IterationFinished(i) =>
+      if (i % 100 == 0) {
+        log.info("Iteration finished: {}", i)
+      }
       startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(status)
