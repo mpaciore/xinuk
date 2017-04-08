@@ -3,6 +3,8 @@ package pl.edu.agh.formin.model
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
 
+import scala.collection.mutable
+
 final case class Grid(cells: CellArray) {
 
   import Grid._
@@ -49,7 +51,6 @@ object Grid {
   //todo reduce new grid creation - it should be possible with just 2
   def empty(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
-    require(n > 3, "Insufficient grid size, no cells would be empty.")
     val values = Array.tabulate[Cell](n, n) {
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
       case _ => EmptyCell()
@@ -62,12 +63,17 @@ object Grid {
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
   }
 
+  private val neighbourCoordinatesMap: mutable.Map[(Int, Int), Vector[(Int, Int)]] = mutable.Map.empty
+
   def neighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
+    neighbourCoordinatesMap.getOrElseUpdate((x, y), calculateNeighbourCoordinates(x, y))
+  }
+
+  private def calculateNeighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
     val pos = Vector(-1, 0, 1)
     pos.flatMap(i => pos.collect {
       case j if !(i == 0 && j == 0) => (x + i, y + j)
-    }
-    )
+    })
   }
 
 }
@@ -106,7 +112,7 @@ sealed trait SmellMedium[T <: Cell with SmellMedium[T]] {
   self: T =>
   type Self >: self.type <: T
 
-  protected final def smellWithSignal(added: Signal): SmellArray = {
+  protected final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
   }
 
@@ -138,7 +144,7 @@ final case class AlgaeCell(smell: SmellArray)
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWithSignal(config.foraminiferaInitialSignal))
+    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWith(config.foraminiferaInitialSignal))
   }
 }
 
@@ -153,11 +159,11 @@ final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
   override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy, smellWithSignal(config.foraminiferaInitialSignal))
+    ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
   }
 
   def withAlgae(implicit config: ForminConfig): AlgaeCell = {
-    AlgaeCell(smellWithSignal(config.algaeInitialSignal))
+    AlgaeCell(smellWith(config.algaeInitialSignal))
   }
 
 }
