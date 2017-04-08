@@ -77,18 +77,29 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             reproduce(x, y) { case accessible: ForaminiferaAcessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
+            //moving
             val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
-            val destinationCoords =
+            val destinations =
               Grid.SubcellCoordinates
                 .map { case (i, j) => cell.smell(i)(j) }
                 .zipWithIndex
                 .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-                .map { case (_, idx) => neighbourCoordinates(idx) }
+                .iterator
+                .map { case (_, idx) =>
+                  val (i, j) = neighbourCoordinates(idx)
+                  (i, j, grid.cells(i)(j))
+                }
 
-            destinationCoords
-              .iterator
-              .map { case (i, j) => (i, j, grid.cells(i)(j)) }
-              .collectFirstOpt { case (i, j, destination: ForaminiferaAcessible) => (i, j, destination) } match {
+            destinations
+              .collectFirstOpt {
+                case (i, j, destination: AlgaeCell) => (i, j, destination)
+                case (i, j, destination: EmptyCell) =>
+                  val effectiveDestination = newGrid.cells(i)(j) match {
+                    case newAlgae: AlgaeCell => newAlgae
+                    case _ => destination
+                  }
+                  (i, j, effectiveDestination)
+              } match {
               case Opt((i, j, destinationCell)) =>
                 newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)
                 newGrid.cells(x)(y) = EmptyCell(cell.smell)

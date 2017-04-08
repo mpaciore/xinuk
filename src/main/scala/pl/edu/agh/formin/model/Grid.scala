@@ -1,16 +1,18 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.Grid.SmellArray
+import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
 
-final case class Grid(cells: Array[Array[Cell]]) {
+import scala.collection.mutable
+
+final case class Grid(cells: CellArray) {
 
   import Grid._
 
   private val cellSignalFun: (Int) => (Int) => Option[SmellArray] = {
     cells.map(_.lift).lift.andThen {
       case Some(rowFunction) => rowFunction.andThen(_.map(_.smell))
-      case None => _: Int => None
+      case None => _ => None
     }
   }
 
@@ -43,14 +45,16 @@ final case class Grid(cells: Array[Array[Cell]]) {
 }
 
 object Grid {
+  type CellArray = Array[Array[Cell]]
+
+  //todo is not mutable after all
   type SmellArray = Array[Array[Signal]]
 
   def empty(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
-    require(n > 3, "Insufficient grid size, no cells would be empty.")
     val values = Array.tabulate[Cell](n, n) {
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
-      case _ => EmptyCell()
+      case _ => EmptyCell.Instance
     }
     Grid(values)
   }
@@ -60,12 +64,17 @@ object Grid {
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
   }
 
+  private val neighbourCoordinatesMap: mutable.Map[(Int, Int), Vector[(Int, Int)]] = mutable.Map.empty
+
   def neighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
+    neighbourCoordinatesMap.getOrElseUpdate((x, y), calculateNeighbourCoordinates(x, y))
+  }
+
+  private def calculateNeighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
     val pos = Vector(-1, 0, 1)
     pos.flatMap(i => pos.collect {
       case j if !(i == 0 && j == 0) => (x + i, y + j)
-    }
-    )
+    })
   }
 
 }
@@ -100,14 +109,14 @@ object Cell {
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-sealed trait SmellMedium[T <: Cell with SmellMedium[T]] {
+sealed trait SmellMedium[T <: Cell with SmellMedium[T]] extends Any {
   self: T =>
-  type Self >: self.type <: T
 
-  protected final def smellWithSignal(added: Signal): SmellArray = {
+  protected final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
   }
-  def withSmell(smell: SmellArray): Self
+
+  def withSmell(smell: SmellArray): T
 }
 
 sealed trait HasEnergy {
@@ -115,45 +124,46 @@ sealed trait HasEnergy {
   def energy: Energy
 }
 
-sealed trait ForaminiferaAcessible {
+sealed trait ForaminiferaAcessible extends Any {
   self: Cell =>
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell
 }
 
 final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
   extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
-  type Self = ForaminiferaCell
 
-  override def withSmell(smell: SmellArray) = copy(smell = smell)
+  override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
 final case class AlgaeCell(smell: SmellArray)
-  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible {
-  type Self = AlgaeCell
+  extends AnyVal with Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible {
 
-  override def withSmell(smell: SmellArray) = copy(smell = smell)
+  override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWithSignal(config.foraminiferaInitialSignal))
+    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWith(config.foraminiferaInitialSignal))
   }
 }
 
 case object Obstacle extends Cell {
-  override def smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
+  override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
 final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
-  type Self = EmptyCell
+  extends AnyVal with Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
 
-  override def withSmell(smell: SmellArray) = copy(smell = smell)
+  override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
 
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy, smellWithSignal(config.foraminiferaInitialSignal))
+    ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
   }
 
   def withAlgae(implicit config: ForminConfig): AlgaeCell = {
-    AlgaeCell(smellWithSignal(config.algaeInitialSignal))
+    AlgaeCell(smellWith(config.algaeInitialSignal))
   }
 
+}
+
+object EmptyCell {
+  final val Instance = EmptyCell()
 }

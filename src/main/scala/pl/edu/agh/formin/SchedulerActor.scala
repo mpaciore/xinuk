@@ -1,10 +1,7 @@
 package pl.edu.agh.formin
 
-import java.{lang => jl}
-
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
-import com.google.common.cache.CacheBuilder
 import pl.edu.agh.formin.SchedulerActor._
 import pl.edu.agh.formin.gui.GuiActor.NewIteration
 import pl.edu.agh.formin.model.Grid
@@ -14,12 +11,7 @@ import scala.collection.mutable
 class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging {
   require(workers.nonEmpty, "Workers cannot be empty")
 
-  //todo: this could benefit from being totally unsynchronized, but was a fast way to get a bounded map
-  private val iteration2status: mutable.Map[jl.Long, IterationStatus] =
-    CacheBuilder.newBuilder()
-      .maximumSize(100)
-      .concurrencyLevel(1)
-      .build[jl.Long, IterationStatus]().asMap().asScala
+  private val iteration2status: mutable.Map[Long, IterationStatus] = mutable.Map.empty[Long, IterationStatus]
 
   private var iterations: Long = _
 
@@ -27,13 +19,10 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   override def receive: Receive = stopped
 
-  private def status: Map[Long, IterationStatus] = {
-    iteration2status.map { case (iteration, status) => (iteration: Long, status) }(scala.collection.breakOut)
-  }
-
-  private def startIteration(n: Long): Unit = {
-    iteration2status.update(n, IterationStatus.empty())
-    workers.foreach(_ ! WorkerActor.StartIteration(n))
+  private def startIteration(i: Long): Unit = {
+    iteration2status.remove(i - 1)
+    iteration2status.update(i, IterationStatus.empty())
+    workers.foreach(_ ! WorkerActor.StartIteration(i))
   }
 
   def stopped: Receive = {
@@ -54,40 +43,40 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   def started: Receive = {
     case IterationPartFinished(iteration, status) =>
-      iteration2status.getOpt(iteration - 1).foreach(_.remove(status.worker))
       iteration2status.getOpt(iteration) match {
         case Opt(currentIterationStatus) =>
           currentIterationStatus.add(status)
           if (currentIterationStatus.size == workers.size) {
             notifyListeners(iteration)
             //todo if headless
-            Thread.sleep(300)
+            //Thread.sleep(10)
             self ! IterationFinished(iteration)
           }
         case Opt.Empty =>
           log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
       }
+    case IterationFinished(i) =>
+      if (i % 100 == 0) {
+        log.info("Iteration finished: {}", i)
+      }
+      if (i == iterations) self ! StopSimulation
+      else startIteration(i + 1)
     case Register =>
       registered += sender()
-    case IterationFinished(i) if i == iterations =>
-      self ! StopSimulation
-    case IterationFinished(i) =>
-      startIteration(i + 1)
     case GetState =>
-      sender() ! State.Running(status)
+      sender() ! State.Running(iteration2status.toMap)
     case StopSimulation =>
       log.info("Simulation stopped.")
       context.become(finished)
   }
 
   private def notifyListeners(iteration: Long): Unit = {
-    val finishedIterationStatus = status(iteration)
-    registered.foreach(_ ! NewIteration(finishedIterationStatus, iteration))
+    registered.foreach(_ ! NewIteration(iteration2status(iteration), iteration))
   }
 
   def finished: Receive = {
     case GetState =>
-      sender() ! State.Finished(status)
+      sender() ! State.Finished(iteration2status.toMap)
   }
 }
 
@@ -111,9 +100,9 @@ object SchedulerActor {
 
     case object Stopped extends State
 
-    case class Running(status: Map[Long, IterationStatus]) extends State
+    case class Running(status: IMap[Long, IterationStatus]) extends State
 
-    case class Finished(status: Map[Long, IterationStatus]) extends State
+    case class Finished(status: IMap[Long, IterationStatus]) extends State
 
   }
 
@@ -128,10 +117,6 @@ case class IterationStatus private() {
 
   def add(status: SimulationStatus): Unit = {
     worker2grid += status.worker -> status.grid
-  }
-
-  def remove(id: WorkerId): Unit = {
-    worker2grid.remove(id)
   }
 
   def size: Int = {
