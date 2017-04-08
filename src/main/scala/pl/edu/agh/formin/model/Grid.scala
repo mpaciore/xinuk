@@ -46,6 +46,8 @@ final case class Grid(cells: CellArray) {
 
 object Grid {
   type CellArray = Array[Array[Cell]]
+
+  //todo is not mutable after all
   type SmellArray = Array[Array[Signal]]
 
   //todo reduce new grid creation - it should be possible with just 2
@@ -53,7 +55,7 @@ object Grid {
     val n = config.gridSize
     val values = Array.tabulate[Cell](n, n) {
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
-      case _ => EmptyCell()
+      case _ => EmptyCell.Instance
     }
     Grid(values)
   }
@@ -108,16 +110,14 @@ object Cell {
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-sealed trait SmellMedium[T <: Cell with SmellMedium[T]] {
+sealed trait SmellMedium[T <: Cell with SmellMedium[T]] extends Any {
   self: T =>
-  type Self >: self.type <: T
 
   protected final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
   }
 
-  //todo remove!
-  def withSmell(smell: SmellArray): Self
+  def withSmell(smell: SmellArray): T
 }
 
 sealed trait HasEnergy {
@@ -125,21 +125,19 @@ sealed trait HasEnergy {
   def energy: Energy
 }
 
-sealed trait ForaminiferaAcessible {
+sealed trait ForaminiferaAcessible extends Any {
   self: Cell =>
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell
 }
 
 final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
   extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
-  type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
 final case class AlgaeCell(smell: SmellArray)
-  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible {
-  type Self = AlgaeCell
+  extends AnyVal with Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible {
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
@@ -149,12 +147,11 @@ final case class AlgaeCell(smell: SmellArray)
 }
 
 case object Obstacle extends Cell {
-  override def smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
+  override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
 final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
-  type Self = EmptyCell
+  extends AnyVal with Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
 
   override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
 
@@ -166,4 +163,8 @@ final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
     AlgaeCell(smellWith(config.algaeInitialSignal))
   }
 
+}
+
+object EmptyCell {
+  final val Instance = EmptyCell()
 }
