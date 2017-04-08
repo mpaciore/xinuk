@@ -50,7 +50,6 @@ object Grid {
   //todo is not mutable after all
   type SmellArray = Array[Array[Signal]]
 
-  //todo reduce new grid creation - it should be possible with just 2
   def empty(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
     val values = Array.tabulate[Cell](n, n) {

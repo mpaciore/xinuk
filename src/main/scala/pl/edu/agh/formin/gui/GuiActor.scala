@@ -22,14 +22,16 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 import scala.util.Try
 
-class GuiActor private(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig)
-  extends Actor with ActorLogging {
-
+class GuiActor private(
+                        scheduler: ActorRef,
+                        worker: WorkerId,
+                        guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
+                      )(implicit config: ForminConfig) extends Actor with ActorLogging {
   import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)(iteration =>
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)(iteration =>
     scheduler ! IterationFinished(iteration)
   )
 
@@ -54,12 +56,12 @@ object GuiActor {
 
   case class NewIteration(state: IterationStatus, iteration: Long)
 
-  def props(scheduler: ActorRef, worker: WorkerId)(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(scheduler, worker))
+  def props(scheduler: ActorRef, worker: WorkerId, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(scheduler, worker, guiType))
   }
 }
 
-private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)(implicit config: ForminConfig)
+private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(onNextIterationClicked: Long => Unit)(implicit config: ForminConfig)
   extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
@@ -68,12 +70,9 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
   private val iterations = mutable.ListBuffer.empty[Long]
   private val forminSeries = mutable.ListBuffer.empty[Long]
   private val algaeSeries = mutable.ListBuffer.empty[Long]
-  private val cellView = config.guiType match {
-    case GuiType.None => new CellArraySettable {
-      override def set(cells: CellArray): Unit = {}
-    }
-    case GuiType.Basic => new ParticleCanvas(dimension, config.guiCellSize)
-    case GuiType.Signal => new SignalTable(dimension)
+  private val cellView = guiType match {
+    case Left(GuiType.Basic) => new ParticleCanvas(dimension, config.guiCellSize)
+    case Right(GuiType.Signal) => new SignalTable(dimension)
   }
 
   private val chartPanel = new BorderPanel {
@@ -183,7 +182,7 @@ private[gui] class GuiGrid(dimension: Int)(onNextIterationClicked: Long => Unit)
 
     class CellLabel extends Label {
 
-      def prepare(row: Int, column: Int) {
+      def prepare(row: Int, column: Int): Unit = {
         text = cells(column / Cell.Size)(row / Cell.Size).smell(column % Cell.Size)(row % Cell.Size).value.toString
         background = cells(column / Cell.Size)(row / Cell.Size) match {
           case AlgaeCell(_) => algaeColor

@@ -1,9 +1,22 @@
 name := "formin"
+organization := "pl.edu.agh"
 
 version := "1.0"
 
 scalaVersion := "2.11.8"
-organization := "pl.edu.agh"
+scalacOptions ++= Seq(
+  "-feature",
+  "-deprecation",
+  "-unchecked",
+  "-language:implicitConversions",
+  "-language:existentials",
+  "-language:dynamics",
+  "-language:experimental.macros",
+  "-language:higherKinds",
+  "-Xfuture",
+  "-Xfatal-warnings",
+  "-Xlint:_,-missing-interpolator,-adapted-args"
+)
 
 cancelable in Global := true
 
