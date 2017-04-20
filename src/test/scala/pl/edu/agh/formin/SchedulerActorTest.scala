@@ -74,7 +74,7 @@ class SchedulerActorTest
 
     scheduler ! GetState
     val afterSecondWorker = expectMsgClass(classOf[SchedulerActor.State.Running])
-    afterSecondWorker.status.keySet should contain only(1L, 2L)
+    afterSecondWorker.status.keySet should contain only 2L
   }
 
   it should "be in finished state" in {
