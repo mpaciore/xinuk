@@ -3,7 +3,7 @@ organization := "pl.edu.agh"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
