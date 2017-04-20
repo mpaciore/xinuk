@@ -34,11 +34,12 @@ final case class Grid(cells: CellArray) {
           case (i, j) =>
             destinationCellSignal(i, j).map(_.apply(i)(j))
         }
-        val (newSmell, _) = addends.foldLeft((Cell.emptySignal, 0)) { case ((cell, index), signalOpt) =>
+        val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
           cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
           (cell, index + 1)
         }
+        newSmell(1)(1) = Signal.Zero
         smelling.withSmell(newSmell)
     }
   }
