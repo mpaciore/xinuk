@@ -3,7 +3,7 @@ package pl.edu.agh.formin
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.avsystem.commons._
 import pl.edu.agh.formin.SchedulerActor._
-import pl.edu.agh.formin.gui.GuiActor.NewIteration
+import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, Register}
 import pl.edu.agh.formin.model.Grid
 
 import scala.collection.mutable
@@ -15,13 +15,13 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   private var iterations: Long = _
 
-  private val registered: mutable.Set[ActorRef] = mutable.Set.empty
-
   override def receive: Receive = stopped
 
   private def startIteration(i: Long): Unit = {
     iteration2status.remove(i - 1)
     iteration2status.update(i, IterationStatus.empty())
+    //todo will always be true
+    if (i == 1) workers.foreach(_ ! Register)
     workers.foreach(_ ! WorkerActor.StartIteration(i))
   }
 
@@ -37,8 +37,6 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       }
     case GetState =>
       sender() ! State.Stopped
-    case Register =>
-      registered += sender()
   }
 
   def started: Receive = {
@@ -47,7 +45,6 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
         case Opt(currentIterationStatus) =>
           currentIterationStatus.add(status)
           if (currentIterationStatus.size == workers.size) {
-            notifyListeners(iteration)
             self ! IterationFinished(iteration)
           }
         case Opt.Empty =>
@@ -59,17 +56,11 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
       }
       if (i == iterations) self ! StopSimulation
       else startIteration(i + 1)
-    case Register =>
-      registered += sender()
     case GetState =>
       sender() ! State.Running(iteration2status.toMap)
     case StopSimulation =>
       log.info("Simulation stopped.")
       context.become(finished)
-  }
-
-  private def notifyListeners(iteration: Long): Unit = {
-    registered.foreach(_ ! NewIteration(iteration2status(iteration), iteration))
   }
 
   def finished: Receive = {
@@ -82,11 +73,7 @@ object SchedulerActor {
 
   case class StartSimulation(iterations: Long) extends AnyVal
 
-  case object Register
-
   case object GetState
-
-  case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
 
   case class IterationFinished(i: Long) extends AnyVal
 

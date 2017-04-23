@@ -1,13 +1,13 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import pl.edu.agh.formin.SchedulerActor.IterationPartFinished
-import pl.edu.agh.formin.WorkerActor.StartIteration
+import pl.edu.agh.formin.WorkerActor.{Deregister, IterationPartFinished, Register, StartIteration}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 
+import scala.collection.mutable
 import scala.util.Random
 
 class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
@@ -15,6 +15,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   private var grid = Grid.empty
 
   private val random = new Random(System.nanoTime())
+
+  private val registered: mutable.Set[ActorRef] = mutable.Set.empty
 
   override def receive: Receive = stopped
 
@@ -112,36 +114,60 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     grid = newGrid
   }
 
+  private def handleRegistrations: Receive = {
+    case Register =>
+      registered += sender()
+    case Deregister =>
+      registered -= sender()
+  }
+
   def stopped: Receive = {
-    case StartIteration(1) =>
-      val empty = EmptyCell()
-      for {
-        x <- 0 until config.gridSize
-        y <- 0 until config.gridSize
-        if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
-      } {
-        if (random.nextDouble() < config.spawnChance) {
-          grid.cells(x)(y) =
-            if (random.nextDouble() < config.foraminiferaSpawnChance) empty.withForaminifera(config.foraminiferaStartEnergy)
-            else empty.withAlgae
+    val specific: Receive = {
+      case StartIteration(1) =>
+        val empty = EmptyCell()
+        for {
+          x <- 0 until config.gridSize
+          y <- 0 until config.gridSize
+          if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
+        } {
+          if (random.nextDouble() < config.spawnChance) {
+            grid.cells(x)(y) =
+              if (random.nextDouble() < config.foraminiferaSpawnChance) empty.withForaminifera(config.foraminiferaStartEnergy)
+              else empty.withAlgae
+          }
         }
-      }
-      propagateSignal()
-      sender() ! IterationPartFinished(1, SimulationStatus(id, grid))
-      context.become(started)
+        propagateSignal()
+        notifyListeners(1, SimulationStatus(id, grid))
+        context.become(started)
+    }
+    specific.orElse(handleRegistrations)
   }
 
   def started: Receive = {
-    case StartIteration(i) =>
-      propagateSignal()
-      makeMoves(i)
-      sender() ! IterationPartFinished(i, SimulationStatus(id, grid))
+    val specific: Receive = {
+      case StartIteration(i) =>
+        propagateSignal()
+        makeMoves(i)
+        notifyListeners(i, SimulationStatus(id, grid))
+    }
+    specific.orElse(handleRegistrations)
+  }
+
+  private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
+    registered.foreach(_ ! IterationPartFinished(iteration, status))
   }
 }
 
 object WorkerActor {
 
   case class StartIteration(i: Long) extends AnyVal
+
+  case object Register
+
+  case object Deregister
+
+  //sent to listeners
+  case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
 
   def props(id: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new WorkerActor(id))
@@ -150,3 +176,7 @@ object WorkerActor {
 
 
 case class WorkerId(value: Int) extends AnyVal
+
+object WorkerId {
+  implicit val WorkerOrdering: Ordering[WorkerId] = Ordering.by(_.value)
+}
