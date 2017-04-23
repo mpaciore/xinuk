@@ -175,7 +175,9 @@ object WorkerActor {
 }
 
 
-case class WorkerId(value: Int) extends AnyVal
+case class WorkerId(value: Int) extends AnyVal {
+  def isValid(implicit config: ForminConfig): Boolean = (value >= 0) && (value < math.pow(config.workersRoot, 2))
+}
 
 object WorkerId {
   implicit val WorkerOrdering: Ordering[WorkerId] = Ordering.by(_.value)
