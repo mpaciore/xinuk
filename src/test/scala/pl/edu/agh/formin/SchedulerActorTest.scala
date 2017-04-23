@@ -27,7 +27,8 @@ class SchedulerActorTest
     foraminiferaInitialSignal = Signal(-1),
     algaeInitialSignal = Signal(1),
     guiType = GuiType.None,
-    guiCellSize = 0
+    guiCellSize = 0,
+    workersRoot = 1
   )
 
   "A SchedulerActor" should "be in stopped state" in {
