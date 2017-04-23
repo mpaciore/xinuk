@@ -46,7 +46,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
       val emptyCells =
         Grid.neighbourCoordinates(x, y).flatMap {
           case (i, j) =>
@@ -87,7 +87,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAcessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
+            reproduce(x, y) { case accessible: ForaminiferaAcessible[_] => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             //moving
