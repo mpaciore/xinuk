@@ -8,7 +8,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
+import pl.edu.agh.formin.SchedulerActor.Register
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
@@ -19,7 +19,6 @@ import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
 import scala.swing.Table.AbstractRenderer
 import scala.swing._
-import scala.swing.event.ButtonClicked
 import scala.util.Try
 
 class GuiActor private(
@@ -31,9 +30,7 @@ class GuiActor private(
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)(iteration =>
-    scheduler ! IterationFinished(iteration)
-  )
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
     scheduler ! Register
@@ -61,7 +58,7 @@ object GuiActor {
   }
 }
 
-private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(onNextIterationClicked: Long => Unit)(implicit config: ForminConfig)
+private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig)
   extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
@@ -91,15 +88,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
 
     border = BorderFactory.createEmptyBorder(50, 20, 50, 20)
   }
-  private val nextIterationButton = new Button("Next iteration") {
-    border = BorderFactory.createEmptyBorder(100, 20, 20, 20)
-  }
-  listenTo(nextIterationButton)
-  reactions += {
-    case ButtonClicked(`nextIterationButton`) =>
-      nextIterationButton.enabled = false
-      onNextIterationClicked(iterationLabel.iteration)
-  }
 
   def top = new MainFrame {
     title = "Formin model"
@@ -124,8 +112,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
       }
 
       val statusPanel = new BorderPanel {
-        layout(iterationLabel) = North
-        layout(nextIterationButton) = Center
+        layout(iterationLabel) = Center
       }
 
       layout(contentPane) = Center
@@ -140,7 +127,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     updateForminAlgaeCount(newGrid.cells, iteration)
     plot()
     iterationLabel.setIteration(iteration)
-    nextIterationButton.enabled = true
   }
 
   def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
