@@ -150,7 +150,7 @@ case object Obstacle extends Cell {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-final case class BufferCell(smell: SmellArray)
+final case class BufferCell(smell: SmellArray = Cell.emptySignal)
   extends AnyVal with Cell with SmellMedium[BufferCell] with ForaminiferaAcessible{
   override def withSmell(smell: SmellArray): BufferCell = copy(smell = smell)
 

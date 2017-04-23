@@ -8,12 +8,13 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.SchedulerActor.Register
+import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, Register}
+import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
+import scala.collection.immutable.TreeMap
 import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
@@ -22,40 +23,32 @@ import scala.swing._
 import scala.util.Try
 
 class GuiActor private(
-                        scheduler: ActorRef,
-                        worker: WorkerId,
+                        workers: TreeMap[WorkerId, ActorRef],
                         guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
                       )(implicit config: ForminConfig) extends Actor with ActorLogging {
-  import GuiActor._
 
   override def receive: Receive = started
 
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
-    scheduler ! Register
+    workers.values.headOption.foreach(_ ! Register)
     log.info("GUI started")
   }
 
   def started: Receive = {
-    //todo add counts
-    case NewIteration(state, iteration) =>
-      state.getGridForWorker(worker) match {
-        case Some(grid) =>
-          gui.setNewValues(grid, iteration)
-        case None =>
-          log.error("Worker {} grid status unavailable", worker.value)
-      }
+    //todo fix counts
+    case IterationPartFinished(iteration, status) =>
+      gui.setNewValues(status.grid, iteration)
   }
 }
 
 object GuiActor {
 
-  case class NewIteration(state: IterationStatus, iteration: Long)
-
-  def props(scheduler: ActorRef, worker: WorkerId, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(scheduler, worker, guiType))
+  def props(workers: TreeMap[WorkerId, ActorRef], guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(workers, guiType))
   }
+
 }
 
 private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig)

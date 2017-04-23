@@ -8,6 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.gui.GuiActor
 
+import scala.collection.immutable.TreeMap
 import scala.util.{Failure, Success, Try}
 
 object Simulation extends App with LazyLogging {
@@ -34,8 +35,8 @@ object Simulation extends App with LazyLogging {
   private val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(worker)))
 
   config.guiType match {
-    case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(scheduler, workerId, Left(tpe)))
-    case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(scheduler, workerId, Right(tpe)))
+    case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(TreeMap(workerId -> worker), Left(tpe)))
+    case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(TreeMap(workerId -> worker), Right(tpe)))
     case _ =>
   }
 
