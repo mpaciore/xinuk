@@ -150,6 +150,24 @@ case object Obstacle extends Cell {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
+final case class BufferCell(smell: SmellArray)
+  extends AnyVal with Cell with SmellMedium[BufferCell] with ForaminiferaAcessible{
+  override def withSmell(smell: SmellArray): BufferCell = copy(smell = smell)
+
+  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
+    ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
+  }
+
+  def withAlgae(implicit config: ForminConfig): AlgaeCell = {
+    AlgaeCell(smellWith(config.algaeInitialSignal))
+  }
+
+  def emptyBuffer(): BufferCell = {
+     BufferCell(Array.fill(Cell.Size, Cell.Size)(Signal.Zero))
+  }
+}
+
+
 final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
   extends AnyVal with Cell with SmellMedium[EmptyCell] with ForaminiferaAcessible {
 

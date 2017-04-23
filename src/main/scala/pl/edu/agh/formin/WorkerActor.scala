@@ -37,6 +37,13 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
 
+    def isEmptyBufferCellIn(grid: Grid)(i: Int, j: Int): Boolean = {
+      grid.cells(i)(j) match {
+        case BufferCell(_) => true
+        case _ => false
+      }
+    }
+
     def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
       val emptyCells =
         Grid.neighbourCoordinates(x, y).flatMap {
@@ -61,6 +68,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           newGrid.cells(x)(y) = Obstacle
         case cell: EmptyCell =>
           if (isEmptyIn(newGrid)(x, y)) {
+            newGrid.cells(x)(y) = cell
+          }
+        case cell : BufferCell =>
+          if(isEmptyBufferCellIn(newGrid)(x ,y)) {
             newGrid.cells(x)(y) = cell
           }
         case cell: AlgaeCell =>

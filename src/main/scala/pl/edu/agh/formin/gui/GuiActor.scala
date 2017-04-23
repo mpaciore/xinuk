@@ -157,6 +157,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     private val algaeColor = new swing.Color(9, 108, 16)
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
+    private val bufferColor = new swing.Color(163, 163, 194)
     private val emptyColor = new swing.Color(255, 255, 255)
     private val renderer = new AbstractRenderer(new CellLabel) {
       override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
@@ -180,6 +181,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
               forminColor
             }
           case Obstacle => obstacleColor
+          case BufferCell(_) => bufferColor
           case EmptyCell(_) => emptyColor
         }
       }
@@ -200,6 +202,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
     private val obstacleColor = new swing.Color(0, 0, 0).getRGB
+    private val bufferColor = new swing.Color(163, 163, 194).getRGB
     private val emptyColor = new swing.Color(255, 255, 255).getRGB
     private val img = new BufferedImage(dimension * guiCellSize, dimension * guiCellSize, BufferedImage.TYPE_INT_ARGB)
 
@@ -210,6 +213,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
         case AlgaeCell(_) => algaeColor
         case ForaminiferaCell(_, _) => forminColor
         case Obstacle => obstacleColor
+        case BufferCell(_) => bufferColor
         case EmptyCell(_) => emptyColor
       })
 
