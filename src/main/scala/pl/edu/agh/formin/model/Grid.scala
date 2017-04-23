@@ -48,12 +48,12 @@ final case class Grid(cells: CellArray) {
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  //todo is not mutable after all
   type SmellArray = Array[Array[Signal]]
 
-  def empty(implicit config: ForminConfig): Grid = {
+  def empty(bufferZone: Set[(Int, Int)])(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
     val values = Array.tabulate[GridPart](n, n) {
+      case (x, y) if bufferZone.contains((x, y)) => BufferCell(EmptyCell.Instance)
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
       case _ => EmptyCell.Instance
     }

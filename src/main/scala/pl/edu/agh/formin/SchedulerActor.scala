@@ -21,8 +21,12 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
     iteration2status.remove(i - 1)
     iteration2status.update(i, IterationStatus.empty())
     //todo will always be true
-    if (i == 1) workers.foreach(_ ! Register)
-    workers.foreach(_ ! WorkerActor.StartIteration(i))
+    if (i == 1) {
+      workers.foreach(_ ! Register)
+      workers.foreach(_ ! WorkerActor.NeighboursInitialized(Set.empty))
+    } else {
+      workers.foreach(_ ! WorkerActor.StartIteration(i))
+    }
   }
 
   def stopped: Receive = {

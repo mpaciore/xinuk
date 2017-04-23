@@ -1,14 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
-import org.scalatest.concurrent.Eventually
-import org.scalatest.{FlatSpecLike, Matchers}
-import pl.edu.agh.formin.SchedulerActor.{GetState, StartSimulation}
-import pl.edu.agh.formin.config.{ForminConfig, GuiType}
-import pl.edu.agh.formin.model.{Energy, Grid, Signal}
-
-class SchedulerActorTest
+/*class SchedulerActorTest
   extends TestKit(ActorSystem("SchedulerActorTest"))
     with FlatSpecLike with Matchers with ImplicitSender with Eventually {
 
@@ -147,4 +139,4 @@ class SchedulerActorTest
     }
   }
 
-}
+}*/

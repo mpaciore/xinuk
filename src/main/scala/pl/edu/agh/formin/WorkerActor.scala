@@ -3,20 +3,25 @@ package pl.edu.agh.formin
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import pl.edu.agh.formin.WorkerActor.{Deregister, IterationPartFinished, Register, StartIteration}
+import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.formin.model.parallel.Neighbour
 
 import scala.collection.mutable
 import scala.util.Random
 
 class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
 
-  private var grid = Grid.empty
+  private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
 
   private val registered: mutable.Set[ActorRef] = mutable.Set.empty
+
+  private var neighbours: Set[Neighbour] = _
+
+  private var bufferZone: Set[(Int, Int)] = _
 
   override def receive: Receive = stopped
 
@@ -30,7 +35,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   }
 
   private def makeMoves(iteration: Long): Unit = {
-    val newGrid = Grid.empty
+    val newGrid = Grid.empty(bufferZone)
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
       grid.cells(i)(j) match {
@@ -123,6 +128,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   def stopped: Receive = {
     val specific: Receive = {
+      case NeighboursInitialized(neighbours: Set[Neighbour]) =>
+        this.neighbours = neighbours
+        bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
+        grid = Grid.empty(bufferZone)
+        self ! StartIteration(1)
       case StartIteration(1) =>
         val empty = EmptyCell()
         for {
@@ -160,14 +170,16 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
 object WorkerActor {
 
-  case class StartIteration(i: Long) extends AnyVal
+  case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
+
+  case class StartIteration private(i: Long) extends AnyVal
 
   case object Register
 
   case object Deregister
 
   //sent to listeners
-  case class IterationPartFinished(iteration: Long, simulationStatus: SimulationStatus)
+  case class IterationPartFinished private(iteration: Long, simulationStatus: SimulationStatus)
 
   def props(id: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new WorkerActor(id))
