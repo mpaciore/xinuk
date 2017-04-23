@@ -126,7 +126,7 @@ sealed trait HasEnergy {
   def energy: Energy
 }
 
-sealed trait ForaminiferaAcessible[ResultGridPart <: GridPart] extends GridPart {
+sealed trait ForaminiferaAccessible[ResultGridPart <: GridPart] extends GridPart {
   def withForaminifera(energy: Energy)(implicit config: ForminConfig): ResultGridPart
 }
 
@@ -141,7 +141,7 @@ final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
 }
 
 final case class AlgaeCell(smell: SmellArray)
-  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAcessible[ForaminiferaCell] {
+  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
@@ -158,7 +158,7 @@ final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with Sm
   extends GridPart
     with SmellMedium[BufferCell]
     with AlgaeAccessible[BufferCell]
-    with ForaminiferaAcessible[BufferCell] {
+    with ForaminiferaAccessible[BufferCell] {
 
   override def smell: SmellArray = cell.smell
 
@@ -177,7 +177,7 @@ final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with Sm
 }
 
 final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends Cell with SmellMedium[EmptyCell] with AlgaeAccessible[AlgaeCell] with ForaminiferaAcessible[ForaminiferaCell] {
+  extends Cell with SmellMedium[EmptyCell] with AlgaeAccessible[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
 
   override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
 

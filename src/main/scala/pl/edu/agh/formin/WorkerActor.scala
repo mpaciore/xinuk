@@ -34,14 +34,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
       grid.cells(i)(j) match {
-        case EmptyCell(_) => true
-        case _ => false
-      }
-    }
-
-    def isEmptyBufferCellIn(grid: Grid)(i: Int, j: Int): Boolean = {
-      grid.cells(i)(j) match {
-        case BufferCell(_) => true
+        case EmptyCell(_) | BufferCell(EmptyCell(_)) => true
         case _ => false
       }
     }
@@ -68,17 +61,13 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       grid.cells(x)(y) match {
         case Obstacle =>
           newGrid.cells(x)(y) = Obstacle
-        case cell: EmptyCell =>
+        case cell@(EmptyCell(_) | BufferCell(_)) =>
           if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell
-          }
-        case cell : BufferCell =>
-          if(isEmptyBufferCellIn(newGrid)(x ,y)) {
             newGrid.cells(x)(y) = cell
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case empty: EmptyCell => empty.withAlgae }
+            reproduce(x, y) { case accessible: AlgaeAccessible[_] => accessible.withAlgae }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
@@ -87,7 +76,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAcessible[_] => accessible.withForaminifera(config.foraminiferaStartEnergy) }
+            reproduce(x, y) { case accessible: ForaminiferaAccessible[_] => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             //moving
