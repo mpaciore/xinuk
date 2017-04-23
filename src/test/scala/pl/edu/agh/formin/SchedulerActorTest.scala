@@ -31,6 +31,10 @@ class SchedulerActorTest
     workersRoot = 1
   )
 
+  import scala.concurrent.duration._
+
+  override implicit val patienceConfig = PatienceConfig(3.seconds, 3.seconds)
+
   "A SchedulerActor" should "be in stopped state" in {
     val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(self)))
     scheduler ! GetState
