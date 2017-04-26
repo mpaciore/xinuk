@@ -41,7 +41,8 @@ final case class ForminConfig private(
                                        algaeInitialSignal: Signal,
                                        guiType: GuiType,
                                        guiCellSize: Int,
-                                       workersRoot: Int
+                                       workersRoot: Int,
+                                       iterationsNumber : Long
                  )
 
 object ForminConfig {

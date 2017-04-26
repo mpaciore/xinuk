@@ -3,6 +3,7 @@ package pl.edu.agh.formin
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
+import pl.edu.agh.formin.SchedulerActor.StopSimulation
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -22,6 +23,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   private var neighbours: Set[Neighbour] = _
 
   private var bufferZone: Set[(Int, Int)] = _
+
+  private var scheduler : ActorRef = _
 
   override def receive: Receive = stopped
 
@@ -129,6 +132,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   def stopped: Receive = {
     val specific: Receive = {
       case NeighboursInitialized(neighbours: Set[Neighbour]) =>
+        scheduler = sender
         this.neighbours = neighbours
         bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
@@ -149,16 +153,33 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         propagateSignal()
         notifyListeners(1, SimulationStatus(id, grid))
         context.become(started)
+        self ! IterationPartFinished(1, SimulationStatus(id, grid))
     }
     specific.orElse(handleRegistrations)
   }
 
   def started: Receive = {
+    var registeredFinished = 0
+    var finishedIteration: Long = 1
     val specific: Receive = {
       case StartIteration(i) =>
         propagateSignal()
         makeMoves(i)
         notifyListeners(i, SimulationStatus(id, grid))
+        finishedIteration = i
+        self ! IterationPartFinished(i, SimulationStatus(id, grid))
+      case IterationPartFinished(iteration, status) =>
+        if (iteration == finishedIteration) {
+          if (registeredFinished == registered.size) {
+            registeredFinished = 0
+            if(config.iterationsNumber == finishedIteration){
+              scheduler ! StopSimulation
+            }else {
+              self ! StartIteration(finishedIteration + 1)
+            }
+          }
+          registeredFinished += 1
+        }
     }
     specific.orElse(handleRegistrations)
   }
@@ -175,6 +196,8 @@ object WorkerActor {
   case class StartIteration private(i: Long) extends AnyVal
 
   case object Register
+
+  case object WaitForNeighbours
 
   case object Deregister
 

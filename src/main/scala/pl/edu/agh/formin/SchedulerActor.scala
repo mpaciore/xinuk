@@ -15,18 +15,14 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
 
   private var iterations: Long = _
 
+  private var workersFinished : Long = 0
+
   override def receive: Receive = stopped
 
   private def startIteration(i: Long): Unit = {
     iteration2status.remove(i - 1)
     iteration2status.update(i, IterationStatus.empty())
-    //todo will always be true
-    if (i == 1) {
-      workers.foreach(_ ! Register)
-      workers.foreach(_ ! WorkerActor.NeighboursInitialized(Set.empty))
-    } else {
-      workers.foreach(_ ! WorkerActor.StartIteration(i))
-    }
+    workers.foreach(_ ! WorkerActor.NeighboursInitialized(Set.empty))
   }
 
   def stopped: Receive = {
@@ -44,27 +40,14 @@ class SchedulerActor(workers: Vector[ActorRef]) extends Actor with ActorLogging 
   }
 
   def started: Receive = {
-    case IterationPartFinished(iteration, status) =>
-      iteration2status.getOpt(iteration) match {
-        case Opt(currentIterationStatus) =>
-          currentIterationStatus.add(status)
-          if (currentIterationStatus.size == workers.size) {
-            self ! IterationFinished(iteration)
-          }
-        case Opt.Empty =>
-          log.warning("Cache miss on iteration {} part finish for worker {}", iteration, status.worker)
-      }
-    case IterationFinished(i) =>
-      if (i % 100 == 0) {
-        log.info("Iteration finished: {}", i)
-      }
-      if (i == iterations) self ! StopSimulation
-      else startIteration(i + 1)
     case GetState =>
       sender() ! State.Running(iteration2status.toMap)
     case StopSimulation =>
-      log.info("Simulation stopped.")
-      context.become(finished)
+      workersFinished +=1
+      if(workersFinished==workers.size){
+        log.info("Simulation stopped.")
+        context.become(finished)
+      }
   }
 
   def finished: Receive = {

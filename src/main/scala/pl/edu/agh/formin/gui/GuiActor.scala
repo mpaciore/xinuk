@@ -40,6 +40,7 @@ class GuiActor private(
     //todo fix counts
     case IterationPartFinished(iteration, status) =>
       gui.setNewValues(status.grid, iteration)
+      sender ! IterationPartFinished(iteration, status)
   }
 }
 

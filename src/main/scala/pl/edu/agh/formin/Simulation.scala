@@ -40,7 +40,7 @@ object Simulation extends App with LazyLogging {
     case _ =>
   }
 
-  scheduler ! SchedulerActor.StartSimulation(1000000)
+  scheduler ! SchedulerActor.StartSimulation(config.iterationsNumber)
 
 }
 
