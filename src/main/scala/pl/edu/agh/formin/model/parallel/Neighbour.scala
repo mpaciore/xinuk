@@ -2,7 +2,7 @@ package pl.edu.agh.formin.model.parallel
 
 import akka.actor.ActorRef
 import com.avsystem.commons.SharedExtensions._
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons.misc.{Opt, SealedEnumCompanion}
 import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.ForminConfig
 
@@ -39,7 +39,7 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
   }
 }
 
-object NeighbourPosition {
+object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
 
   case object Top extends NeighbourPositionGen(-_.workersRoot)(_.iterator.map((0, _)))
 
@@ -57,6 +57,7 @@ object NeighbourPosition {
 
   case object BottomLeft extends NeighbourPositionComposite(Bottom, Left)
 
+  override val values: List[NeighbourPosition] = caseObjects
 }
 
 final case class Neighbour(position: NeighbourPosition, ref: ActorRef)

@@ -206,9 +206,11 @@ object WorkerActor {
   }
 }
 
+case class SimulationStatus(worker: WorkerId, grid: Grid)
+
 
 case class WorkerId(value: Int) extends AnyVal {
-  def isValid(implicit config: ForminConfig): Boolean = (value >= 0) && (value < math.pow(config.workersRoot, 2))
+  def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
 }
 
 object WorkerId {

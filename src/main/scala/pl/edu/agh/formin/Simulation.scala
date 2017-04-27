@@ -2,17 +2,19 @@ package pl.edu.agh.formin
 
 import java.io.File
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.gui.GuiActor
+import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 
 import scala.collection.immutable.TreeMap
 import scala.util.{Failure, Success, Try}
 
 object Simulation extends App with LazyLogging {
   final val ForminConfigPrefix = "formin"
+
   private val rawConfig =
     Try(ConfigFactory.parseFile(new File("formin.conf")).getConfig(ForminConfigPrefix)).getOrElse {
       logger.info("Falling back to reference.conf")
@@ -36,7 +38,6 @@ object Simulation extends App with LazyLogging {
       workerId -> system.actorOf(WorkerActor.props(workerId))
     }(collection.breakOut)
 
-  private val scheduler = system.actorOf(Props(classOf[SchedulerActor], workers.values.toVector))
 
   config.guiType match {
     case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(workers, Left(tpe)))
@@ -44,7 +45,12 @@ object Simulation extends App with LazyLogging {
     case _ =>
   }
 
-  scheduler ! SchedulerActor.StartSimulation(config.iterationsNumber)
+  workers.foreach { case (id, ref) =>
+    val neighbours = NeighbourPosition.values.flatMap { pos =>
+      pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
+    }
+    ref ! WorkerActor.NeighboursInitialized(neighbours.toSet)
+  }
 
 }
 
