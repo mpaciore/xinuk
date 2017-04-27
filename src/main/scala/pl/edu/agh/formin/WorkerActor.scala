@@ -3,7 +3,6 @@ package pl.edu.agh.formin
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import pl.edu.agh.formin.SchedulerActor.StopSimulation
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -172,9 +171,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         if (iteration == finishedIteration) {
           if (registeredFinished == registered.size) {
             registeredFinished = 0
-            if(config.iterationsNumber == finishedIteration){
-              scheduler ! StopSimulation
-            }else {
+            if (config.iterationsNumber > finishedIteration) {
               self ! StartIteration(finishedIteration + 1)
             }
           }

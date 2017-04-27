@@ -2,7 +2,7 @@ package pl.edu.agh.formin
 
 import java.io.File
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
@@ -30,13 +30,17 @@ object Simulation extends App with LazyLogging {
     }
 
   private val system = ActorSystem("formin")
-  private val workerId = WorkerId(1)
-  private val worker = system.actorOf(WorkerActor.props(workerId))
-  private val scheduler = system.actorOf(Props(classOf[SchedulerActor], Vector(worker)))
+  private val workers: TreeMap[WorkerId, ActorRef] =
+    (1 to math.pow(config.workersRoot, 2).toInt).map { i =>
+      val workerId = WorkerId(i)
+      workerId -> system.actorOf(WorkerActor.props(workerId))
+    }(collection.breakOut)
+
+  private val scheduler = system.actorOf(Props(classOf[SchedulerActor], workers.values.toVector))
 
   config.guiType match {
-    case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(TreeMap(workerId -> worker), Left(tpe)))
-    case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(TreeMap(workerId -> worker), Right(tpe)))
+    case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(workers, Left(tpe)))
+    case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(workers, Right(tpe)))
     case _ =>
   }
 
