@@ -16,9 +16,15 @@ sealed trait NeighbourPosition {
 sealed protected abstract class NeighbourPositionGen(private[parallel] val idModifier: ForminConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
   extends NeighbourPosition {
 
+  //todo simplify
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
-    of.copy(of.value + idModifier(config))
-      .opt
+    val modifier = idModifier(config)
+    val newValue = of.value + modifier
+    val nextLinePredicate = modifier % config.workersRoot == 0 || (newValue - 1) / config.workersRoot == (of.value - 1) / config.workersRoot
+
+    of.opt
+      .filter(_ => nextLinePredicate)
+      .map(_.copy(of.value + idModifier(config)))
       .filter(_.isValid)
   }
 
@@ -29,9 +35,13 @@ sealed protected abstract class NeighbourPositionGen(private[parallel] val idMod
 
 sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositionGen, pos2: NeighbourPositionGen) extends NeighbourPosition {
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
-    of.copy(of.value + pos1.idModifier(config) + pos2.idModifier(config))
-      .opt
-      .filter(_.isValid)
+    def applyModifier(id: WorkerId, position: NeighbourPositionGen): Opt[WorkerId] = {
+      id.copy(id.value + position.idModifier(config)).opt.filter(_.isValid)
+    }
+
+    applyModifier(of, pos1)
+      .filter(_ => applyModifier(of, pos2).isDefined)
+      .flatMap(applyModifier(_, pos2))
   }
 
   override def bufferZone(implicit config: ForminConfig): Set[(Int, Int)] = {

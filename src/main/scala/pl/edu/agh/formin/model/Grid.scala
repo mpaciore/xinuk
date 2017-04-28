@@ -3,8 +3,6 @@ package pl.edu.agh.formin.model
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
 
-import scala.collection.mutable
-
 final case class Grid(cells: CellArray) {
 
   import Grid._
@@ -65,10 +63,9 @@ object Grid {
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
   }
 
-  private val neighbourCoordinatesMap: mutable.Map[(Int, Int), Vector[(Int, Int)]] = mutable.Map.empty
-
-  def neighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
-    neighbourCoordinatesMap.getOrElseUpdate((x, y), calculateNeighbourCoordinates(x, y))
+  //todo cache
+  def neighbourCellCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
+    calculateNeighbourCoordinates(x, y)
   }
 
   private def calculateNeighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {

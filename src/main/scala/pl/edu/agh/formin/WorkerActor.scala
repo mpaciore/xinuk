@@ -21,6 +21,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private var neighbours: Set[Neighbour] = _
 
+  private val finished: mutable.Map[Long, Int] = mutable.Map.empty.withDefaultValue(0)
+
   private var bufferZone: Set[(Int, Int)] = _
 
   private var scheduler : ActorRef = _
@@ -48,7 +50,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
     def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
       val emptyCells =
-        Grid.neighbourCoordinates(x, y).flatMap {
+        Grid.neighbourCellCoordinates(x, y).flatMap {
           case (i, j) =>
             grid.cells(i)(j).opt
               .filter(_ => creator.isDefinedAt(newGrid.cells(i)(j))) //use the same availability criteria on new grid
@@ -87,7 +89,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             //moving
-            val neighbourCoordinates = Grid.neighbourCoordinates(x, y)
+            val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
             val destinations =
               Grid.SubcellCoordinates
                 .map { case (i, j) => cell.smell(i)(j) }
@@ -95,7 +97,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
                 .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
                 .iterator
                 .map { case (_, idx) =>
-                  val (i, j) = neighbourCoordinates(idx)
+                  val (i, j) = neighbourCellCoordinates(idx)
                   (i, j, grid.cells(i)(j))
                 }
 
@@ -133,6 +135,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       case NeighboursInitialized(neighbours: Set[Neighbour]) =>
         scheduler = sender
         this.neighbours = neighbours
+        log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
+        registered ++= neighbours.map(_.ref)
         bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
@@ -157,25 +161,28 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     specific.orElse(handleRegistrations)
   }
 
+  var currentIteration: Long = 1
+
   def started: Receive = {
-    var registeredFinished = 0
-    var finishedIteration: Long = 1
     val specific: Receive = {
       case StartIteration(i) =>
+        finished.remove(i - 1)
+        log.info(s"$id started $i")
         propagateSignal()
         makeMoves(i)
         notifyListeners(i, SimulationStatus(id, grid))
-        finishedIteration = i
+        log.info(s"$id finished $i")
         self ! IterationPartFinished(i, SimulationStatus(id, grid))
       case IterationPartFinished(iteration, status) =>
-        if (iteration == finishedIteration) {
-          if (registeredFinished == registered.size) {
-            registeredFinished = 0
-            if (config.iterationsNumber > finishedIteration) {
-              self ! StartIteration(finishedIteration + 1)
+        val currentlyFinished = finished(iteration)
+        finished(iteration) = currentlyFinished + 1
+        if (iteration == currentIteration) {
+          if (finished(currentIteration) == neighbours.size + 1) {
+            if (config.iterationsNumber > currentIteration) {
+              currentIteration += 1
+              self ! StartIteration(currentIteration)
             }
           }
-          registeredFinished += 1
         }
     }
     specific.orElse(handleRegistrations)
