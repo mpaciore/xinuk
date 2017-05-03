@@ -1,6 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Stash}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.WorkerActor._
@@ -11,7 +11,8 @@ import pl.edu.agh.formin.model.parallel.Neighbour
 import scala.collection.mutable
 import scala.util.Random
 
-class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging {
+class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
+  extends Actor with ActorLogging with Stash {
 
   private var grid: Grid = _
 
@@ -153,7 +154,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         }
         propagateSignal()
         notifyListeners(1, SimulationStatus(id, grid))
+        unstashAll()
         context.become(started)
+      case IterationPartFinished(_, _) =>
+        stash()
     }
     specific.orElse(handleRegistrations)
   }

@@ -42,6 +42,7 @@ class GuiActor private(
       if(sender == workers.values.head){
         gui.setNewValues(status.grid, iteration)
       }
+      gui.setWorkerIteration(status.worker.value, iteration)
   }
 }
 
@@ -71,6 +72,21 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     background = bgcolor
   }
   private val chartPage = new Page("Plot", chartPanel)
+
+  private val workersPanel = new BorderPanel {
+    val workersCount: Int = config.workersRoot*config.workersRoot
+    val view = new Table (workersCount+1,2)
+    view.update(0,0,"Worker ID")
+    view.update(0,1,"Iteration")
+    for { x <- 1 to workersCount} {
+      view.update(x,0,x)
+    }
+    background = bgcolor
+    layout(view) = Center
+  }
+
+  private val workersPage = new Page("Workers", workersPanel)
+
   private val iterationLabel = new Label {
     private var _iteration: Long = _
 
@@ -100,10 +116,10 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
         layout(view) = Center
       }
 
-
       val contentPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
+        pages += workersPage
       }
 
       val statusPanel = new BorderPanel {
@@ -122,6 +138,10 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     updateForminAlgaeCount(newGrid.cells, iteration)
     plot()
     iterationLabel.setIteration(iteration)
+  }
+
+  def setWorkerIteration(workerId : Int, iteration: Long): Unit = {
+    workersPanel.view.update(workerId,1,iteration)
   }
 
   def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
