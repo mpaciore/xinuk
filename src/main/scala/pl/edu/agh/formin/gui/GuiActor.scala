@@ -72,20 +72,13 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     background = bgcolor
   }
   private val chartPage = new Page("Plot", chartPanel)
-
+  private val workersView = new Table(Array.tabulate(config.workersRoot * config.workersRoot)(id =>
+    Array[Any](id + 1, 0)), Seq("Worker", "Iteration")
+  )
   private val workersPanel = new BorderPanel {
-    val workersCount: Int = config.workersRoot*config.workersRoot
-    val view = new Table (workersCount+1,2)
-    view.update(0,0,"Worker ID")
-    view.update(0,1,"Iteration")
-    for { x <- 1 to workersCount} {
-      view.update(x,0,x)
-    }
     background = bgcolor
-    layout(view) = Center
+    layout(new ScrollPane(workersView)) = Center
   }
-
-  private val workersPage = new Page("Workers", workersPanel)
 
   private val iterationLabel = new Label {
     private var _iteration: Long = _
@@ -119,7 +112,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
       val contentPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
-        pages += workersPage
+        pages += new Page("Workers", workersPanel)
       }
 
       val statusPanel = new BorderPanel {
@@ -141,7 +134,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
   }
 
   def setWorkerIteration(workerId : Int, iteration: Long): Unit = {
-    workersPanel.view.update(workerId,1,iteration)
+    workersView.update(workerId - 1, 1, iteration)
   }
 
   def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
