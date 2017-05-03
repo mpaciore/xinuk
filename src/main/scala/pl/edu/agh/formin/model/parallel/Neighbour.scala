@@ -49,9 +49,9 @@ object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
 
   case object Top extends NeighbourPositionGen(-_.workersRoot)(_.iterator.map((0, _)))
 
-  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end, _)))
+  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end - 1, _)))
 
-  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end)))
+  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end - 1)))
 
   case object Left extends NeighbourPositionGen(_ => -1)(_.iterator.map((_, 0)))
 

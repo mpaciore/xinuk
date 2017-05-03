@@ -116,7 +116,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
   }
 
   def setNewValues(newGrid: Grid, iteration: Long): Unit = {
-    cellView.set(newGrid.cells)
+    cellView.set(newGrid.cells.transpose)
     updateForminAlgaeCount(newGrid.cells, iteration)
     plot()
     iterationLabel.setIteration(iteration)
@@ -131,8 +131,8 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
       y <- cells.indices
     } {
       cells(x)(y) match {
-        case AlgaeCell(_) => algaeCounter += 1
-        case ForaminiferaCell(_, _) => forminCounter += 1
+        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) => algaeCounter += 1
+        case ForaminiferaCell(_, _) | BufferCell(ForaminiferaCell(_, _)) => forminCounter += 1
         case _ =>
       }
     }

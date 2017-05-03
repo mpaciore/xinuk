@@ -17,7 +17,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private val random = new Random(System.nanoTime())
 
-  private val registered: mutable.Set[ActorRef] = mutable.Set.empty
+  private val listeners: mutable.Set[ActorRef] = mutable.Set.empty
 
   private var neighbours: Set[Neighbour] = _
 
@@ -125,9 +125,9 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private def handleRegistrations: Receive = {
     case Register =>
-      registered += sender()
+      listeners += sender()
     case Deregister =>
-      registered -= sender()
+      listeners -= sender()
   }
 
   def stopped: Receive = {
@@ -136,7 +136,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         scheduler = sender
         this.neighbours = neighbours
         log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
-        registered ++= neighbours.map(_.ref)
+        listeners ++= neighbours.map(_.ref)
+        listeners += self
         bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
@@ -156,7 +157,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         propagateSignal()
         notifyListeners(1, SimulationStatus(id, grid))
         context.become(started)
-        self ! IterationPartFinished(1, SimulationStatus(id, grid))
     }
     specific.orElse(handleRegistrations)
   }
@@ -172,7 +172,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         makeMoves(i)
         notifyListeners(i, SimulationStatus(id, grid))
         log.info(s"$id finished $i")
-        self ! IterationPartFinished(i, SimulationStatus(id, grid))
       case IterationPartFinished(iteration, status) =>
         val currentlyFinished = finished(iteration)
         finished(iteration) = currentlyFinished + 1
@@ -189,7 +188,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   }
 
   private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
-    registered.foreach(_ ! IterationPartFinished(iteration, status))
+    listeners.foreach(_ ! IterationPartFinished(iteration, status))
   }
 }
 
