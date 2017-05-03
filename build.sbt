@@ -21,11 +21,11 @@ scalacOptions ++= Seq(
 cancelable in Global := true
 
 lazy val Version = new {
-  lazy val Akka = "2.4.17"
-  lazy val Logback = "1.2.1"
+  lazy val Akka = "2.5.0"
+  lazy val Logback = "1.2.3"
   lazy val Guava = "21.0"
-  lazy val AvsCommons = "1.20.0"
-  lazy val ScalaTest = "3.0.1"
+  lazy val AvsCommons = "1.20.2"
+  lazy val ScalaTest = "3.0.3"
   lazy val ScalaLogging = "3.5.0"
   lazy val Ficus = "1.4.0"
   lazy val ScalaSwing = "2.0.0"

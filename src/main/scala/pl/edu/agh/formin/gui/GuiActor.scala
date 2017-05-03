@@ -8,60 +8,50 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.SchedulerActor.{IterationFinished, Register}
+import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, Register}
+import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.{IterationStatus, WorkerId}
 
+import scala.collection.immutable.TreeMap
 import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
 import scala.swing.Table.AbstractRenderer
 import scala.swing._
-import scala.swing.event.ButtonClicked
 import scala.util.Try
 
 class GuiActor private(
-                        scheduler: ActorRef,
-                        worker: WorkerId,
+                        workers: TreeMap[WorkerId, ActorRef],
                         guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
                       )(implicit config: ForminConfig) extends Actor with ActorLogging {
-  import GuiActor._
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)(iteration =>
-    scheduler ! IterationFinished(iteration)
-  )
+  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
-    scheduler ! Register
+    workers.values.headOption.foreach(_ ! Register)
     log.info("GUI started")
   }
 
   def started: Receive = {
-    //todo add counts
-    case NewIteration(state, iteration) =>
-      state.getGridForWorker(worker) match {
-        case Some(grid) =>
-          gui.setNewValues(grid, iteration)
-        case None =>
-          log.error("Worker {} grid status unavailable", worker.value)
-      }
+    //todo fix counts
+    case IterationPartFinished(iteration, status) =>
+      gui.setNewValues(status.grid, iteration)
   }
 }
 
 object GuiActor {
 
-  case class NewIteration(state: IterationStatus, iteration: Long)
-
-  def props(scheduler: ActorRef, worker: WorkerId, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(scheduler, worker, guiType))
+  def props(workers: TreeMap[WorkerId, ActorRef], guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(workers, guiType))
   }
+
 }
 
-private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(onNextIterationClicked: Long => Unit)(implicit config: ForminConfig)
+private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig)
   extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
@@ -91,15 +81,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
 
     border = BorderFactory.createEmptyBorder(50, 20, 50, 20)
   }
-  private val nextIterationButton = new Button("Next iteration") {
-    border = BorderFactory.createEmptyBorder(100, 20, 20, 20)
-  }
-  listenTo(nextIterationButton)
-  reactions += {
-    case ButtonClicked(`nextIterationButton`) =>
-      nextIterationButton.enabled = false
-      onNextIterationClicked(iterationLabel.iteration)
-  }
 
   def top = new MainFrame {
     title = "Formin model"
@@ -124,8 +105,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
       }
 
       val statusPanel = new BorderPanel {
-        layout(iterationLabel) = North
-        layout(nextIterationButton) = Center
+        layout(iterationLabel) = Center
       }
 
       layout(contentPane) = Center
@@ -140,7 +120,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     updateForminAlgaeCount(newGrid.cells, iteration)
     plot()
     iterationLabel.setIteration(iteration)
-    nextIterationButton.enabled = true
   }
 
   def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
@@ -171,6 +150,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     private val algaeColor = new swing.Color(9, 108, 16)
     private val forminColor = new swing.Color(81, 71, 8)
     private val obstacleColor = new swing.Color(0, 0, 0)
+    private val bufferColor = new swing.Color(163, 163, 194)
     private val emptyColor = new swing.Color(255, 255, 255)
     private val renderer = new AbstractRenderer(new CellLabel) {
       override def configure(table: Table, isSelected: Boolean, hasFocus: Boolean, a: Any, row: Int, column: Int): Unit = {
@@ -194,6 +174,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
               forminColor
             }
           case Obstacle => obstacleColor
+          case BufferCell(_) => bufferColor
           case EmptyCell(_) => emptyColor
         }
       }
@@ -214,6 +195,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     private val algaeColor = new swing.Color(9, 108, 16).getRGB
     private val forminColor = new swing.Color(81, 71, 8).getRGB
     private val obstacleColor = new swing.Color(0, 0, 0).getRGB
+    private val bufferColor = new swing.Color(163, 163, 194).getRGB
     private val emptyColor = new swing.Color(255, 255, 255).getRGB
     private val img = new BufferedImage(dimension * guiCellSize, dimension * guiCellSize, BufferedImage.TYPE_INT_ARGB)
 
@@ -224,6 +206,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
         case AlgaeCell(_) => algaeColor
         case ForaminiferaCell(_, _) => forminColor
         case Obstacle => obstacleColor
+        case BufferCell(_) => bufferColor
         case EmptyCell(_) => emptyColor
       })
 
