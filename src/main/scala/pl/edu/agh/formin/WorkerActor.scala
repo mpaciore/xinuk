@@ -19,13 +19,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private val listeners: mutable.Set[ActorRef] = mutable.Set.empty
 
-  private var neighbours: Set[Neighbour] = _
+  private var neighbours: Map[WorkerId, Neighbour] = _
 
   private val finished: mutable.Map[Long, Int] = mutable.Map.empty.withDefaultValue(0)
 
   private var bufferZone: Set[(Int, Int)] = _
-
-  private var scheduler : ActorRef = _
 
   override def receive: Receive = stopped
 
@@ -147,9 +145,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   def stopped: Receive = {
     val specific: Receive = {
       case NeighboursInitialized(neighbours: Set[Neighbour]) =>
-        scheduler = sender
-        this.neighbours = neighbours
         log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
+        this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
         listeners ++= neighbours.map(_.ref)
         listeners += self
         bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
@@ -177,7 +174,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         }
         propagateSignal()
-        notifyListeners(1, SimulationStatus(id, grid, foraminiferaCount, algaeCount))
+        notifyListeners(1, SimulationStatus(grid, foraminiferaCount, algaeCount))
         context.become(started)
     }
     specific.orElse(handleRegistrations)
@@ -192,9 +189,9 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         log.info(s"$id started $i")
         propagateSignal()
         val (foraminiferaCount, algaeCount) = makeMoves(i)
-        notifyListeners(i, SimulationStatus(id, grid, foraminiferaCount, algaeCount))
+        notifyListeners(i, SimulationStatus(grid, foraminiferaCount, algaeCount))
         log.info(s"$id finished $i")
-      case IterationPartFinished(iteration, status) =>
+      case IterationPartFinished(workerId, iteration, status) =>
         val currentlyFinished = finished(iteration)
         finished(iteration) = currentlyFinished + 1
         if (iteration == currentIteration) {
@@ -209,8 +206,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     specific.orElse(handleRegistrations)
   }
 
+  private def createEdgeModifier(workerId: WorkerId, status: SimulationStatus): Seq[(Long, Long, Cell)] = ???
+
   private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
-    listeners.foreach(_ ! IterationPartFinished(iteration, status))
+    listeners.foreach(_ ! IterationPartFinished(id, iteration, status))
   }
 }
 
@@ -227,14 +226,14 @@ object WorkerActor {
   case object Deregister
 
   //sent to listeners
-  case class IterationPartFinished private(iteration: Long, simulationStatus: SimulationStatus)
+  case class IterationPartFinished private(worker: WorkerId, iteration: Long, simulationStatus: SimulationStatus)
 
   def props(id: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new WorkerActor(id))
   }
 }
 
-case class SimulationStatus(worker: WorkerId, grid: Grid, foraminiferaCount: Long, algaeCount: Long)
+case class SimulationStatus(grid: Grid, foraminiferaCount: Long, algaeCount: Long)
 
 
 case class WorkerId(value: Int) extends AnyVal {
