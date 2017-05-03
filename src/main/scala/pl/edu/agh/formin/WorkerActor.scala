@@ -8,6 +8,7 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.model.parallel.Neighbour
 
+import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 import scala.util.Random
 
@@ -23,7 +24,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private val finished: mutable.Map[Long, Int] = mutable.Map.empty.withDefaultValue(0)
 
-  private var bufferZone: Set[(Int, Int)] = _
+  private var bufferZone: TreeSet[(Int, Int)] = _
 
   override def receive: Receive = stopped
 
@@ -149,7 +150,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
         listeners ++= neighbours.map(_.ref)
         listeners += self
-        bufferZone = neighbours.foldLeft(Set.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
+        bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
       case StartIteration(1) =>
@@ -206,7 +207,17 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     specific.orElse(handleRegistrations)
   }
 
-  private def createEdgeModifier(workerId: WorkerId, status: SimulationStatus): Seq[(Long, Long, Cell)] = ???
+  private def createEdgeModifier(workerId: WorkerId, status: SimulationStatus): Vector[(Int, Int, SmellMedium[_])] = {
+    val neighbour = neighbours(workerId)
+    val incomingCells = neighbour.position.bufferZone.iterator.map {
+      case (x, y) => status.grid.cells(x)(y).asInstanceOf[BufferCell].cell
+    }
+
+    neighbour.position.affectedCells.iterator.zip(incomingCells).map {
+      case ((x, y), cell) =>
+        (x, y, cell)
+    }.toVector
+  }
 
   private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
     listeners.foreach(_ ! IterationPartFinished(id, iteration, status))

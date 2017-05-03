@@ -37,7 +37,7 @@ class GuiActor private(
   }
 
   def started: Receive = {
-    case IterationPartFinished(iteration, status) =>
+    case IterationPartFinished(_, iteration, status) =>
       gui.setNewValues(iteration, status)
   }
 }
