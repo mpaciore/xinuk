@@ -38,7 +38,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     }
   }
 
-  private def makeMoves(iteration: Long): Unit = {
+  /**
+    * @return (foraminiferaCount, algaeCount)
+    */
+  private def makeMoves(iteration: Long): (Long, Long) = {
     val newGrid = Grid.empty(bufferZone)
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
@@ -62,6 +65,9 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         newGrid.cells(newAlgaeX)(newAlgaeY) = newCell
       }
     }
+
+    var foraminiferaCount = 0L
+    var algaeCount = 0L
 
     for {
       x <- 0 until config.gridSize
@@ -119,8 +125,16 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             }
           }
       }
+      newGrid.cells(x)(y) match {
+        case ForaminiferaCell(_, _) | BufferCell(ForaminiferaCell(_, _)) =>
+          foraminiferaCount += 1
+        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) =>
+          algaeCount += 1
+        case _ =>
+      }
     }
     grid = newGrid
+    (foraminiferaCount, algaeCount)
   }
 
   private def handleRegistrations: Receive = {
@@ -143,6 +157,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         self ! StartIteration(1)
       case StartIteration(1) =>
         val empty = EmptyCell()
+        var foraminiferaCount = 0L
+        var algaeCount = 0L
         for {
           x <- 0 until config.gridSize
           y <- 0 until config.gridSize
@@ -150,12 +166,18 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         } {
           if (random.nextDouble() < config.spawnChance) {
             grid.cells(x)(y) =
-              if (random.nextDouble() < config.foraminiferaSpawnChance) empty.withForaminifera(config.foraminiferaStartEnergy)
-              else empty.withAlgae
+              if (random.nextDouble() < config.foraminiferaSpawnChance) {
+                foraminiferaCount += 1
+                empty.withForaminifera(config.foraminiferaStartEnergy)
+              }
+              else {
+                algaeCount += 1
+                empty.withAlgae
+              }
           }
         }
         propagateSignal()
-        notifyListeners(1, SimulationStatus(id, grid))
+        notifyListeners(1, SimulationStatus(id, grid, foraminiferaCount, algaeCount))
         context.become(started)
     }
     specific.orElse(handleRegistrations)
@@ -169,8 +191,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         finished.remove(i - 1)
         log.info(s"$id started $i")
         propagateSignal()
-        makeMoves(i)
-        notifyListeners(i, SimulationStatus(id, grid))
+        val (foraminiferaCount, algaeCount) = makeMoves(i)
+        notifyListeners(i, SimulationStatus(id, grid, foraminiferaCount, algaeCount))
         log.info(s"$id finished $i")
       case IterationPartFinished(iteration, status) =>
         val currentlyFinished = finished(iteration)
@@ -212,7 +234,7 @@ object WorkerActor {
   }
 }
 
-case class SimulationStatus(worker: WorkerId, grid: Grid)
+case class SimulationStatus(worker: WorkerId, grid: Grid, foraminiferaCount: Long, algaeCount: Long)
 
 
 case class WorkerId(value: Int) extends AnyVal {

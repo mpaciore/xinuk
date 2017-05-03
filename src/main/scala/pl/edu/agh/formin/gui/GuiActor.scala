@@ -9,10 +9,10 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, Register}
-import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
+import pl.edu.agh.formin.{SimulationStatus, WorkerId}
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable
@@ -39,7 +39,7 @@ class GuiActor private(
   def started: Receive = {
     //todo fix counts
     case IterationPartFinished(iteration, status) =>
-      gui.setNewValues(status.grid, iteration)
+      gui.setNewValues(iteration, status)
   }
 }
 
@@ -115,31 +115,13 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     contents = mainPanel
   }
 
-  def setNewValues(newGrid: Grid, iteration: Long): Unit = {
-    cellView.set(newGrid.cells.transpose)
-    updateForminAlgaeCount(newGrid.cells, iteration)
+  def setNewValues(iteration: Long, status: SimulationStatus): Unit = {
+    cellView.set(status.grid.cells.transpose)
+    iterations += iteration
+    forminSeries += status.foraminiferaCount
+    algaeSeries += status.algaeCount
     plot()
     iterationLabel.setIteration(iteration)
-  }
-
-  def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
-    var forminCounter = 0
-    var algaeCounter = 0
-
-    for {
-      x <- cells.indices
-      y <- cells.indices
-    } {
-      cells(x)(y) match {
-        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) => algaeCounter += 1
-        case ForaminiferaCell(_, _) | BufferCell(ForaminiferaCell(_, _)) => forminCounter += 1
-        case _ =>
-      }
-    }
-    iterations += iteration
-    forminSeries += forminCounter.toLong
-    algaeSeries += algaeCounter.toLong
-
   }
 
   sealed trait CellArraySettable extends Component {
@@ -222,7 +204,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     }
   }
 
-  def plot(): Unit = {
+  private def plot(): Unit = {
     val dataset = new XYSeriesCollection()
     val foraminiferaXYSeries = new XYSeries("Foraminifera")
     val algaeXYSeries = new XYSeries("Algae")
