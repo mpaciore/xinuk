@@ -34,7 +34,7 @@ final case class Grid(cells: CellArray) {
         }
         val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
-          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
+          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor
           (cell, index + 1)
         }
         newSmell(1)(1) = Signal.Zero
@@ -63,12 +63,7 @@ object Grid {
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
   }
 
-  //todo cache
   def neighbourCellCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
-    calculateNeighbourCoordinates(x, y)
-  }
-
-  private def calculateNeighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
     val pos = Vector(-1, 0, 1)
     pos.flatMap(i => pos.collect {
       case j if !(i == 0 && j == 0) => (x + i, y + j)

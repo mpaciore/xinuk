@@ -37,7 +37,6 @@ class GuiActor private(
   }
 
   def started: Receive = {
-    //todo fix counts
     case IterationPartFinished(iteration, status) =>
       gui.setNewValues(iteration, status)
   }
