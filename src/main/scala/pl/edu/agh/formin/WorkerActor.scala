@@ -25,8 +25,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private var bufferZone: Set[(Int, Int)] = _
 
-  private var scheduler : ActorRef = _
-
   override def receive: Receive = stopped
 
   private def propagateSignal(): Unit = {
@@ -133,7 +131,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   def stopped: Receive = {
     val specific: Receive = {
       case NeighboursInitialized(neighbours: Set[Neighbour]) =>
-        scheduler = sender
         this.neighbours = neighbours
         log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
         listeners ++= neighbours.map(_.ref)
