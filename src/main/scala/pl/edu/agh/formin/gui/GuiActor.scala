@@ -32,14 +32,16 @@ class GuiActor private(
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
-    workers.values.headOption.foreach(_ ! Register)
+    workers.values.foreach(_ ! Register)
     log.info("GUI started")
   }
 
   def started: Receive = {
     //todo fix counts
     case IterationPartFinished(iteration, status) =>
-      gui.setNewValues(status.grid, iteration)
+      if(sender == workers.values.head){
+        gui.setNewValues(status.grid, iteration)
+      }
   }
 }
 
