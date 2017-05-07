@@ -99,6 +99,7 @@ sealed trait GridPart {
 sealed trait Cell extends GridPart
 
 object Cell {
+
   final val Size = 3
 
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)

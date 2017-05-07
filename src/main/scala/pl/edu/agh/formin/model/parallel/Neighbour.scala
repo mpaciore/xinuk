@@ -10,6 +10,7 @@ import scala.collection.immutable.TreeSet
 
 
 sealed trait NeighbourPosition {
+
   def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId]
 
   def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)]
@@ -22,18 +23,21 @@ sealed trait NeighbourPosition {
     reverseTo.bufferZone
   }
 
-  def affectedCells(implicit config: ForminConfig): Vector[(Int, Int)] = {
+  def affectedCells(implicit config: ForminConfig): Iterator[(Int, Int)] = {
     val (xModifier, yModifier) = bufferZoneAffectedModifier
-    bufferZone.map { case (x, y) => (x + xModifier, y + yModifier) }(collection.breakOut)
+    bufferZone.iterator.map { case (x, y) => (x + xModifier, y + yModifier) }
   }
 
 }
 
 sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
                                                     (
-                                                      protected[parallel] val reverseTo: NeighbourPositionGen,
+                                                      reversePosition: => NeighbourPositionGen,
                                                       protected[parallel] val bufferZoneAffectedModifier: (Int, Int)
                                                     ) extends NeighbourPosition {
+
+
+  override protected def reverseTo: NeighbourPosition = reversePosition
 
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
     val modifier = idModifier(config)
@@ -56,8 +60,10 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
 }
 
 sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositionGen, pos2: NeighbourPositionGen)(
-  protected val reverseTo: NeighbourPositionComposite
+  reversePosition: => NeighbourPositionComposite
 ) extends NeighbourPosition {
+
+  override protected def reverseTo: NeighbourPosition = reversePosition
 
   override protected[parallel] val bufferZoneAffectedModifier: (Int, Int) = {
     val (x1, y1) = (pos1: NeighbourPosition).bufferZoneAffectedModifier

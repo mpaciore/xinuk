@@ -22,7 +22,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
-  private val finished: mutable.Map[Long, Int] = mutable.Map.empty.withDefaultValue(0)
+  private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
   private var bufferZone: TreeSet[(Int, Int)] = _
 
@@ -193,30 +193,31 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         notifyListeners(i, SimulationStatus(grid, foraminiferaCount, algaeCount))
         log.info(s"$id finished $i")
       case IterationPartFinished(workerId, iteration, status) =>
-        val currentlyFinished = finished(iteration)
-        finished(iteration) = currentlyFinished + 1
-        if (iteration == currentIteration) {
-          if (finished(currentIteration) == neighbours.size + 1) {
-            if (config.iterationsNumber > currentIteration) {
-              currentIteration += 1
-              self ! StartIteration(currentIteration)
-            }
+        val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
+        val incomingNeighbourCells: IncomingNeighbourCells =
+          if (workerId != id) {
+            val neighbour = neighbours(workerId)
+            val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
+            val neighbourBuffer: Iterator[GridPart] = neighbour.position.neighbourBuffer.map { case (x, y) => status.grid.cells(x)(y) }.iterator
+            val incoming: Vector[((Int, Int), GridPart)] = affectedCells.zip(neighbourBuffer).toVector
+            new IncomingNeighbourCells(incoming)
+          } else {
+            new IncomingNeighbourCells(Vector.empty)
+          }
+        finished(iteration) = currentlyFinished :+ incomingNeighbourCells
+        if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
+          val incomingCells = finished(currentIteration)
+          if (incomingCells.size == neighbours.size + 1) {
+            //todo apply incomingCells - conflict resolution
+
+            //todo clear buffers
+
+            currentIteration += 1
+            self ! StartIteration(currentIteration)
           }
         }
     }
     specific.orElse(handleRegistrations)
-  }
-
-  private def createEdgeModifier(workerId: WorkerId, status: SimulationStatus): Vector[(Int, Int, SmellMedium[_])] = {
-    val neighbour = neighbours(workerId)
-    val incomingCells = neighbour.position.bufferZone.iterator.map {
-      case (x, y) => status.grid.cells(x)(y).asInstanceOf[BufferCell].cell
-    }
-
-    neighbour.position.affectedCells.iterator.zip(incomingCells).map {
-      case ((x, y), cell) =>
-        (x, y, cell)
-    }.toVector
   }
 
   private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
@@ -226,9 +227,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
 object WorkerActor {
 
-  case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
+  private class IncomingNeighbourCells(val cells: Vector[((Int, Int), GridPart)]) extends AnyVal
 
-  case class StartIteration private(i: Long) extends AnyVal
+  final case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
+
+  final case class StartIteration private(i: Long) extends AnyVal
 
   case object Register
 
@@ -237,17 +240,16 @@ object WorkerActor {
   case object Deregister
 
   //sent to listeners
-  case class IterationPartFinished private(worker: WorkerId, iteration: Long, simulationStatus: SimulationStatus)
+  final case class IterationPartFinished private(worker: WorkerId, iteration: Long, simulationStatus: SimulationStatus)
 
   def props(id: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new WorkerActor(id))
   }
 }
 
-case class SimulationStatus(grid: Grid, foraminiferaCount: Long, algaeCount: Long)
+final case class SimulationStatus(grid: Grid, foraminiferaCount: Long, algaeCount: Long)
 
-
-case class WorkerId(value: Int) extends AnyVal {
+final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
 }
 
