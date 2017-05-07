@@ -210,7 +210,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (incomingCells.size == neighbours.size + 1) {
             //todo apply incomingCells - conflict resolution
 
-            //todo clear buffers
+            //clean buffers
+            bufferZone.foreach { case (x, y) =>
+              grid.cells(x)(y) = BufferCell(EmptyCell.Instance)
+            }
 
             currentIteration += 1
             self ! StartIteration(currentIteration)
