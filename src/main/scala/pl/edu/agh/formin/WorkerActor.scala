@@ -198,8 +198,12 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           if (workerId != id) {
             val neighbour = neighbours(workerId)
             val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
-            val neighbourBuffer: Iterator[GridPart] = neighbour.position.neighbourBuffer.map { case (x, y) => status.grid.cells(x)(y) }.iterator
-            val incoming: Vector[((Int, Int), GridPart)] = affectedCells.zip(neighbourBuffer).toVector
+            val neighbourBuffer: Iterator[GridPart] = neighbour.position.neighbourBuffer.iterator.map { case (x, y) => status.grid.cells(x)(y) }
+            val incoming: Vector[((Int, Int), GridPart)] =
+              affectedCells.zip(neighbourBuffer)
+                .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
+                .toVector
+
             new IncomingNeighbourCells(incoming)
           } else {
             new IncomingNeighbourCells(Vector.empty)
@@ -208,7 +212,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
           val incomingCells = finished(currentIteration)
           if (incomingCells.size == neighbours.size + 1) {
-            //todo apply incomingCells - conflict resolution
+            //todo apply incoming cells - conflict resolution
 
             //clean buffers
             bufferZone.foreach { case (x, y) =>
