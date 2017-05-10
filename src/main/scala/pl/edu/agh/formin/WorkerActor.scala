@@ -6,7 +6,7 @@ import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.model.parallel.Neighbour
+import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
@@ -202,8 +202,9 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
           if (workerId != id) {
             val neighbour = neighbours(workerId)
             val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
-            val neighbourBuffer: Iterator[GridPart] = neighbour.position.neighbourBuffer.iterator.map { case (x, y) => status.grid.cells(x)(y) }
-            val incoming: Vector[((Int, Int), GridPart)] =
+            val neighbourBuffer: Iterator[BufferCell] =
+              neighbour.position.neighbourBuffer.iterator.map { case (x, y) => status.grid.cells(x)(y).asInstanceOf[BufferCell] }
+            val incoming: Vector[((Int, Int), BufferCell)] =
               affectedCells.zip(neighbourBuffer)
                 .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
                 .toVector
@@ -216,7 +217,13 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
         if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
           val incomingCells = finished(currentIteration)
           if (incomingCells.size == neighbours.size + 1) {
-            //todo apply incoming cells - conflict resolution
+
+            //todo configurable strategy
+            incomingCells.foreach(_.cells.foreach {
+              case ((x, y), BufferCell(cell)) =>
+                val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
+                grid.cells(x)(y) = DefaultConflictResolver.resolveConflict(currentCell, cell)
+            })
 
             //clean buffers
             bufferZone.foreach { case (x, y) =>
@@ -238,7 +245,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
 
 object WorkerActor {
 
-  private class IncomingNeighbourCells(val cells: Vector[((Int, Int), GridPart)]) extends AnyVal
+  private class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
   final case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
 

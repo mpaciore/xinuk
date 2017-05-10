@@ -1,7 +1,8 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
+import pl.edu.agh.formin.model.Cell.SmellArray
+import pl.edu.agh.formin.model.Grid.CellArray
 
 final case class Grid(cells: CellArray) {
 
@@ -45,8 +46,6 @@ final case class Grid(cells: CellArray) {
 
 object Grid {
   type CellArray = Array[Array[GridPart]]
-
-  type SmellArray = Array[Array[Signal]]
 
   def empty(bufferZone: Set[(Int, Int)])(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
@@ -100,12 +99,20 @@ sealed trait Cell extends GridPart
 
 object Cell {
 
+  type SmellArray = Array[Array[Signal]]
+
+  implicit class SmellArrayOps(private val arr: SmellArray) extends AnyVal {
+    def +(other: SmellArray): SmellArray = {
+      Array.tabulate(Cell.Size, Cell.Size)((x, y) => arr(x)(y) + other(x)(y))
+    }
+  }
+
   final val Size = 3
 
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-sealed trait SmellMedium[T <: SmellMedium[T]] extends GridPart {
+sealed abstract class SmellMedium[T <: SmellMedium[T]] extends GridPart {
 
   protected final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
@@ -128,13 +135,13 @@ sealed trait AlgaeAccessible[ResultGridPart <: GridPart] extends GridPart {
 }
 
 final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
-  extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
+  extends SmellMedium[ForaminiferaCell] with Cell with HasEnergy {
 
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
 final case class AlgaeCell(smell: SmellArray)
-  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
+  extends SmellMedium[AlgaeCell] with Cell with ForaminiferaAccessible[ForaminiferaCell] {
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
@@ -147,9 +154,9 @@ case object Obstacle extends Cell {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with SmellMedium[T]})
-  extends GridPart
-    with SmellMedium[BufferCell]
+final case class BufferCell(cell: Cell with SmellMedium[T] forSome {type T <: Cell with SmellMedium[T]})
+  extends SmellMedium[BufferCell]
+    with GridPart
     with AlgaeAccessible[BufferCell]
     with ForaminiferaAccessible[BufferCell] {
 
@@ -170,7 +177,7 @@ final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with Sm
 }
 
 final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends Cell with SmellMedium[EmptyCell] with AlgaeAccessible[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
+  extends SmellMedium[EmptyCell] with Cell with AlgaeAccessible[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
 
   override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
 

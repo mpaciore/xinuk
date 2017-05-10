@@ -38,11 +38,11 @@ class GuiActor private(
 
   def started: Receive = {
     //todo fix counts
-    case IterationPartFinished(workerid, iteration, status) =>
+    case IterationPartFinished(workerId, iteration, status) =>
       if(sender == workers.values.head){
         gui.setNewValues(iteration, status)
       }
-      gui.setWorkerIteration(workerid.value, iteration)
+      gui.setWorkerIteration(workerId.value, iteration)
   }
 }
 
