@@ -32,13 +32,17 @@ class GuiActor private(
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
-    workers.values.headOption.foreach(_ ! Register)
+    workers.values.foreach(_ ! Register)
     log.info("GUI started")
   }
 
   def started: Receive = {
-    case IterationPartFinished(_, iteration, status) =>
-      gui.setNewValues(iteration, status)
+    //todo fix counts
+    case IterationPartFinished(workerid, iteration, status) =>
+      if(sender == workers.values.head){
+        gui.setNewValues(iteration, status)
+      }
+      gui.setWorkerIteration(workerid.value, iteration)
   }
 }
 
@@ -68,6 +72,14 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     background = bgcolor
   }
   private val chartPage = new Page("Plot", chartPanel)
+  private val workersView = new Table(Array.tabulate(config.workersRoot * config.workersRoot)(id =>
+    Array[Any](id + 1, 0)), Seq("Worker", "Iteration")
+  )
+  private val workersPanel = new BorderPanel {
+    background = bgcolor
+    layout(new ScrollPane(workersView)) = Center
+  }
+
   private val iterationLabel = new Label {
     private var _iteration: Long = _
 
@@ -97,10 +109,10 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
         layout(view) = Center
       }
 
-
       val contentPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
+        pages += new Page("Workers", workersPanel)
       }
 
       val statusPanel = new BorderPanel {
@@ -121,6 +133,30 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     algaeSeries += status.algaeCount
     plot()
     iterationLabel.setIteration(iteration)
+  }
+
+  def setWorkerIteration(workerId : Int, iteration: Long): Unit = {
+    workersView.update(workerId - 1, 1, iteration)
+  }
+
+  def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
+    var forminCounter = 0
+    var algaeCounter = 0
+
+    for {
+      x <- cells.indices
+      y <- cells.indices
+    } {
+      cells(x)(y) match {
+        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) => algaeCounter += 1
+        case ForaminiferaCell(_, _) | BufferCell(ForaminiferaCell(_, _)) => forminCounter += 1
+        case _ =>
+      }
+    }
+    iterations += iteration
+    forminSeries += forminCounter.toLong
+    algaeSeries += algaeCounter.toLong
+
   }
 
   sealed trait CellArraySettable extends Component {
