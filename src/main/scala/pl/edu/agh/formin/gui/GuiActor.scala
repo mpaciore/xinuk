@@ -1,8 +1,8 @@
 package pl.edu.agh.formin.gui
 
+import java.awt.Color
 import java.awt.image.BufferedImage
-import java.awt.{Color, Dimension}
-import javax.swing.{BorderFactory, ImageIcon, UIManager}
+import javax.swing.{ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.jfree.chart.plot.PlotOrientation
@@ -24,6 +24,7 @@ import scala.util.Try
 
 class GuiActor private(
                         workers: TreeMap[WorkerId, ActorRef],
+                        selected: WorkerId,
                         guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
                       )(implicit config: ForminConfig) extends Actor with ActorLogging {
 
@@ -37,9 +38,8 @@ class GuiActor private(
   }
 
   def started: Receive = {
-    //todo fix counts
     case IterationPartFinished(workerId, iteration, status) =>
-      if(sender == workers.values.head){
+      if (sender == workers(selected)) {
         gui.setNewValues(iteration, status)
       }
       gui.setWorkerIteration(workerId.value, iteration)
@@ -48,8 +48,8 @@ class GuiActor private(
 
 object GuiActor {
 
-  def props(workers: TreeMap[WorkerId, ActorRef], guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
-    Props(new GuiActor(workers, guiType))
+  def props(workers: TreeMap[WorkerId, ActorRef], selected: WorkerId, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
+    Props(new GuiActor(workers, selected, guiType))
   }
 
 }
@@ -80,22 +80,8 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     layout(new ScrollPane(workersView)) = Center
   }
 
-  private val iterationLabel = new Label {
-    private var _iteration: Long = _
-
-    def iteration: Long = _iteration
-
-    def setIteration(iteration: Long): Unit = {
-      _iteration = iteration
-      text = s"Iteration: $iteration"
-    }
-
-    border = BorderFactory.createEmptyBorder(50, 20, 50, 20)
-  }
-
   def top = new MainFrame {
     title = "Formin model"
-    minimumSize = new Dimension(1200, 800)
     background = bgcolor
 
     val mainPanel = new BorderPanel {
@@ -115,12 +101,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
         pages += new Page("Workers", workersPanel)
       }
 
-      val statusPanel = new BorderPanel {
-        layout(iterationLabel) = Center
-      }
-
       layout(contentPane) = Center
-      layout(statusPanel) = East
     }
 
     contents = mainPanel
@@ -132,10 +113,9 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     forminSeries += status.foraminiferaCount
     algaeSeries += status.algaeCount
     plot()
-    iterationLabel.setIteration(iteration)
   }
 
-  def setWorkerIteration(workerId : Int, iteration: Long): Unit = {
+  def setWorkerIteration(workerId: Int, iteration: Long): Unit = {
     workersView.update(workerId - 1, 1, iteration)
   }
 
@@ -156,7 +136,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     iterations += iteration
     forminSeries += forminCounter.toLong
     algaeSeries += algaeCounter.toLong
-
   }
 
   sealed trait CellArraySettable extends Component {

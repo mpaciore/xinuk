@@ -189,11 +189,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     val specific: Receive = {
       case StartIteration(i) =>
         finished.remove(i - 1)
-        log.info(s"$id started $i")
+        log.debug(s"$id started $i")
         propagateSignal()
         val (foraminiferaCount, algaeCount) = makeMoves(i)
         notifyListeners(i, SimulationStatus(grid, foraminiferaCount, algaeCount))
-        log.info(s"$id finished $i")
+        if (i % 100 == 0) log.info(s"$id finished $i")
       case IterationPartFinished(workerId, iteration, status) =>
         val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
         val incomingNeighbourCells: IncomingNeighbourCells =
