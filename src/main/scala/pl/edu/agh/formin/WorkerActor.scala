@@ -12,8 +12,7 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 import scala.util.Random
 
-class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
-  extends Actor with ActorLogging with Stash {
+class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging with Stash {
 
   private var grid: Grid = _
 
@@ -82,7 +81,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case accessible: AlgaeAccessible[_] => accessible.withAlgae }
+            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
@@ -91,7 +90,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAccessible[_] => accessible.withForaminifera(config.foraminiferaStartEnergy) }
+            reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
           } else {
             //moving
@@ -155,7 +154,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
       case StartIteration(1) =>
-        val empty = EmptyCell()
         var foraminiferaCount = 0L
         var algaeCount = 0L
         for {
@@ -167,11 +165,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig)
             grid.cells(x)(y) =
               if (random.nextDouble() < config.foraminiferaSpawnChance) {
                 foraminiferaCount += 1
-                empty.withForaminifera(config.foraminiferaStartEnergy)
+                EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy)
               }
               else {
                 algaeCount += 1
-                empty.withAlgae
+                EmptyCell.Instance.withAlgae
               }
           }
         }

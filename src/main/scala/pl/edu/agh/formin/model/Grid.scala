@@ -127,25 +127,21 @@ object Cell {
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-
-
-sealed trait ForaminiferaAccessible[ResultGridPart <: GridPart] extends GridPart {
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ResultGridPart
+sealed trait ForaminiferaAccessible extends GridPart {
+  def withForaminifera(energy: Energy)(implicit config: ForminConfig): GridPart
 }
 
-sealed trait AlgaeAccessible[ResultGridPart <: GridPart] extends GridPart {
-  def withAlgae(implicit config: ForminConfig): ResultGridPart
+sealed trait AlgaeAccessible extends GridPart {
+  def withAlgae(implicit config: ForminConfig): GridPart
 }
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
-  extends SmellingCell {
+final case class ForaminiferaCell(energy: Energy, smell: SmellArray) extends SmellingCell {
   override type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
-final case class AlgaeCell(smell: SmellArray)
-  extends SmellingCell with ForaminiferaAccessible[ForaminiferaCell] {
+final case class AlgaeCell(smell: SmellArray) extends SmellingCell with ForaminiferaAccessible {
   override type Self = AlgaeCell
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
@@ -160,10 +156,7 @@ case object Obstacle extends Cell {
 }
 
 final case class BufferCell(cell: SmellingCell)
-  extends SmellMedium
-    with GridPart
-    with AlgaeAccessible[BufferCell]
-    with ForaminiferaAccessible[BufferCell] {
+  extends SmellMedium with GridPart with AlgaeAccessible with ForaminiferaAccessible {
 
   override type Self = BufferCell
 
@@ -183,22 +176,21 @@ final case class BufferCell(cell: SmellingCell)
 
 }
 
-final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends SmellingCell with AlgaeAccessible[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
+final case class EmptyCell(smell: SmellArray) extends SmellingCell with AlgaeAccessible with ForaminiferaAccessible {
   override type Self = EmptyCell
 
-  override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
+  override def withSmell(smell: SmellArray): EmptyCell = copy(smell)
 
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
+  override def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
     ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
   }
 
-  def withAlgae(implicit config: ForminConfig): AlgaeCell = {
+  override def withAlgae(implicit config: ForminConfig): AlgaeCell = {
     AlgaeCell(smellWith(config.algaeInitialSignal))
   }
 
 }
 
 object EmptyCell {
-  final val Instance = EmptyCell()
+  final val Instance = EmptyCell(Cell.emptySignal)
 }
