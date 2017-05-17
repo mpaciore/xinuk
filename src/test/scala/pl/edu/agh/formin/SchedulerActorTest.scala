@@ -12,7 +12,7 @@ package pl.edu.agh.formin
     algaeReproductionFrequency = 2,
     algaeEnergeticCapacity = Energy(0.4),
     signalSpeedRatio = 2,
-    signalSuppresionFactor = 0.5,
+    signalSuppressionFactor = 0.5,
     gridSize = 10,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,

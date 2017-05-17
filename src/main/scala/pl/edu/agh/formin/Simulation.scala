@@ -39,10 +39,12 @@ object Simulation extends App with LazyLogging {
     }(collection.breakOut)
 
 
-  config.guiType match {
-    case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(workers, Left(tpe)))
-    case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(workers, Right(tpe)))
-    case _ =>
+  workers.keysIterator.foreach { id =>
+    config.guiType match {
+      case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(workers, id, Left(tpe)))
+      case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(workers, id, Right(tpe)))
+      case _ =>
+    }
   }
 
   workers.foreach { case (id, ref) =>

@@ -33,7 +33,7 @@ final case class ForminConfig private(
                                        algaeEnergeticCapacity: Energy,
                                        signalSpeedRatio: Int,
                                        //diffractionFactor: Double,
-                                       signalSuppresionFactor: Double,
+                                       signalSuppressionFactor: Double,
                                        gridSize: Int,
                                        spawnChance: Double,
                                        foraminiferaSpawnChance: Double,

@@ -1,7 +1,8 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.Grid.{CellArray, SmellArray}
+import pl.edu.agh.formin.model.Cell.SmellArray
+import pl.edu.agh.formin.model.Grid.CellArray
 
 final case class Grid(cells: CellArray) {
 
@@ -22,7 +23,7 @@ final case class Grid(cells: CellArray) {
     val current = cells(x)(y)
     current match {
       case Obstacle => current
-      case smelling: SmellMedium[_] =>
+      case smelling: SmellMedium =>
         val currentSmell = current.smell
         val addends = SubcellCoordinates.map {
           case (i, j) if i == 1 || j == 1 =>
@@ -34,7 +35,7 @@ final case class Grid(cells: CellArray) {
         }
         val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
-          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppresionFactor
+          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor
           (cell, index + 1)
         }
         newSmell(1)(1) = Signal.Zero
@@ -45,8 +46,6 @@ final case class Grid(cells: CellArray) {
 
 object Grid {
   type CellArray = Array[Array[GridPart]]
-
-  type SmellArray = Array[Array[Signal]]
 
   def empty(bufferZone: Set[(Int, Int)])(implicit config: ForminConfig): Grid = {
     val n = config.gridSize
@@ -63,12 +62,7 @@ object Grid {
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
   }
 
-  //todo cache
   def neighbourCellCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
-    calculateNeighbourCoordinates(x, y)
-  }
-
-  private def calculateNeighbourCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
     val pos = Vector(-1, 0, 1)
     pos.flatMap(i => pos.collect {
       case j if !(i == 0 && j == 0) => (x + i, y + j)
@@ -101,44 +95,54 @@ sealed trait GridPart {
   def smell: SmellArray
 }
 
-sealed trait Cell extends GridPart
-
-object Cell {
-  final val Size = 3
-
-  def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
-}
-
-sealed trait SmellMedium[T <: SmellMedium[T]] extends GridPart {
+sealed trait SmellMedium extends GridPart {
+  type Self <: SmellMedium
 
   protected final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
   }
 
-  def withSmell(smell: SmellArray): T
+  def withSmell(smell: SmellArray): Self
 
 }
 
-sealed trait HasEnergy {
-  def energy: Energy
+sealed trait Cell extends GridPart
+
+sealed trait SmellingCell extends Cell with SmellMedium {
+  override type Self <: SmellingCell
 }
 
-sealed trait ForaminiferaAccessible[ResultGridPart <: GridPart] extends GridPart {
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ResultGridPart
+object Cell {
+
+  type SmellArray = Array[Array[Signal]]
+
+  implicit class SmellArrayOps(private val arr: SmellArray) extends AnyVal {
+    def +(other: SmellArray): SmellArray = {
+      Array.tabulate(Cell.Size, Cell.Size)((x, y) => arr(x)(y) + other(x)(y))
+    }
+  }
+
+  final val Size = 3
+
+  def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-sealed trait AlgaeAccessible[ResultGridPart <: GridPart] extends GridPart {
-  def withAlgae(implicit config: ForminConfig): ResultGridPart
+sealed trait ForaminiferaAccessible extends GridPart {
+  def withForaminifera(energy: Energy)(implicit config: ForminConfig): GridPart
 }
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray)
-  extends Cell with HasEnergy with SmellMedium[ForaminiferaCell] {
+sealed trait AlgaeAccessible extends GridPart {
+  def withAlgae(implicit config: ForminConfig): GridPart
+}
+
+final case class ForaminiferaCell(energy: Energy, smell: SmellArray) extends SmellingCell {
+  override type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
-final case class AlgaeCell(smell: SmellArray)
-  extends Cell with SmellMedium[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
+final case class AlgaeCell(smell: SmellArray) extends SmellingCell with ForaminiferaAccessible {
+  override type Self = AlgaeCell
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
@@ -151,11 +155,10 @@ case object Obstacle extends Cell {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with SmellMedium[T]})
-  extends GridPart
-    with SmellMedium[BufferCell]
-    with AlgaeAccessible[BufferCell]
-    with ForaminiferaAccessible[BufferCell] {
+final case class BufferCell(cell: SmellingCell)
+  extends SmellMedium with GridPart with AlgaeAccessible with ForaminiferaAccessible {
+
+  override type Self = BufferCell
 
   override def smell: SmellArray = cell.smell
 
@@ -173,21 +176,21 @@ final case class BufferCell(cell: SmellMedium[T] forSome {type T <: Cell with Sm
 
 }
 
-final case class EmptyCell(smell: SmellArray = Cell.emptySignal)
-  extends Cell with SmellMedium[EmptyCell] with AlgaeAccessible[AlgaeCell] with ForaminiferaAccessible[ForaminiferaCell] {
+final case class EmptyCell(smell: SmellArray) extends SmellingCell with AlgaeAccessible with ForaminiferaAccessible {
+  override type Self = EmptyCell
 
-  override def withSmell(smell: SmellArray): EmptyCell = copy(smell = smell)
+  override def withSmell(smell: SmellArray): EmptyCell = copy(smell)
 
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
+  override def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
     ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
   }
 
-  def withAlgae(implicit config: ForminConfig): AlgaeCell = {
+  override def withAlgae(implicit config: ForminConfig): AlgaeCell = {
     AlgaeCell(smellWith(config.algaeInitialSignal))
   }
 
 }
 
 object EmptyCell {
-  final val Instance = EmptyCell()
+  final val Instance = EmptyCell(Cell.emptySignal)
 }
