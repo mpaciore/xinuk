@@ -18,7 +18,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private val random = new Random(System.nanoTime())
 
-  private val listeners: mutable.Set[ActorRef] = mutable.Set.empty
+  private val gridListeners: mutable.Set[ActorRef] = mutable.Set.empty
+  private val metricsListeners: mutable.Set[ActorRef] = mutable.Set.empty
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
@@ -40,7 +41,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   /**
     * @return (foraminiferaCount, algaeCount)
     */
-  private def makeMoves(iteration: Long): (Long, Long) = {
+  private def makeMoves(iteration: Long): Metrics = {
     val newGrid = Grid.empty(bufferZone)
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
@@ -133,14 +134,18 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
     grid = newGrid
-    (foraminiferaCount, algaeCount)
+    Metrics(foraminiferaCount, algaeCount)
   }
 
   private def handleRegistrations: Receive = {
-    case Register =>
-      listeners += sender()
-    case Deregister =>
-      listeners -= sender()
+    case RegisterGrid =>
+      gridListeners += sender
+    case DeregisterGrid =>
+      gridListeners -= sender
+    case RegisterMetrics =>
+      metricsListeners += sender
+    case DeregisterMetrics =>
+      metricsListeners -= sender
   }
 
   def stopped: Receive = {
@@ -148,8 +153,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       case NeighboursInitialized(neighbours: Set[Neighbour]) =>
         log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
         this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
-        listeners ++= neighbours.map(_.ref)
-        listeners += self
+        gridListeners ++= neighbours.map(_.ref)
+        gridListeners += self
         bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
@@ -174,7 +179,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         }
         propagateSignal()
-        notifyListeners(1, SimulationStatus(grid, foraminiferaCount, algaeCount))
+        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount))
         unstashAll()
         context.become(started)
       case IterationPartFinished(_,_, _) =>
@@ -191,17 +196,17 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         finished.remove(i - 1)
         log.debug(s"$id started $i")
         propagateSignal()
-        val (foraminiferaCount, algaeCount) = makeMoves(i)
-        notifyListeners(i, SimulationStatus(grid, foraminiferaCount, algaeCount))
+        val metrics = makeMoves(i)
+        notifyListeners(i, grid, metrics)
         if (i % 100 == 0) log.info(s"$id finished $i")
-      case IterationPartFinished(workerId, iteration, status) =>
+      case IterationPartFinished(workerId, iteration, incomingGrid) =>
         val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
         val incomingNeighbourCells: IncomingNeighbourCells =
           if (workerId != id) {
             val neighbour = neighbours(workerId)
             val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
             val neighbourBuffer: Iterator[BufferCell] =
-              neighbour.position.neighbourBuffer.iterator.map { case (x, y) => status.grid.cells(x)(y).asInstanceOf[BufferCell] }
+              neighbour.position.neighbourBuffer.iterator.map { case (x, y) => incomingGrid.cells(x)(y).asInstanceOf[BufferCell] }
             val incoming: Vector[((Int, Int), BufferCell)] =
               affectedCells.zip(neighbourBuffer)
                 .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
@@ -215,7 +220,6 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
           val incomingCells = finished(currentIteration)
           if (incomingCells.size == neighbours.size + 1) {
-
             //todo configurable strategy
             incomingCells.foreach(_.cells.foreach {
               case ((x, y), BufferCell(cell)) =>
@@ -236,34 +240,39 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     specific.orElse(handleRegistrations)
   }
 
-  private def notifyListeners(iteration: Long, status: SimulationStatus): Unit = {
-    listeners.foreach(_ ! IterationPartFinished(id, iteration, status))
+  private def notifyListeners(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
+    gridListeners.foreach(_ ! IterationPartFinished(id, iteration, grid))
+    metricsListeners.foreach(_ ! IterationPartMetrics(id, iteration, metrics))
   }
 }
 
 object WorkerActor {
 
-  private class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
+  private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
   final case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
 
   final case class StartIteration private(i: Long) extends AnyVal
 
-  case object Register
+  case object RegisterGrid
 
-  case object WaitForNeighbours
+  case object DeregisterGrid
 
-  case object Deregister
+  case object RegisterMetrics
+
+  case object DeregisterMetrics
 
   //sent to listeners
-  final case class IterationPartFinished private(worker: WorkerId, iteration: Long, simulationStatus: SimulationStatus)
+  final case class IterationPartFinished private(worker: WorkerId, iteration: Long, grid: Grid)
+
+  final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props(id: WorkerId)(implicit config: ForminConfig): Props = {
     Props(new WorkerActor(id))
   }
 }
 
-final case class SimulationStatus(grid: Grid, foraminiferaCount: Long, algaeCount: Long)
+final case class Metrics(foraminiferaCount: Long, algaeCount: Long)
 
 final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))

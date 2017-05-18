@@ -8,13 +8,12 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, Register}
+import pl.edu.agh.formin.Metrics
+import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, IterationPartMetrics, RegisterGrid, RegisterMetrics}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.{SimulationStatus, WorkerId}
 
-import scala.collection.immutable.TreeMap
 import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
@@ -22,33 +21,35 @@ import scala.swing.Table.AbstractRenderer
 import scala.swing._
 import scala.util.Try
 
-class GuiActor private(
-                        workers: TreeMap[WorkerId, ActorRef],
-                        selected: WorkerId,
-                        guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
+class GuiActor private(workers: Vector[ActorRef],
+                       selected: ActorRef,
+                       guiType: Either[GuiType.Basic.type, GuiType.Signal.type]
                       )(implicit config: ForminConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
+  //todo polling
   override def preStart: Unit = {
-    workers.values.foreach(_ ! Register)
+    selected ! RegisterGrid
+    workers.foreach(_ ! RegisterMetrics)
     log.info("GUI started")
   }
 
   def started: Receive = {
-    case IterationPartFinished(workerId, iteration, status) =>
-      if (sender == workers(selected)) {
-        gui.setNewValues(iteration, status)
-      }
+    case IterationPartFinished(_, iteration, grid) if sender == selected =>
+      gui.setNewValues(iteration, grid)
+    case IterationPartMetrics(workerId, iteration, metrics) =>
       gui.setWorkerIteration(workerId.value, iteration)
+      if (sender == selected) gui.setMetrics(iteration, metrics)
   }
 }
 
 object GuiActor {
 
-  def props(workers: TreeMap[WorkerId, ActorRef], selected: WorkerId, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig): Props = {
+  def props(workers: Vector[ActorRef], selected: ActorRef, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])
+           (implicit config: ForminConfig): Props = {
     Props(new GuiActor(workers, selected, guiType))
   }
 
@@ -107,35 +108,19 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     contents = mainPanel
   }
 
-  def setNewValues(iteration: Long, status: SimulationStatus): Unit = {
-    cellView.set(status.grid.cells.transpose)
-    iterations += iteration
-    forminSeries += status.foraminiferaCount
-    algaeSeries += status.algaeCount
+  def setNewValues(iteration: Long, grid: Grid): Unit = {
+    cellView.set(grid.cells.transpose)
     plot()
+  }
+
+  def setMetrics(iteration: Long, metrics: Metrics): Unit = {
+    iterations += iteration
+    forminSeries += metrics.foraminiferaCount
+    algaeSeries += metrics.algaeCount
   }
 
   def setWorkerIteration(workerId: Int, iteration: Long): Unit = {
     workersView.update(workerId - 1, 1, iteration)
-  }
-
-  def updateForminAlgaeCount(cells: CellArray, iteration: Long): Unit = {
-    var forminCounter = 0
-    var algaeCounter = 0
-
-    for {
-      x <- cells.indices
-      y <- cells.indices
-    } {
-      cells(x)(y) match {
-        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) => algaeCounter += 1
-        case ForaminiferaCell(_, _) | BufferCell(ForaminiferaCell(_, _)) => forminCounter += 1
-        case _ =>
-      }
-    }
-    iterations += iteration
-    forminSeries += forminCounter.toLong
-    algaeSeries += algaeCounter.toLong
   }
 
   sealed trait CellArraySettable extends Component {
