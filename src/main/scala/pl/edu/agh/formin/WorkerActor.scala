@@ -20,6 +20,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
   private val gridListeners: mutable.Set[ActorRef] = mutable.Set.empty
   private val metricsListeners: mutable.Set[ActorRef] = mutable.Set.empty
+  private val statusRequests: mutable.Set[ActorRef] = mutable.Set.empty
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
@@ -146,6 +147,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       metricsListeners += sender
     case DeregisterMetrics =>
       metricsListeners -= sender
+    case GetStatus =>
+      statusRequests += sender
   }
 
   def stopped: Receive = {
@@ -241,7 +244,10 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
   }
 
   private def notifyListeners(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
-    gridListeners.foreach(_ ! IterationPartFinished(id, iteration, grid))
+    val partFinished = IterationPartFinished(id, iteration, grid)
+    gridListeners.foreach(_ ! partFinished)
+    statusRequests.foreach(_ ! partFinished)
+    statusRequests.clear()
     metricsListeners.foreach(_ ! IterationPartMetrics(id, iteration, metrics))
   }
 }
@@ -261,6 +267,8 @@ object WorkerActor {
   case object RegisterMetrics
 
   case object DeregisterMetrics
+
+  case object GetStatus
 
   //sent to listeners
   final case class IterationPartFinished private(worker: WorkerId, iteration: Long, grid: Grid)

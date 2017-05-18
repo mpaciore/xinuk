@@ -5,16 +5,16 @@ import java.awt.image.BufferedImage
 import javax.swing.{ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import com.avsystem.commons.SharedExtensions._
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.Metrics
-import pl.edu.agh.formin.WorkerActor.{IterationPartFinished, IterationPartMetrics, RegisterGrid, RegisterMetrics}
+import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
 
-import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
 import scala.swing.Table.AbstractRenderer
@@ -30,9 +30,8 @@ class GuiActor private(workers: Vector[ActorRef],
 
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
-  //todo polling
   override def preStart: Unit = {
-    selected ! RegisterGrid
+    selected ! GetStatus
     workers.foreach(_ ! RegisterMetrics)
     log.info("GUI started")
   }
@@ -40,9 +39,10 @@ class GuiActor private(workers: Vector[ActorRef],
   def started: Receive = {
     case IterationPartFinished(_, iteration, grid) if sender == selected =>
       gui.setNewValues(iteration, grid)
+      selected ! GetStatus
     case IterationPartMetrics(workerId, iteration, metrics) =>
       gui.setWorkerIteration(workerId.value, iteration)
-      if (sender == selected) gui.setMetrics(iteration, metrics)
+      if (sender == selected) gui.updatePlot(iteration, metrics)
   }
 }
 
@@ -55,15 +55,12 @@ object GuiActor {
 
 }
 
-private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])(implicit config: ForminConfig)
-  extends SimpleSwingApplication {
+private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, GuiType.Signal.type])
+                          (implicit config: ForminConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val iterations = mutable.ListBuffer.empty[Long]
-  private val forminSeries = mutable.ListBuffer.empty[Long]
-  private val algaeSeries = mutable.ListBuffer.empty[Long]
   private val cellView = guiType match {
     case Left(GuiType.Basic) => new ParticleCanvas(dimension, config.guiCellSize)
     case Right(GuiType.Signal) => new SignalTable(dimension)
@@ -110,13 +107,6 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
 
   def setNewValues(iteration: Long, grid: Grid): Unit = {
     cellView.set(grid.cells.transpose)
-    plot()
-  }
-
-  def setMetrics(iteration: Long, metrics: Metrics): Unit = {
-    iterations += iteration
-    forminSeries += metrics.foraminiferaCount
-    algaeSeries += metrics.algaeCount
   }
 
   def setWorkerIteration(workerId: Int, iteration: Long): Unit = {
@@ -203,24 +193,27 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
     }
   }
 
-  private def plot(): Unit = {
-    val dataset = new XYSeriesCollection()
-    val foraminiferaXYSeries = new XYSeries("Foraminifera")
-    val algaeXYSeries = new XYSeries("Algae")
-    for (i <- iterations.indices) {
-      foraminiferaXYSeries.add(iterations(i), forminSeries(i))
-      algaeXYSeries.add(iterations(i), algaeSeries(i))
-    }
-    dataset.addSeries(foraminiferaXYSeries)
-    dataset.addSeries(algaeXYSeries)
-    val chart = ChartFactory.createXYLineChart(
-      "Foraminifera and algae population size per iteration", "Iteration", "Population size", dataset, PlotOrientation.VERTICAL, true, true, false
-    )
-    val panel = new ChartPanel(chart)
-    chartPanel.layout(swing.Component.wrap(panel)) = Center
+  private val dataset = new XYSeriesCollection()
+  private val foraminiferaXYSeries = new XYSeries("Foraminifera").setup(_.setMaximumItemCount(GuiGrid.MaximumPlotSize))
+  private val algaeXYSeries = new XYSeries("Algae").setup(_.setMaximumItemCount(GuiGrid.MaximumPlotSize))
+  dataset.addSeries(foraminiferaXYSeries)
+  dataset.addSeries(algaeXYSeries)
+  private val chart = ChartFactory.createXYLineChart(
+    "Foraminifera and algae population size per iteration", "Iteration", "Population size", dataset, PlotOrientation.VERTICAL, true, true, false
+  )
+  private val panel = new ChartPanel(chart)
+  chartPanel.layout(swing.Component.wrap(panel)) = Center
+
+  def updatePlot(iteration: Long, metrics: Metrics): Unit = {
+    foraminiferaXYSeries.add(iteration, metrics.foraminiferaCount)
+    algaeXYSeries.add(iteration, metrics.algaeCount)
   }
 
   main(Array.empty)
 
+}
+
+object GuiGrid {
+  final val MaximumPlotSize = 400
 }
 
