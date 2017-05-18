@@ -71,6 +71,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     var algaeCount = 0L
     var foraminiferaDeaths = 0L
     var foraminiferaReproductionsCount = 0L
+    var consumedAlgaeCount = 0L
     var foraminiferaTotalEnergy = 0.0
 
     for {
@@ -115,10 +116,14 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
 
             destinations
               .collectFirstOpt {
-                case (i, j, destination: AlgaeCell) => (i, j, destination)
+                case (i, j, destination: AlgaeCell) =>
+                  consumedAlgaeCount+=1
+                  (i, j, destination)
                 case (i, j, destination: EmptyCell) =>
                   val effectiveDestination = newGrid.cells(i)(j) match {
-                    case newAlgae: AlgaeCell => newAlgae
+                    case newAlgae: AlgaeCell =>
+                      consumedAlgaeCount+=1
+                      newAlgae
                     case _ => destination
                   }
                   (i, j, effectiveDestination)
@@ -144,7 +149,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
     grid = newGrid
-    Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount)
+    Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount)
   }
 
   private def handleRegistrations: Receive = {
@@ -191,7 +196,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         }
         propagateSignal()
-        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value*foraminiferaCount, 0))
+        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value*foraminiferaCount, 0, 0))
         unstashAll()
         context.become(started)
       case IterationPartFinished(_,_, _) =>
@@ -289,7 +294,7 @@ object WorkerActor {
   }
 }
 
-final case class Metrics(foraminiferaCount: Long, algaeCount: Long, foraminiferaDeaths: Long, foraminiferaTotalEnergy: Double, foraminiferaReproductionsCount: Long)
+final case class Metrics(foraminiferaCount: Long, algaeCount: Long, foraminiferaDeaths: Long, foraminiferaTotalEnergy: Double, foraminiferaReproductionsCount: Long, consumedAlgaeCount: Long)
 
 final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
