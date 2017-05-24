@@ -53,7 +53,7 @@ object Simulation extends App with LazyLogging {
     }(collection.breakOut)
 
   Future {
-    //Thread.sleep(20000)
+    Thread.sleep(20000)
     workers.foreach { case (id, ref) =>
       val neighbours = NeighbourPosition.values.flatMap { pos =>
         pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
