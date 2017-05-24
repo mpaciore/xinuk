@@ -268,16 +268,17 @@ object WorkerActor {
     Props(new WorkerActor)
   }
 
+  private def idToShard(id: WorkerId): String = (id.value % 2).toString
+
   def extractShardId: ExtractShardId = {
-    case NeighboursInitialized(id, _) => "1"
-    case IterationPartFinished(_, id, _, _) => "1"
+    case NeighboursInitialized(id, _) => idToShard(id)
+    case IterationPartFinished(_, id, _, _) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
     case msg@NeighboursInitialized(id, _) =>
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
-      println(to)
       (to.value.toString, msg)
   }
 }
