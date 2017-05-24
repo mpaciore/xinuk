@@ -72,6 +72,8 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     var foraminiferaDeaths = 0L
     var foraminiferaReproductionsCount = 0L
     var consumedAlgaeCount = 0L
+    var foraminiferaTotalLifespan = 0L
+    var algaeTotalLifespan = 0L
     var foraminiferaTotalEnergy = 0.0
 
     for {
@@ -95,6 +97,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
         case cell: ForaminiferaCell =>
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             foraminiferaDeaths+=1
+            foraminiferaTotalLifespan+=cell.lifespan
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
             reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
@@ -118,11 +121,13 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
               .collectFirstOpt {
                 case (i, j, destination: AlgaeCell) =>
                   consumedAlgaeCount+=1
+                  algaeTotalLifespan+=destination.lifespan
                   (i, j, destination)
                 case (i, j, destination: EmptyCell) =>
                   val effectiveDestination = newGrid.cells(i)(j) match {
                     case newAlgae: AlgaeCell =>
                       consumedAlgaeCount+=1
+                      algaeTotalLifespan+=newAlgae.lifespan
                       newAlgae
                     case _ => destination
                   }
@@ -149,7 +154,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
       }
     }
     grid = newGrid
-    Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount)
+    Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
   }
 
   private def handleRegistrations: Receive = {
@@ -196,7 +201,7 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         }
         propagateSignal()
-        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value*foraminiferaCount, 0, 0))
+        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value*foraminiferaCount, 0, 0, 0, 0))
         unstashAll()
         context.become(started)
       case IterationPartFinished(_,_, _) =>
@@ -294,7 +299,14 @@ object WorkerActor {
   }
 }
 
-final case class Metrics(foraminiferaCount: Long, algaeCount: Long, foraminiferaDeaths: Long, foraminiferaTotalEnergy: Double, foraminiferaReproductionsCount: Long, consumedAlgaeCount: Long)
+final case class Metrics(foraminiferaCount: Long,
+                         algaeCount: Long,
+                         foraminiferaDeaths: Long,
+                         foraminiferaTotalEnergy: Double,
+                         foraminiferaReproductionsCount: Long,
+                         consumedAlgaeCount: Long,
+                         foraminiferaTotalLifespan : Long,
+                         algaeTotalLifespan : Long)
 
 final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
