@@ -1,6 +1,7 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props, Stash}
+import akka.actor.{Actor, ActorLogging, Props, Stash}
+import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.WorkerActor._
@@ -12,15 +13,13 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 import scala.util.Random
 
-class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends Actor with ActorLogging with Stash {
+class WorkerActor private(implicit config: ForminConfig) extends Actor with ActorLogging with Stash {
+
+  private var id: WorkerId = _
 
   private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
-
-  private val gridListeners: mutable.Set[ActorRef] = mutable.Set.empty
-  private val metricsListeners: mutable.Set[ActorRef] = mutable.Set.empty
-  private val statusRequests: mutable.Set[ActorRef] = mutable.Set.empty
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
@@ -157,26 +156,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
     Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
   }
 
-  private def handleRegistrations: Receive = {
-    case RegisterGrid =>
-      gridListeners += sender
-    case DeregisterGrid =>
-      gridListeners -= sender
-    case RegisterMetrics =>
-      metricsListeners += sender
-    case DeregisterMetrics =>
-      metricsListeners -= sender
-    case GetStatus =>
-      statusRequests += sender
-  }
-
   def stopped: Receive = {
-    val specific: Receive = {
-      case NeighboursInitialized(neighbours: Set[Neighbour]) =>
+    case NeighboursInitialized(id, neighbours: Set[Neighbour]) =>
         log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
+      this.id = id
         this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
-        gridListeners ++= neighbours.map(_.ref)
-        gridListeners += self
         bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
         grid = Grid.empty(bufferZone)
         self ! StartIteration(1)
@@ -201,27 +185,24 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         }
         propagateSignal()
-        notifyListeners(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value*foraminiferaCount, 0, 0, 0, 0))
+        notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
         unstashAll()
         context.become(started)
-      case IterationPartFinished(_,_, _) =>
+    case _: IterationPartFinished =>
         stash()
-    }
-    specific.orElse(handleRegistrations)
   }
 
   var currentIteration: Long = 1
 
   def started: Receive = {
-    val specific: Receive = {
       case StartIteration(i) =>
         finished.remove(i - 1)
         log.debug(s"$id started $i")
         propagateSignal()
         val metrics = makeMoves(i)
-        notifyListeners(i, grid, metrics)
+        notifyNeighbours(i, grid, metrics)
         if (i % 100 == 0) log.info(s"$id finished $i")
-      case IterationPartFinished(workerId, iteration, incomingGrid) =>
+      case IterationPartFinished(workerId, _, iteration, incomingGrid) =>
         val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
         val incomingNeighbourCells: IncomingNeighbourCells =
           if (workerId != id) {
@@ -258,44 +239,46 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             self ! StartIteration(currentIteration)
           }
         }
-    }
-    specific.orElse(handleRegistrations)
   }
 
-  private def notifyListeners(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
-    val partFinished = IterationPartFinished(id, iteration, grid)
-    gridListeners.foreach(_ ! partFinished)
-    statusRequests.foreach(_ ! partFinished)
-    statusRequests.clear()
-    metricsListeners.foreach(_ ! IterationPartMetrics(id, iteration, metrics))
+  private def notifyNeighbours(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
+    self ! IterationPartFinished(id, id, iteration, grid)
+    neighbours.foreach { case (neighbourId, ngh) =>
+      ngh.ref ! IterationPartFinished(id, neighbourId, iteration, grid)
+    }
   }
 }
 
 object WorkerActor {
 
+  final val Name: String = "WorkerActor"
+
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
-  final case class NeighboursInitialized(neighbours: Set[Neighbour]) extends AnyVal
+  final case class NeighboursInitialized(id: WorkerId, neighbours: Set[Neighbour])
 
   final case class StartIteration private(i: Long) extends AnyVal
 
-  case object RegisterGrid
-
-  case object DeregisterGrid
-
-  case object RegisterMetrics
-
-  case object DeregisterMetrics
-
-  case object GetStatus
-
   //sent to listeners
-  final case class IterationPartFinished private(worker: WorkerId, iteration: Long, grid: Grid)
+  final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, grid: Grid)
 
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
-  def props(id: WorkerId)(implicit config: ForminConfig): Props = {
-    Props(new WorkerActor(id))
+  def props(implicit config: ForminConfig): Props = {
+    Props(new WorkerActor)
+  }
+
+  def extractShardId: ExtractShardId = {
+    case NeighboursInitialized(id, _) => "1"
+    case IterationPartFinished(_, id, _, _) => "1"
+  }
+
+  def extractEntityId: ExtractEntityId = {
+    case msg@NeighboursInitialized(id, _) =>
+      (id.value.toString, msg)
+    case msg@IterationPartFinished(_, to, _, _) =>
+      println(to)
+      (to.value.toString, msg)
   }
 }
 

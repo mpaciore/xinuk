@@ -3,6 +3,7 @@ package pl.edu.agh.formin
 import java.io.File
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
@@ -33,18 +34,28 @@ object Simulation extends App with LazyLogging {
     }
 
   private val system = ActorSystem(rawConfig.getString("application.name"))
+
+  ClusterSharding(system).start(
+    typeName = WorkerActor.Name,
+    entityProps = WorkerActor.props,
+    settings = ClusterShardingSettings(system),
+    extractShardId = WorkerActor.extractShardId,
+    extractEntityId = WorkerActor.extractEntityId
+  )
+
+  val decider = ClusterSharding(system).shardRegion(WorkerActor.Name)
+
   private val workers: TreeMap[WorkerId, ActorRef] =
     (1 to math.pow(config.workersRoot, 2).toInt).map { i =>
       val workerId = WorkerId(i)
-      workerId -> system.actorOf(WorkerActor.props(workerId))
+      workerId -> decider
     }(collection.breakOut)
-
 
   workers.foreach { case (id, ref) =>
     val neighbours = NeighbourPosition.values.flatMap { pos =>
       pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
     }
-    ref ! WorkerActor.NeighboursInitialized(neighbours.toSet)
+    ref ! WorkerActor.NeighboursInitialized(id, neighbours.toSet)
   }
 
 }

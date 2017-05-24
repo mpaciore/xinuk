@@ -31,15 +31,15 @@ class GuiActor private(workers: Vector[ActorRef],
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize, guiType)
 
   override def preStart: Unit = {
-    selected ! GetStatus
-    workers.foreach(_ ! RegisterMetrics)
+    //selected ! GetStatus
+    //workers.foreach(_ ! RegisterMetrics)
     log.info("GUI started")
   }
 
   def started: Receive = {
-    case IterationPartFinished(_, iteration, grid) if sender == selected =>
+    case IterationPartFinished(_, _, iteration, grid) if sender == selected =>
       gui.setNewValues(iteration, grid)
-      selected ! GetStatus
+    //selected ! GetStatus
     case IterationPartMetrics(workerId, iteration, metrics) =>
       gui.setWorkerIteration(workerId.value, iteration)
       if (sender == selected) gui.updatePlot(iteration, metrics)
