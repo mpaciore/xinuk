@@ -10,6 +10,7 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 
 import scala.collection.immutable.TreeMap
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 object Simulation extends App with LazyLogging {
@@ -51,12 +52,17 @@ object Simulation extends App with LazyLogging {
       workerId -> decider
     }(collection.breakOut)
 
-  workers.foreach { case (id, ref) =>
-    val neighbours = NeighbourPosition.values.flatMap { pos =>
-      pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
+  Future {
+    //Thread.sleep(20000)
+    workers.foreach { case (id, ref) =>
+      val neighbours = NeighbourPosition.values.flatMap { pos =>
+        pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
+      }
+      ref ! WorkerActor.NeighboursInitialized(id, neighbours.toSet)
     }
-    ref ! WorkerActor.NeighboursInitialized(id, neighbours.toSet)
-  }
+  }(ExecutionContext.global)
+
+
 
 }
 
