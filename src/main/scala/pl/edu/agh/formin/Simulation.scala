@@ -3,10 +3,9 @@ package pl.edu.agh.formin
 import java.io.File
 
 import akka.actor.{ActorRef, ActorSystem}
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.formin.config.{ForminConfig, GuiType}
-import pl.edu.agh.formin.gui.GuiActor
+import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 
 import scala.collection.immutable.TreeMap
@@ -15,14 +14,16 @@ import scala.util.{Failure, Success, Try}
 object Simulation extends App with LazyLogging {
   final val ForminConfigPrefix = "formin"
 
-  private val rawConfig =
-    Try(ConfigFactory.parseFile(new File("formin.conf")).getConfig(ForminConfigPrefix)).getOrElse {
-      logger.info("Falling back to reference.conf")
-      ConfigFactory.load().getConfig(ForminConfigPrefix)
-    }
+  private val rawConfig: Config =
+    Try(ConfigFactory.parseFile(new File("formin.conf")))
+      .filter(_.hasPath(ForminConfigPrefix))
+      .getOrElse {
+        logger.info("Falling back to reference.conf")
+        ConfigFactory.load()
+      }
 
   implicit val config: ForminConfig =
-    ForminConfig.fromConfig(rawConfig) match {
+    ForminConfig.fromConfig(rawConfig.getConfig(ForminConfigPrefix)) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>
@@ -31,21 +32,13 @@ object Simulation extends App with LazyLogging {
         throw new IllegalArgumentException
     }
 
-  private val system = ActorSystem("formin")
+  private val system = ActorSystem(rawConfig.getString("application.name"))
   private val workers: TreeMap[WorkerId, ActorRef] =
     (1 to math.pow(config.workersRoot, 2).toInt).map { i =>
       val workerId = WorkerId(i)
       workerId -> system.actorOf(WorkerActor.props(workerId))
     }(collection.breakOut)
 
-
-  workers.keysIterator.foreach { id =>
-    config.guiType match {
-      case tpe: GuiType.Basic.type => system.actorOf(GuiActor.props(workers.values.toVector, workers(id), Left(tpe)))
-      case tpe: GuiType.Signal.type => system.actorOf(GuiActor.props(workers.values.toVector, workers(id), Right(tpe)))
-      case _ =>
-    }
-  }
 
   workers.foreach { case (id, ref) =>
     val neighbours = NeighbourPosition.values.flatMap { pos =>

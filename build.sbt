@@ -39,6 +39,8 @@ dependencyOverrides ++= Set(
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % Version.Akka,
   "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
+  "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
+  "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
   "ch.qos.logback" % "logback-classic" % Version.Logback,
   "com.google.guava" % "guava" % Version.Guava,
   "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
