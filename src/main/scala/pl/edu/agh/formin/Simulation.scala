@@ -9,11 +9,9 @@ import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 
-import scala.collection.immutable.TreeMap
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-object Simulation extends App with LazyLogging {
+object Simulation extends LazyLogging {
   final val ForminConfigPrefix = "formin"
 
   private val rawConfig: Config =
@@ -44,25 +42,23 @@ object Simulation extends App with LazyLogging {
     extractEntityId = WorkerActor.extractEntityId
   )
 
-  val decider = ClusterSharding(system).shardRegion(WorkerActor.Name)
+  val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
 
-  private val workers: TreeMap[WorkerId, ActorRef] =
-    (1 to math.pow(config.workersRoot, 2).toInt).map { i =>
-      val workerId = WorkerId(i)
-      workerId -> decider
-    }(collection.breakOut)
+  def main(args: Array[String]): Unit = {
+    if (args.length == 0) {
 
-  Future {
-    Thread.sleep(20000)
-    workers.foreach { case (id, ref) =>
-      val neighbours = NeighbourPosition.values.flatMap { pos =>
-        pos.neighbourId(id).map(id => Neighbour(pos, workers(id)))
+      val workers: Vector[WorkerId] =
+        (1 to math.pow(config.workersRoot, 2).toInt)
+          .map(WorkerId(_))(collection.breakOut)
+
+      workers.foreach { id =>
+        val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
+          pos.neighbourId(id).map(_ => Neighbour(pos))
+        }(collection.breakOut)
+        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours)
       }
-      ref ! WorkerActor.NeighboursInitialized(id, neighbours.toSet)
     }
-  }(ExecutionContext.global)
-
-
+  }
 
 }
 

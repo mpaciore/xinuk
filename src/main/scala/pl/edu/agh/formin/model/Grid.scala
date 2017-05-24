@@ -4,20 +4,13 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.Cell.SmellArray
 import pl.edu.agh.formin.model.Grid.CellArray
 
-final case class Grid(cells: CellArray) {
+final case class Grid(cells: CellArray) extends AnyVal {
 
   import Grid._
 
-  private val cellSignalFun: (Int) => (Int) => Option[SmellArray] = {
-    cells.map(_.lift).lift.andThen {
-      case Some(rowFunction) => rowFunction.andThen(_.map(_.smell))
-      case None => _ => None
-    }
-  }
-
   def propagatedSignal(x: Int, y: Int)(implicit config: ForminConfig): GridPart = {
     @inline def destinationCellSignal(i: Int, j: Int): Option[SmellArray] = {
-      cellSignalFun(x + i - 1)(y + j - 1)
+      cells.lift(x + i - 1).flatMap(_.lift(y + j - 1).map(_.smell))
     }
 
     val current = cells(x)(y)

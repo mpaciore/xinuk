@@ -95,13 +95,13 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
           }
         case cell: ForaminiferaCell =>
           if (cell.energy < config.foraminiferaLifeActivityCost) {
-            foraminiferaDeaths+=1
-            foraminiferaTotalLifespan+=cell.lifespan
+            foraminiferaDeaths += 1
+            foraminiferaTotalLifespan += cell.lifespan
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
             reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
             newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
-            foraminiferaReproductionsCount+=1
+            foraminiferaReproductionsCount += 1
           } else {
             //moving
             val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
@@ -119,21 +119,21 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
             destinations
               .collectFirstOpt {
                 case (i, j, destination: AlgaeCell) =>
-                  consumedAlgaeCount+=1
-                  algaeTotalLifespan+=destination.lifespan
+                  consumedAlgaeCount += 1
+                  algaeTotalLifespan += destination.lifespan
                   (i, j, destination)
                 case (i, j, destination: EmptyCell) =>
                   val effectiveDestination = newGrid.cells(i)(j) match {
                     case newAlgae: AlgaeCell =>
-                      consumedAlgaeCount+=1
-                      algaeTotalLifespan+=newAlgae.lifespan
+                      consumedAlgaeCount += 1
+                      algaeTotalLifespan += newAlgae.lifespan
                       newAlgae
                     case _ => destination
                   }
                   (i, j, effectiveDestination)
               } match {
               case Opt((i, j, destinationCell)) =>
-                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan+1)
+                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
                 newGrid.cells(x)(y) = EmptyCell(cell.smell)
               case Opt.Empty =>
                 newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
@@ -142,10 +142,10 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
       }
       newGrid.cells(x)(y) match {
         case ForaminiferaCell(energy, _, _) =>
-          foraminiferaTotalEnergy+=energy.value
+          foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
         case BufferCell(ForaminiferaCell(energy, _, _)) =>
-          foraminiferaTotalEnergy+=energy.value
+          foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
         case AlgaeCell(_, _) | BufferCell(AlgaeCell(_, _)) =>
           algaeCount += 1
@@ -157,94 +157,94 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   }
 
   def stopped: Receive = {
-    case NeighboursInitialized(id, neighbours: Set[Neighbour]) =>
-        log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
+    case NeighboursInitialized(id, neighbours) =>
+      log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
       this.id = id
-        this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
-        bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
-        grid = Grid.empty(bufferZone)
-        self ! StartIteration(1)
-      case StartIteration(1) =>
-        var foraminiferaCount = 0L
-        var algaeCount = 0L
-        for {
-          x <- 0 until config.gridSize
-          y <- 0 until config.gridSize
-          if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
-        } {
-          if (random.nextDouble() < config.spawnChance) {
-            grid.cells(x)(y) =
-              if (random.nextDouble() < config.foraminiferaSpawnChance) {
-                foraminiferaCount += 1
-                EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
-              }
-              else {
-                algaeCount += 1
-                EmptyCell.Instance.withAlgae(0)
-              }
-          }
+      this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
+      bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
+      grid = Grid.empty(bufferZone)
+      self ! StartIteration(1)
+    case StartIteration(1) =>
+      var foraminiferaCount = 0L
+      var algaeCount = 0L
+      for {
+        x <- 0 until config.gridSize
+        y <- 0 until config.gridSize
+        if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
+      } {
+        if (random.nextDouble() < config.spawnChance) {
+          grid.cells(x)(y) =
+            if (random.nextDouble() < config.foraminiferaSpawnChance) {
+              foraminiferaCount += 1
+              EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+            }
+            else {
+              algaeCount += 1
+              EmptyCell.Instance.withAlgae(0)
+            }
         }
-        propagateSignal()
-        notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
-        unstashAll()
-        context.become(started)
+      }
+      propagateSignal()
+      notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
+      unstashAll()
+      context.become(started)
     case _: IterationPartFinished =>
-        stash()
+      stash()
   }
 
   var currentIteration: Long = 1
 
   def started: Receive = {
-      case StartIteration(i) =>
-        finished.remove(i - 1)
-        log.debug(s"$id started $i")
-        propagateSignal()
-        val metrics = makeMoves(i)
-        notifyNeighbours(i, grid, metrics)
-        if (i % 100 == 0) log.info(s"$id finished $i")
-      case IterationPartFinished(workerId, _, iteration, incomingGrid) =>
-        val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
-        val incomingNeighbourCells: IncomingNeighbourCells =
-          if (workerId != id) {
-            val neighbour = neighbours(workerId)
-            val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
-            val neighbourBuffer: Iterator[BufferCell] =
-              neighbour.position.neighbourBuffer.iterator.map { case (x, y) => incomingGrid.cells(x)(y).asInstanceOf[BufferCell] }
-            val incoming: Vector[((Int, Int), BufferCell)] =
-              affectedCells.zip(neighbourBuffer)
-                .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
-                .toVector
+    case StartIteration(i) =>
+      finished.remove(i - 1)
+      log.debug(s"$id started $i")
+      propagateSignal()
+      val metrics = makeMoves(i)
+      notifyNeighbours(i, grid, metrics)
+      if (i % 100 == 0) log.info(s"$id finished $i")
+    case IterationPartFinished(workerId, _, iteration, incomingGrid) =>
+      val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
+      val incomingNeighbourCells: IncomingNeighbourCells =
+        if (workerId != id) {
+          val neighbour = neighbours(workerId)
+          val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
+          val neighbourBuffer: Iterator[BufferCell] =
+            neighbour.position.neighbourBuffer.iterator.map { case (x, y) => incomingGrid.cells(x)(y).asInstanceOf[BufferCell] }
+          val incoming: Vector[((Int, Int), BufferCell)] =
+            affectedCells.zip(neighbourBuffer)
+              .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
+              .toVector
 
-            new IncomingNeighbourCells(incoming)
-          } else {
-            new IncomingNeighbourCells(Vector.empty)
-          }
-        finished(iteration) = currentlyFinished :+ incomingNeighbourCells
-        if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
-          val incomingCells = finished(currentIteration)
-          if (incomingCells.size == neighbours.size + 1) {
-            //todo configurable strategy
-            incomingCells.foreach(_.cells.foreach {
-              case ((x, y), BufferCell(cell)) =>
-                val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
-                grid.cells(x)(y) = DefaultConflictResolver.resolveConflict(currentCell, cell)
-            })
-
-            //clean buffers
-            bufferZone.foreach { case (x, y) =>
-              grid.cells(x)(y) = BufferCell(EmptyCell.Instance)
-            }
-
-            currentIteration += 1
-            self ! StartIteration(currentIteration)
-          }
+          new IncomingNeighbourCells(incoming)
+        } else {
+          new IncomingNeighbourCells(Vector.empty)
         }
+      finished(iteration) = currentlyFinished :+ incomingNeighbourCells
+      if (config.iterationsNumber > currentIteration && iteration == currentIteration) {
+        val incomingCells = finished(currentIteration)
+        if (incomingCells.size == neighbours.size + 1) {
+          //todo configurable strategy
+          incomingCells.foreach(_.cells.foreach {
+            case ((x, y), BufferCell(cell)) =>
+              val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
+              grid.cells(x)(y) = DefaultConflictResolver.resolveConflict(currentCell, cell)
+          })
+
+          //clean buffers
+          bufferZone.foreach { case (x, y) =>
+            grid.cells(x)(y) = BufferCell(EmptyCell.Instance)
+          }
+
+          currentIteration += 1
+          self ! StartIteration(currentIteration)
+        }
+      }
   }
 
   private def notifyNeighbours(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
     self ! IterationPartFinished(id, id, iteration, grid)
     neighbours.foreach { case (neighbourId, ngh) =>
-      ngh.ref ! IterationPartFinished(id, neighbourId, iteration, grid)
+      Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, grid)
     }
   }
 }
@@ -255,7 +255,7 @@ object WorkerActor {
 
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
-  final case class NeighboursInitialized(id: WorkerId, neighbours: Set[Neighbour])
+  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour])
 
   final case class StartIteration private(i: Long) extends AnyVal
 
@@ -289,8 +289,8 @@ final case class Metrics(foraminiferaCount: Long,
                          foraminiferaTotalEnergy: Double,
                          foraminiferaReproductionsCount: Long,
                          consumedAlgaeCount: Long,
-                         foraminiferaTotalLifespan : Long,
-                         algaeTotalLifespan : Long)
+                         foraminiferaTotalLifespan: Long,
+                         algaeTotalLifespan: Long)
 
 final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))

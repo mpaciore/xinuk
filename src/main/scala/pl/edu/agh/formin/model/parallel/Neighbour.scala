@@ -1,6 +1,5 @@
 package pl.edu.agh.formin.model.parallel
 
-import akka.actor.ActorRef
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.{Opt, SealedEnumCompanion}
 import pl.edu.agh.formin.WorkerId
@@ -101,4 +100,4 @@ object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
   override val values: List[NeighbourPosition] = caseObjects
 }
 
-final case class Neighbour(position: NeighbourPosition, ref: ActorRef)
+final case class Neighbour(position: NeighbourPosition) extends AnyVal
