@@ -128,26 +128,26 @@ object Cell {
 }
 
 sealed trait ForaminiferaAccessible extends GridPart {
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): GridPart
+  def withForaminifera(energy: Energy, lifespan : Long)(implicit config: ForminConfig): GridPart
 }
 
 sealed trait AlgaeAccessible extends GridPart {
-  def withAlgae(implicit config: ForminConfig): GridPart
+  def withAlgae(lifespan : Long)(implicit config: ForminConfig): GridPart
 }
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray) extends SmellingCell {
+final case class ForaminiferaCell(energy: Energy, smell: SmellArray, lifespan : Long) extends SmellingCell {
   override type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
-final case class AlgaeCell(smell: SmellArray) extends SmellingCell with ForaminiferaAccessible {
+final case class AlgaeCell(smell: SmellArray, lifespan : Long) extends SmellingCell with ForaminiferaAccessible {
   override type Self = AlgaeCell
 
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 
-  def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWith(config.foraminiferaInitialSignal))
+  def withForaminifera(energy: Energy, lifespan : Long)(implicit config: ForminConfig): ForaminiferaCell = {
+    ForaminiferaCell(energy + config.algaeEnergeticCapacity, smellWith(config.foraminiferaInitialSignal), lifespan)
   }
 }
 
@@ -166,12 +166,12 @@ final case class BufferCell(cell: SmellingCell)
     BufferCell(cell.withSmell(smell))
   }
 
-  override def withAlgae(implicit config: ForminConfig): BufferCell = {
-    BufferCell(AlgaeCell(smellWith(config.algaeInitialSignal)))
+  override def withAlgae(lifespan : Long)(implicit config: ForminConfig): BufferCell = {
+    BufferCell(AlgaeCell(smellWith(config.algaeInitialSignal), lifespan))
   }
 
-  override def withForaminifera(energy: Energy)(implicit config: ForminConfig): BufferCell = {
-    BufferCell(ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal)))
+  override def withForaminifera(energy: Energy, lifespan : Long)(implicit config: ForminConfig): BufferCell = {
+    BufferCell(ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal), lifespan))
   }
 
 }
@@ -181,12 +181,12 @@ final case class EmptyCell(smell: SmellArray) extends SmellingCell with AlgaeAcc
 
   override def withSmell(smell: SmellArray): EmptyCell = copy(smell)
 
-  override def withForaminifera(energy: Energy)(implicit config: ForminConfig): ForaminiferaCell = {
-    ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal))
+  override def withForaminifera(energy: Energy, lifespan : Long)(implicit config: ForminConfig): ForaminiferaCell = {
+    ForaminiferaCell(energy, smellWith(config.foraminiferaInitialSignal), lifespan)
   }
 
-  override def withAlgae(implicit config: ForminConfig): AlgaeCell = {
-    AlgaeCell(smellWith(config.algaeInitialSignal))
+  override def withAlgae(lifespan : Long)(implicit config: ForminConfig): AlgaeCell = {
+    AlgaeCell(smellWith(config.algaeInitialSignal), lifespan)
   }
 
 }

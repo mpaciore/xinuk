@@ -87,18 +87,18 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae }
+            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae(0) }
           }
           if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell
+            newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
           }
         case cell: ForaminiferaCell =>
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             foraminiferaDeaths+=1
             newGrid.cells(x)(y) = EmptyCell(cell.smell)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy) }
-            newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost)
+            reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
+            newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
             foraminiferaReproductionsCount+=1
           } else {
             //moving
@@ -129,21 +129,21 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
                   (i, j, effectiveDestination)
               } match {
               case Opt((i, j, destinationCell)) =>
-                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost)
+                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan+1)
                 newGrid.cells(x)(y) = EmptyCell(cell.smell)
               case Opt.Empty =>
-                newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost)
+                newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
             }
           }
       }
       newGrid.cells(x)(y) match {
-        case ForaminiferaCell(energy, _) =>
+        case ForaminiferaCell(energy, _, _) =>
           foraminiferaTotalEnergy+=energy.value
           foraminiferaCount += 1
-        case BufferCell(ForaminiferaCell(energy, _)) =>
+        case BufferCell(ForaminiferaCell(energy, _, _)) =>
           foraminiferaTotalEnergy+=energy.value
           foraminiferaCount += 1
-        case AlgaeCell(_) | BufferCell(AlgaeCell(_)) =>
+        case AlgaeCell(_, _) | BufferCell(AlgaeCell(_, _)) =>
           algaeCount += 1
         case _ =>
       }
@@ -187,11 +187,11 @@ class WorkerActor private(id: WorkerId)(implicit config: ForminConfig) extends A
             grid.cells(x)(y) =
               if (random.nextDouble() < config.foraminiferaSpawnChance) {
                 foraminiferaCount += 1
-                EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy)
+                EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
               }
               else {
                 algaeCount += 1
-                EmptyCell.Instance.withAlgae
+                EmptyCell.Instance.withAlgae(0)
               }
           }
         }
