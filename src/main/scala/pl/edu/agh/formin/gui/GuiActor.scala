@@ -136,8 +136,8 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
       def prepare(row: Int, column: Int): Unit = {
         text = cells(column / Cell.Size)(row / Cell.Size).smell(column % Cell.Size)(row % Cell.Size).value.toString
         background = cells(column / Cell.Size)(row / Cell.Size) match {
-          case AlgaeCell(_) => algaeColor
-          case ForaminiferaCell(energy, _) =>
+          case AlgaeCell(_, _) => algaeColor
+          case ForaminiferaCell(energy, _, _) =>
             if (row % Cell.Size == 1 && column % Cell.Size == 1) {
               text = energy.value.toString
               new swing.Color(255, (0 + 255 * energy.value / 2).toInt, (0 + 255 * energy.value / 2).toInt)
@@ -174,8 +174,8 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
 
     def set(cells: CellArray): Unit = {
       val rgbArray = cells.map(_.map {
-        case AlgaeCell(_) => algaeColor
-        case ForaminiferaCell(_, _) => forminColor
+        case AlgaeCell(_,_) => algaeColor
+        case ForaminiferaCell(_, _, _) => forminColor
         case Obstacle => obstacleColor
         case BufferCell(_) => bufferColor
         case EmptyCell(_) => emptyColor
