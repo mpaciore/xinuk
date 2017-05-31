@@ -14,13 +14,7 @@ sealed trait NeighbourPosition {
 
   def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)]
 
-  def reverse: NeighbourPosition
-
   protected[parallel] def bufferZoneAffectedModifier: (Int, Int)
-
-  def neighbourBuffer(implicit config: ForminConfig): TreeSet[(Int, Int)] = {
-    reverse.bufferZone
-  }
 
   def affectedCells(implicit config: ForminConfig): Iterator[(Int, Int)] = {
     val (xModifier, yModifier) = bufferZoneAffectedModifier
@@ -30,13 +24,9 @@ sealed trait NeighbourPosition {
 }
 
 sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
-                                                    (
-                                                      reversePosition: => NeighbourPositionGen,
-                                                      protected[parallel] val bufferZoneAffectedModifier: (Int, Int)
-                                                    ) extends NeighbourPosition {
+                                                    (protected[parallel] val bufferZoneAffectedModifier: (Int, Int))
+  extends NeighbourPosition {
 
-
-  override def reverse: NeighbourPosition = reversePosition
 
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
     val modifier = idModifier(config)
@@ -58,11 +48,8 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
 
 }
 
-sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositionGen, pos2: NeighbourPositionGen)(
-  reversePosition: => NeighbourPositionComposite
-) extends NeighbourPosition {
-
-  override def reverse: NeighbourPosition = reversePosition
+sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositionGen, pos2: NeighbourPositionGen)
+  extends NeighbourPosition {
 
   override protected[parallel] val bufferZoneAffectedModifier: (Int, Int) = {
     val (x1, y1) = (pos1: NeighbourPosition).bufferZoneAffectedModifier
@@ -81,21 +68,21 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
 
 object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
 
-  case object Top extends NeighbourPositionGen(-_.workersRoot)(_.iterator.map((0, _)))(Bottom, (1, 0))
+  case object Top extends NeighbourPositionGen(-_.workersRoot)(_.iterator.map((0, _)))((1, 0))
 
-  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end - 1, _)))(Top, (-1, 0))
+  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end - 1, _)))((-1, 0))
 
-  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end - 1)))(Left, (0, -1))
+  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end - 1)))((0, -1))
 
-  case object Left extends NeighbourPositionGen(_ => -1)(_.iterator.map((_, 0)))(Right, (0, 1))
+  case object Left extends NeighbourPositionGen(_ => -1)(_.iterator.map((_, 0)))((0, 1))
 
-  case object TopRight extends NeighbourPositionComposite(Top, Right)(BottomLeft)
+  case object TopRight extends NeighbourPositionComposite(Top, Right)
 
-  case object TopLeft extends NeighbourPositionComposite(Top, Left)(BottomRight)
+  case object TopLeft extends NeighbourPositionComposite(Top, Left)
 
-  case object BottomRight extends NeighbourPositionComposite(Bottom, Right)(TopLeft)
+  case object BottomRight extends NeighbourPositionComposite(Bottom, Right)
 
-  case object BottomLeft extends NeighbourPositionComposite(Bottom, Left)(TopRight)
+  case object BottomLeft extends NeighbourPositionComposite(Bottom, Left)
 
   override val values: List[NeighbourPosition] = caseObjects
 }

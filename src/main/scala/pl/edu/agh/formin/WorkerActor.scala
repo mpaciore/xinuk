@@ -242,7 +242,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   private def notifyNeighbours(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
     self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
-      val bufferArray = ngh.position.reverse.neighbourBuffer.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
+      val bufferArray = ngh.position.bufferZone.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
       Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
     }
   }
