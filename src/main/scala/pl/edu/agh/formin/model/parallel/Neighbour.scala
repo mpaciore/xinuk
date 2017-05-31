@@ -14,12 +14,12 @@ sealed trait NeighbourPosition {
 
   def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)]
 
-  protected def reverseTo: NeighbourPosition
+  def reverse: NeighbourPosition
 
   protected[parallel] def bufferZoneAffectedModifier: (Int, Int)
 
   def neighbourBuffer(implicit config: ForminConfig): TreeSet[(Int, Int)] = {
-    reverseTo.bufferZone
+    reverse.bufferZone
   }
 
   def affectedCells(implicit config: ForminConfig): Iterator[(Int, Int)] = {
@@ -36,7 +36,7 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
                                                     ) extends NeighbourPosition {
 
 
-  override protected def reverseTo: NeighbourPosition = reversePosition
+  override def reverse: NeighbourPosition = reversePosition
 
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
     val modifier = idModifier(config)
@@ -62,7 +62,7 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
   reversePosition: => NeighbourPositionComposite
 ) extends NeighbourPosition {
 
-  override protected def reverseTo: NeighbourPosition = reversePosition
+  override def reverse: NeighbourPosition = reversePosition
 
   override protected[parallel] val bufferZoneAffectedModifier: (Int, Int) = {
     val (x1, y1) = (pos1: NeighbourPosition).bufferZoneAffectedModifier

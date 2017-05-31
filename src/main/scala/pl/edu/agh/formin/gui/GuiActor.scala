@@ -38,7 +38,7 @@ class GuiActor private(workers: Vector[ActorRef],
 
   def started: Receive = {
     case IterationPartFinished(_, _, iteration, grid) if sender == selected =>
-      gui.setNewValues(iteration, grid)
+    //gui.setNewValues(iteration, grid)
     //selected ! GetStatus
     case IterationPartMetrics(workerId, iteration, metrics) =>
       gui.setWorkerIteration(workerId.value, iteration)

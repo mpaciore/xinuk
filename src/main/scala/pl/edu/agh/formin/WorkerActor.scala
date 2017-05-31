@@ -202,16 +202,14 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
       val metrics = makeMoves(i)
       notifyNeighbours(i, grid, metrics)
       if (i % 100 == 0) log.info(s"$id finished $i")
-    case IterationPartFinished(workerId, _, iteration, incomingGrid) =>
+    case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
       val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
       val incomingNeighbourCells: IncomingNeighbourCells =
         if (workerId != id) {
           val neighbour = neighbours(workerId)
           val affectedCells: Iterator[(Int, Int)] = neighbour.position.affectedCells
-          val neighbourBuffer: Iterator[BufferCell] =
-            neighbour.position.neighbourBuffer.iterator.map { case (x, y) => incomingGrid.cells(x)(y).asInstanceOf[BufferCell] }
           val incoming: Vector[((Int, Int), BufferCell)] =
-            affectedCells.zip(neighbourBuffer)
+            affectedCells.zip(neighbourBuffer.iterator)
               .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
               .toVector
 
@@ -242,9 +240,10 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   }
 
   private def notifyNeighbours(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
-    self ! IterationPartFinished(id, id, iteration, grid)
+    self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
-      Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, grid)
+      val bufferArray = ngh.position.reverse.neighbourBuffer.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
+      Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
     }
   }
 }
@@ -260,7 +259,7 @@ object WorkerActor {
   final case class StartIteration private(i: Long) extends AnyVal
 
   //sent to listeners
-  final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, grid: Grid)
+  final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, incomingBuffer: Array[BufferCell])
 
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
