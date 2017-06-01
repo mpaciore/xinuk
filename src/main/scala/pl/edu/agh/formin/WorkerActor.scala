@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
+import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -26,6 +27,10 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
   private var bufferZone: TreeSet[(Int, Int)] = _
+
+  private val METRICS_MARKER = MarkerFactory.getMarker("MERTICS")
+
+  private var logger: Logger = _
 
   override def receive: Receive = stopped
 
@@ -153,6 +158,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
       }
     }
     grid = newGrid
+    logger.debug(METRICS_MARKER, foraminiferaCount + ";" + algaeCount + ";" + foraminiferaDeaths + ";" + foraminiferaTotalEnergy + ";" + foraminiferaReproductionsCount + ";" + consumedAlgaeCount + ";" + foraminiferaTotalLifespan + ";" + algaeTotalLifespan)
     Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
   }
 
@@ -160,6 +166,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
     case NeighboursInitialized(id, neighbours) =>
       log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
       this.id = id
+      this.logger = LoggerFactory.getLogger("Worker"+this.id.value)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
       bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       grid = Grid.empty(bufferZone)
@@ -185,6 +192,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
         }
       }
       propagateSignal()
+      logger.debug(METRICS_MARKER, foraminiferaCount + ";" + algaeCount + ";" + 0 + ";" + (config.foraminiferaStartEnergy.value * foraminiferaCount) + ";" + 0 + ";" + 0 + ";" + 0 + ";" + 0)
       notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
       unstashAll()
       context.become(started)
