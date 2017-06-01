@@ -30,6 +30,7 @@ lazy val Version = new {
   lazy val Ficus = "1.4.0"
   lazy val ScalaSwing = "2.0.0"
   lazy val JFreeChart = "1.0.19"
+  lazy val Janino = "2.6.1"
 }
 
 dependencyOverrides ++= Set(
@@ -43,6 +44,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
   "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.0",
   "ch.qos.logback" % "logback-classic" % Version.Logback,
+  "org.codehaus.janino" % "janino" % Version.Janino,
   "com.google.guava" % "guava" % Version.Guava,
   "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
   "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
