@@ -158,7 +158,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
       }
     }
     grid = newGrid
-    logger.debug(METRICS_MARKER, foraminiferaCount + ";" + algaeCount + ";" + foraminiferaDeaths + ";" + foraminiferaTotalEnergy + ";" + foraminiferaReproductionsCount + ";" + consumedAlgaeCount + ";" + foraminiferaTotalLifespan + ";" + algaeTotalLifespan)
+    logger.debug(METRICS_MARKER, iteration + ";" + foraminiferaCount + ";" + algaeCount + ";" + foraminiferaDeaths + ";" + foraminiferaTotalEnergy + ";" + foraminiferaReproductionsCount + ";" + consumedAlgaeCount + ";" + foraminiferaTotalLifespan + ";" + algaeTotalLifespan)
     Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
   }
 
@@ -166,7 +166,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
     case NeighboursInitialized(id, neighbours) =>
       log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
       this.id = id
-      this.logger = LoggerFactory.getLogger("Worker"+this.id.value)
+      this.logger = LoggerFactory.getLogger("Worker" + this.id.value)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
       bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       grid = Grid.empty(bufferZone)
@@ -192,7 +192,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
         }
       }
       propagateSignal()
-      logger.debug(METRICS_MARKER, foraminiferaCount + ";" + algaeCount + ";" + 0 + ";" + (config.foraminiferaStartEnergy.value * foraminiferaCount) + ";" + 0 + ";" + 0 + ";" + 0 + ";" + 0)
+      logger.debug(METRICS_MARKER, "1;" + foraminiferaCount + ";" + algaeCount + ";" + 0 + ";" + (config.foraminiferaStartEnergy.value * foraminiferaCount) + ";" + 0 + ";" + 0 + ";" + 0 + ";" + 0)
       notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
       unstashAll()
       context.become(started)
