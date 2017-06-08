@@ -42,7 +42,8 @@ final case class ForminConfig private(
                                        guiType: GuiType,
                                        guiCellSize: Int,
                                        workersRoot: Int,
-                                       iterationsNumber : Long
+                                       iterationsNumber: Long,
+                                       isSupervisor: Boolean
                  )
 
 object ForminConfig {

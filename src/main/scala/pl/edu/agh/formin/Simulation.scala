@@ -32,7 +32,7 @@ object Simulation extends LazyLogging {
         throw new IllegalArgumentException
     }
 
-  private val system = ActorSystem(rawConfig.getString("application.name"))
+  private val system = ActorSystem(rawConfig.getString("application.name"), ConfigFactory.load("cluster.conf"))
 
   ClusterSharding(system).start(
     typeName = WorkerActor.Name,
@@ -45,7 +45,7 @@ object Simulation extends LazyLogging {
   val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
 
   def main(args: Array[String]): Unit = {
-    if (args.length == 0) {
+    if (config.isSupervisor) {
 
       val workers: Vector[WorkerId] =
         (1 to math.pow(config.workersRoot, 2).toInt)
