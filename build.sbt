@@ -55,3 +55,15 @@ libraryDependencies ++= Seq(
   "org.jfree" % "jfreechart" % Version.JFreeChart
 )
 
+mainClass in assembly := Some("pl.edu.agh.formin.Simulation")
+assemblyJarName in assembly := "formin.jar"
+test in assembly := {}
+
+/*
+assemblyMergeStrategy in assembly := {
+  case "application.conf" => MergeStrategy.concat
+  case "reference.conf" => MergeStrategy.concat
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}*/

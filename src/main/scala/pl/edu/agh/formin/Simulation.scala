@@ -19,8 +19,9 @@ object Simulation extends LazyLogging {
       .filter(_.hasPath(ForminConfigPrefix))
       .getOrElse {
         logger.info("Falling back to reference.conf")
-        ConfigFactory.load()
-      }
+        ConfigFactory.empty()
+      }.withFallback(ConfigFactory.load("cluster.conf"))
+      .withFallback(ConfigFactory.load())
 
   implicit val config: ForminConfig =
     ForminConfig.fromConfig(rawConfig.getConfig(ForminConfigPrefix)) match {
@@ -32,7 +33,7 @@ object Simulation extends LazyLogging {
         throw new IllegalArgumentException
     }
 
-  private val system = ActorSystem(rawConfig.getString("application.name"))
+  private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
   ClusterSharding(system).start(
     typeName = WorkerActor.Name,
@@ -45,7 +46,7 @@ object Simulation extends LazyLogging {
   val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
 
   def main(args: Array[String]): Unit = {
-    if (args.length == 0) {
+    if (config.isSupervisor) {
 
       val workers: Vector[WorkerId] =
         (1 to math.pow(config.workersRoot, 2).toInt)
