@@ -4,7 +4,7 @@ import akka.actor.{Actor, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
+import org.slf4j.{Logger, MarkerFactory}
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
@@ -167,10 +167,9 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
 
   def stopped: Receive = {
     case NeighboursInitialized(id, neighbours) =>
-      logger.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
       this.id = id
-      this.logger = LoggerFactory.getLogger("Worker" + this.id.value)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
+      logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       grid = Grid.empty(bufferZone)
       self ! StartIteration(1)

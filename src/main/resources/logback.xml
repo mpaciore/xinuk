@@ -2,7 +2,7 @@
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>forminData.txt</file>
-        <immediateFlush>true</immediateFlush>
+        <param name="Append" value="false"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>METRICS</marker>
@@ -11,7 +11,7 @@
             <onMatch>NEUTRAL</onMatch>
         </filter>
         <encoder>
-            <pattern>%logger{36}:%msg%n</pattern>
+            <pattern>%msg%n</pattern>
         </encoder>
     </appender>
 

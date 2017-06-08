@@ -4,7 +4,7 @@ import java.io.File
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
@@ -23,8 +23,11 @@ object Simulation extends LazyLogging {
       }.withFallback(ConfigFactory.load("cluster.conf"))
       .withFallback(ConfigFactory.load())
 
-  implicit val config: ForminConfig =
-    ForminConfig.fromConfig(rawConfig.getConfig(ForminConfigPrefix)) match {
+  implicit val config: ForminConfig = {
+    val forminConfig = rawConfig.getConfig(ForminConfigPrefix)
+    logger.info(WorkerActor.MetricsMarker, forminConfig.root().render(ConfigRenderOptions.concise()))
+    logger.info(WorkerActor.MetricsMarker, "worker:foraminiferaCount;algaeCount;foraminiferaDeaths;foraminiferaTotalEnergy;foraminiferaReproductionsCount;consumedAlgaeCount;foraminiferaTotalLifespan;algaeTotalLifespan")
+    ForminConfig.fromConfig(forminConfig) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>
@@ -32,6 +35,7 @@ object Simulation extends LazyLogging {
         System.exit(2)
         throw new IllegalArgumentException
     }
+  }
 
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
