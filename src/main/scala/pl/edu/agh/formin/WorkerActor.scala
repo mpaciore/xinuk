@@ -162,7 +162,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
   }
 
   private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
-    logger.info(MetricsMarker, "{};{}", iteration, metrics)
+    logger.info(MetricsMarker, "{}:{};{}", id.value.toString, iteration.toString, metrics)
   }
 
   def stopped: Receive = {
