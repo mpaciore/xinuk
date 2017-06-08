@@ -1,6 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, ActorLogging, Props, Stash}
+import akka.actor.{Actor, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
@@ -14,7 +14,7 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 import scala.util.Random
 
-class WorkerActor private(implicit config: ForminConfig) extends Actor with ActorLogging with Stash {
+class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
 
   private var id: WorkerId = _
 
@@ -27,8 +27,6 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
   private var bufferZone: TreeSet[(Int, Int)] = _
-
-  private val METRICS_MARKER = MarkerFactory.getMarker("MERTICS")
 
   private var logger: Logger = _
 
@@ -158,13 +156,18 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
       }
     }
     grid = newGrid
-    logger.debug(METRICS_MARKER, iteration + ";" + foraminiferaCount + ";" + algaeCount + ";" + foraminiferaDeaths + ";" + foraminiferaTotalEnergy + ";" + foraminiferaReproductionsCount + ";" + consumedAlgaeCount + ";" + foraminiferaTotalLifespan + ";" + algaeTotalLifespan)
-    Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
+    val metrics = Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
+    logMetrics(iteration, metrics)
+    metrics
+  }
+
+  private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
+    logger.info(MetricsMarker, "{};{}", iteration, metrics)
   }
 
   def stopped: Receive = {
     case NeighboursInitialized(id, neighbours) =>
-      log.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
+      logger.info(s"$id neighbours: ${neighbours.map(_.position).toList}")
       this.id = id
       this.logger = LoggerFactory.getLogger("Worker" + this.id.value)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
@@ -192,8 +195,9 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
         }
       }
       propagateSignal()
-      logger.debug(METRICS_MARKER, "1;" + foraminiferaCount + ";" + algaeCount + ";" + 0 + ";" + (config.foraminiferaStartEnergy.value * foraminiferaCount) + ";" + 0 + ";" + 0 + ";" + 0 + ";" + 0)
-      notifyNeighbours(1, grid, Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0))
+      val metrics = Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
+      logMetrics(1, metrics)
+      notifyNeighbours(1, grid, metrics)
       unstashAll()
       context.become(started)
     case _: IterationPartFinished =>
@@ -205,11 +209,11 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Acto
   def started: Receive = {
     case StartIteration(i) =>
       finished.remove(i - 1)
-      log.debug(s"$id started $i")
+      logger.debug(s"$id started $i")
       propagateSignal()
       val metrics = makeMoves(i)
       notifyNeighbours(i, grid, metrics)
-      if (i % 100 == 0) log.info(s"$id finished $i")
+      if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
       val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
       val incomingNeighbourCells: IncomingNeighbourCells =
@@ -260,6 +264,8 @@ object WorkerActor {
 
   final val Name: String = "WorkerActor"
 
+  final val MetricsMarker = MarkerFactory.getMarker("METRICS")
+
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
   final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour])
@@ -297,7 +303,11 @@ final case class Metrics(foraminiferaCount: Long,
                          foraminiferaReproductionsCount: Long,
                          consumedAlgaeCount: Long,
                          foraminiferaTotalLifespan: Long,
-                         algaeTotalLifespan: Long)
+                         algaeTotalLifespan: Long) {
+  override def toString: String = {
+    s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan;$algaeTotalLifespan"
+  }
+}
 
 final case class WorkerId(value: Int) extends AnyVal {
   def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
