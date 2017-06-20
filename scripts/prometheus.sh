@@ -20,25 +20,24 @@ ITERATIONS_NUMBER=1000
 GRID_SIZE=100
 WORKERS_ROOT=9
 
-echo $SUPERVISOR_HOSTNAME
 HOSTSS=`scontrol show hostnames`
 HOSTNAMES=`echo $HOSTSS | sed "s/\b$SUPERVISOR_HOSTNAME\b//g"`
+DIRECTORY_NAME=${#HOSTNAMES[@]}_${WORKERS_ROOT}_${SLURM_JOB_ID}
 
-mkdir -p ${SLURM_SUBMIT_DIR}/results/${SLURM_JOB_ID}
+mkdir -p ${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}
 
 for WORKER_HOST in $HOSTNAMES
     do
-	echo $WORKER_HOST
         srun -w${WORKER_HOST} -c${SLURM_NTASKS_PER_NODE} -N1 -n1 \
             ${JAVA_HOME}/bin/java \
             -Xmx65536m -Xms512m -XX:+UseG1GC \
             -Dclustering.ip=${WORKER_HOST} \
             -Dclustering.supervisor.ip=${SUPERVISOR_HOSTNAME} \
-            -Dlog.name=${SLURM_SUBMIT_DIR}/results/${SLURM_JOB_ID}/${WORKER_HOST} \
+            -Dlog.name=${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}/${WORKER_HOST} \
             -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
             -Dformin.config.gridSize=${GRID_SIZE} \
             -Dformin.config.workersRoot=${WORKERS_ROOT} \
-            -Dakka.cluster.min-nr-of-members=2 \
+            -Dakka.cluster.min-nr-of-members=${#HOSTNAMES[@]} \
             -jar formin.jar &
     done
 
@@ -48,12 +47,12 @@ ${JAVA_HOME}/bin/java \
     -Xmx65536m -Xms512m -XX:+UseG1GC \
     -Dclustering.ip=${SUPERVISOR_HOSTNAME} \
     -Dclustering.supervisor.ip=${SUPERVISOR_HOSTNAME} \
-    -Dlog.name=${SLURM_SUBMIT_DIR}/results/${SLURM_JOB_ID}/${SUPERVISOR_HOSTNAME} \
+    -Dlog.name=${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}/${SUPERVISOR_HOSTNAME} \
     -Dformin.config.isSupervisor=true \
     -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
     -Dformin.config.gridSize=${GRID_SIZE} \
     -Dformin.config.workersRoot=${WORKERS_ROOT} \
-    -Dakka.cluster.min-nr-of-members=2 \
+    -Dakka.cluster.min-nr-of-members=${#HOSTNAMES[@]} \
     -jar formin.jar
 
 sleep 5
