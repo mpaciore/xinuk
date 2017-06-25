@@ -283,7 +283,7 @@ object WorkerActor {
     Props(new WorkerActor)
   }
 
-  private def idToShard(id: WorkerId): String = (id.value % 8).toString
+  private def idToShard(id: WorkerId): String = (id.value % 144).toString
 
   def extractShardId: ExtractShardId = {
     case NeighboursInitialized(id, _) => idToShard(id)
