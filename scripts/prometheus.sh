@@ -21,8 +21,10 @@ GRID_SIZE=100
 WORKERS_ROOT=9
 
 HOSTSS=`scontrol show hostnames`
+NHOSTS=`echo $HOSTSS | wc -w`
+echo NHOSTS $NHOSTS
 HOSTNAMES=`echo $HOSTSS | sed "s/\b$SUPERVISOR_HOSTNAME\b//g"`
-DIRECTORY_NAME=${#HOSTNAMES[@]}_${WORKERS_ROOT}_${SLURM_JOB_ID}
+DIRECTORY_NAME=${NHOSTS}_${WORKERS_ROOT}_${SLURM_JOB_ID}
 
 mkdir -p ${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}
 
@@ -37,7 +39,7 @@ for WORKER_HOST in $HOSTNAMES
             -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
             -Dformin.config.gridSize=${GRID_SIZE} \
             -Dformin.config.workersRoot=${WORKERS_ROOT} \
-            -Dakka.cluster.min-nr-of-members=${#HOSTNAMES[@]} \
+            -Dakka.cluster.min-nr-of-members=${NHOSTS} \
             -jar formin.jar &
     done
 
@@ -52,7 +54,7 @@ ${JAVA_HOME}/bin/java \
     -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
     -Dformin.config.gridSize=${GRID_SIZE} \
     -Dformin.config.workersRoot=${WORKERS_ROOT} \
-    -Dakka.cluster.min-nr-of-members=${#HOSTNAMES[@]} \
+    -Dakka.cluster.min-nr-of-members=${NHOSTS} \
     -jar formin.jar
 
 sleep 5
