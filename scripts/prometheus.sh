@@ -25,8 +25,9 @@ NHOSTS=`echo $HOSTSS | wc -w`
 echo NHOSTS $NHOSTS
 HOSTNAMES=`echo $HOSTSS | sed "s/\b$SUPERVISOR_HOSTNAME\b//g"`
 DIRECTORY_NAME=${NHOSTS}_${WORKERS_ROOT}_${SLURM_JOB_ID}
+LOG_DIR=$PLG_GROUPS_STORAGE/plggformin
 
-mkdir -p ${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}
+mkdir -p ${LOG_DIR}/${DIRECTORY_NAME}
 
 for WORKER_HOST in $HOSTNAMES
     do
@@ -35,7 +36,7 @@ for WORKER_HOST in $HOSTNAMES
             -Xmx65536m -Xms512m -XX:+UseG1GC \
             -Dclustering.ip=${WORKER_HOST} \
             -Dclustering.supervisor.ip=${SUPERVISOR_HOSTNAME} \
-            -Dlog.name=${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}/${WORKER_HOST} \
+            -Dlog.name=${LOG_DIR}/${DIRECTORY_NAME}/${WORKER_HOST} \
             -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
             -Dformin.config.gridSize=${GRID_SIZE} \
             -Dformin.config.workersRoot=${WORKERS_ROOT} \
@@ -49,7 +50,7 @@ ${JAVA_HOME}/bin/java \
     -Xmx65536m -Xms512m -XX:+UseG1GC \
     -Dclustering.ip=${SUPERVISOR_HOSTNAME} \
     -Dclustering.supervisor.ip=${SUPERVISOR_HOSTNAME} \
-    -Dlog.name=${SLURM_SUBMIT_DIR}/results/${DIRECTORY_NAME}/${SUPERVISOR_HOSTNAME} \
+    -Dlog.name=${LOG_DIR}/${DIRECTORY_NAME}/${SUPERVISOR_HOSTNAME} \
     -Dformin.config.isSupervisor=true \
     -Dformin.config.iterationsNumber=${ITERATIONS_NUMBER} \
     -Dformin.config.gridSize=${GRID_SIZE} \
