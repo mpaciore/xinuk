@@ -249,6 +249,8 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
           self ! StartIteration(currentIteration)
         }
       } else if (finished(currentIteration).size == neighbours.size + 1) {
+        import scala.concurrent.duration._
+        Thread.sleep(10.seconds.toMillis)
         context.system.terminate()
       }
   }
