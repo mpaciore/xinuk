@@ -44,16 +44,16 @@ worker:foraminiferaCount;algaeCount;foraminiferaDeaths;foraminiferaTotalEnergy;f
  */
 object Merge extends App {
   val iterators = args.map { name =>
-    Source
-      .fromFile(name)
+    Source.fromFile(name)
       .getLines()
       .drop(2) //skip legend
       .map(line =>
-      Try(line
-        .split(';') match {
-        case Array(iteration, fCount, aCount, fDeaths, fTotalEnergy, fReproductions, fConsumed, fTotalLifespan, aTotalLifespan) =>
-          Metrics(iteration.toLong, fCount.toLong, aCount.toLong, fDeaths.toLong, fTotalEnergy.toDouble, fReproductions.toLong, fConsumed.toLong, fTotalLifespan.toLong, aTotalLifespan.toLong)
-      }).getOrElse(throw new IllegalArgumentException(line))
+      Try(
+        line.split(';') match {
+          case Array(iteration, fCount, aCount, fDeaths, fTotalEnergy, fReproductions, fConsumed, fTotalLifespan, aTotalLifespan) =>
+            Metrics(iteration.toLong, fCount.toLong, aCount.toLong, fDeaths.toLong, fTotalEnergy.toDouble, fReproductions.toLong, fConsumed.toLong, fTotalLifespan.toLong, aTotalLifespan.toLong)
+        }
+      ).getOrElse(throw new IllegalArgumentException(line))
     ).buffered
   }
   println("iteration,foraminiferaCount,algaeCount,foraminiferaTotalEnergy,foraminiferaReproductionCount,foraminiferaAverageDeadLifespan,algaeAverageDeadLifespan")
@@ -62,7 +62,7 @@ object Merge extends App {
     val total = iterators.flatMap { iterator =>
       val currentIteration = ListBuffer.empty[Metrics]
       while (iterator.nonEmpty && iterator.head.iteration == iteration) currentIteration += iterator.next()
-      currentIteration.toList
+      currentIteration
     }.reduce(_ + _)
     val result = ParsedMetrics(
       total.iteration,
