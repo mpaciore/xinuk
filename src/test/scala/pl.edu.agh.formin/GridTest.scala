@@ -119,4 +119,18 @@ class GridTest  extends TestKit(ActorSystem("GridTest"))
     grid.cells(4)(2).smell(0)(1).value should be (0)
   }
 
+  it should "calculate neighbour cells correctly for middle one" in {
+    val gridNeighbourCellCoordinates = Grid.neighbourCellCoordinates(2,2)
+    gridNeighbourCellCoordinates.size should be (8)
+    gridNeighbourCellCoordinates.head should be (1,1)
+    gridNeighbourCellCoordinates(gridNeighbourCellCoordinates.size-1) should be (3,3)
+  }
+
+  it should "calculate neighbour cells correctly for border one" in {
+    val gridNeighbourCellCoordinates = Grid.neighbourCellCoordinates(0,2)
+    gridNeighbourCellCoordinates.size should be (8)
+    gridNeighbourCellCoordinates.head should be (-1,1)
+    gridNeighbourCellCoordinates(gridNeighbourCellCoordinates.size-1) should be (1,3)
+  }
+
 }
