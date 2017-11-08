@@ -2,6 +2,7 @@ package pl.edu.agh.formin
 
 import akka.actor.{Actor, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
+import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
@@ -41,11 +42,17 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
     }
   }
 
-  /**
-    * @return (foraminiferaCount, algaeCount)
-    */
   private def makeMoves(iteration: Long): Metrics = {
     val newGrid = Grid.empty(bufferZone)
+
+    var foraminiferaCount = 0L
+    var algaeCount = 0L
+    var foraminiferaDeaths = 0L
+    var foraminiferaReproductionsCount = 0L
+    var consumedAlgaeCount = 0L
+    var foraminiferaTotalLifespan = 0L
+    var algaeTotalLifespan = 0L
+    var foraminiferaTotalEnergy = 0.0
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
       grid.cells(i)(j) match {
@@ -69,19 +76,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       }
     }
 
-    var foraminiferaCount = 0L
-    var algaeCount = 0L
-    var foraminiferaDeaths = 0L
-    var foraminiferaReproductionsCount = 0L
-    var consumedAlgaeCount = 0L
-    var foraminiferaTotalLifespan = 0L
-    var algaeTotalLifespan = 0L
-    var foraminiferaTotalEnergy = 0.0
-
-    for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-    } {
+    def makeMove(x: Int, y: Int): Unit = {
       grid.cells(x)(y) match {
         case Obstacle =>
           newGrid.cells(x)(y) = Obstacle
@@ -98,51 +93,78 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
           }
         case cell: ForaminiferaCell =>
           if (cell.energy < config.foraminiferaLifeActivityCost) {
-            foraminiferaDeaths += 1
-            foraminiferaTotalLifespan += cell.lifespan
-            newGrid.cells(x)(y) = EmptyCell(cell.smell)
+            killForaminifera(cell, x, y)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
-            newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
-            foraminiferaReproductionsCount += 1
+            reproduceForaminifera(cell, x, y)
           } else {
-            //moving
-            val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-            val destinations =
-              Grid.SubcellCoordinates
-                .map { case (i, j) => cell.smell(i)(j) }
-                .zipWithIndex
-                .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-                .iterator
-                .map { case (_, idx) =>
-                  val (i, j) = neighbourCellCoordinates(idx)
-                  (i, j, grid.cells(i)(j))
-                }
-
-            destinations
-              .collectFirstOpt {
-                case (i, j, destination: AlgaeCell) =>
-                  consumedAlgaeCount += 1
-                  algaeTotalLifespan += destination.lifespan
-                  (i, j, destination)
-                case (i, j, destination: EmptyCell) =>
-                  val effectiveDestination = newGrid.cells(i)(j) match {
-                    case newAlgae: AlgaeCell =>
-                      consumedAlgaeCount += 1
-                      algaeTotalLifespan += newAlgae.lifespan
-                      newAlgae
-                    case _ => destination
-                  }
-                  (i, j, effectiveDestination)
-              } match {
-              case Opt((i, j, destinationCell)) =>
-                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
-                newGrid.cells(x)(y) = EmptyCell(cell.smell)
-              case Opt.Empty =>
-                newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
-            }
+            moveForaminifera(cell, x, y)
           }
       }
+    }
+
+    def killForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+      foraminiferaDeaths += 1
+      foraminiferaTotalLifespan += cell.lifespan
+      newGrid.cells(x)(y) = EmptyCell(cell.smell)
+    }
+
+    def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+      reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
+      newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
+      foraminiferaReproductionsCount += 1
+    }
+
+    def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int): Iterator[(Int, Int, GridPart)] = {
+      val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
+
+      val destinations = Grid.SubcellCoordinates
+        .map { case (i, j) => cell.smell(i)(j) }
+        .zipWithIndex
+        .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
+        .iterator
+        .map { case (_, idx) =>
+          val (i, j) = neighbourCellCoordinates(idx)
+          (i, j, grid.cells(i)(j))
+        }
+      destinations
+    }
+
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, SmellingCell with ForaminiferaAccessible with Product with Serializable)] = {
+      val destinationCell = possibleDestinations
+        .collectFirstOpt {
+          case (i, j, destination: AlgaeCell) =>
+            consumedAlgaeCount += 1
+            algaeTotalLifespan += destination.lifespan
+            (i, j, destination)
+          case (i, j, destination: EmptyCell) =>
+            val effectiveDestination = newGrid.cells(i)(j) match {
+              case newAlgae: AlgaeCell =>
+                consumedAlgaeCount += 1
+                algaeTotalLifespan += newAlgae.lifespan
+                newAlgae
+              case _ => destination
+            }
+            (i, j, effectiveDestination)
+        }
+      destinationCell
+    }
+
+    def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+      val destinations = calculatePossibleDestinations(cell, x, y)
+      selectDestinationCell(destinations) match {
+        case Opt((i, j, destinationCell)) =>
+          newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+          newGrid.cells(x)(y) = EmptyCell(cell.smell)
+        case Opt.Empty =>
+          newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
+      }
+    }
+
+    for {
+      x <- 0 until config.gridSize
+      y <- 0 until config.gridSize
+    } {
+      makeMove(x, y)
       newGrid.cells(x)(y) match {
         case ForaminiferaCell(energy, _, _) =>
           foraminiferaTotalEnergy += energy.value
@@ -156,6 +178,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       }
     }
     grid = newGrid
+
     val metrics = Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
     logMetrics(iteration, metrics)
     metrics
