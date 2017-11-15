@@ -5,6 +5,7 @@ import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.formin.WorkerActor._
+import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
@@ -50,7 +51,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       grid = Grid.empty(bufferZone)
-      this.movesController = new MovesController(bufferZone, logger, id)
+      movesController = new MovesController(bufferZone, logger)
       self ! StartIteration(1)
     case StartIteration(1) =>
       grid = movesController.initializeGrid()

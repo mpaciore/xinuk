@@ -9,8 +9,8 @@ import com.avsystem.commons.SharedExtensions._
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.Metrics
 import pl.edu.agh.formin.WorkerActor._
+import pl.edu.agh.formin.algorithm.Metrics
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._

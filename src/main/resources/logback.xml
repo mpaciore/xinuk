@@ -11,7 +11,7 @@
             <onMatch>NEUTRAL</onMatch>
         </filter>
         <encoder>
-            <pattern>%msg%n</pattern>
+            <pattern>%logger{36}:%msg%n</pattern>
         </encoder>
     </appender>
 

@@ -1,17 +1,18 @@
-package pl.edu.agh.formin
+package pl.edu.agh.formin.algorithm
 
 import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import org.slf4j.Logger
 import pl.edu.agh.formin.WorkerActor.MetricsMarker
+import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
 
-class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger, id: WorkerId)(implicit config: ForminConfig) {
+final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(implicit config: ForminConfig) {
 
   private var grid: Grid = _
 
@@ -185,7 +186,7 @@ class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger, id: Worke
   }
 
   private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
-    logger.info(MetricsMarker, "{}:{};{}", id.value.toString, iteration.toString, metrics)
+    logger.info(MetricsMarker, "{};{}", {iteration.toString; metrics})
   }
 }
 
