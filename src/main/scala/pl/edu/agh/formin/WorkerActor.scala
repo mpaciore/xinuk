@@ -3,9 +3,9 @@ package pl.edu.agh.formin
 import akka.actor.{Actor, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
-import com.avsystem.commons.misc.Opt
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.formin.WorkerActor._
+import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
@@ -30,6 +30,8 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
 
   private var logger: Logger = _
 
+  private var movesController: MovesController = _
+
   override def receive: Receive = stopped
 
   private def propagateSignal(): Unit = {
@@ -41,130 +43,6 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
     }
   }
 
-  /**
-    * @return (foraminiferaCount, algaeCount)
-    */
-  private def makeMoves(iteration: Long): Metrics = {
-    val newGrid = Grid.empty(bufferZone)
-
-    def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
-      grid.cells(i)(j) match {
-        case EmptyCell(_) | BufferCell(EmptyCell(_)) => true
-        case _ => false
-      }
-    }
-
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
-      val emptyCells =
-        Grid.neighbourCellCoordinates(x, y).flatMap {
-          case (i, j) =>
-            grid.cells(i)(j).opt
-              .filter(_ => creator.isDefinedAt(newGrid.cells(i)(j))) //use the same availability criteria on new grid
-              .collect(creator)
-              .map((i, j, _))
-        }
-      if (emptyCells.nonEmpty) {
-        val (newAlgaeX, newAlgaeY, newCell) = emptyCells(random.nextInt(emptyCells.size))
-        newGrid.cells(newAlgaeX)(newAlgaeY) = newCell
-      }
-    }
-
-    var foraminiferaCount = 0L
-    var algaeCount = 0L
-    var foraminiferaDeaths = 0L
-    var foraminiferaReproductionsCount = 0L
-    var consumedAlgaeCount = 0L
-    var foraminiferaTotalLifespan = 0L
-    var algaeTotalLifespan = 0L
-    var foraminiferaTotalEnergy = 0.0
-
-    for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-    } {
-      grid.cells(x)(y) match {
-        case Obstacle =>
-          newGrid.cells(x)(y) = Obstacle
-        case cell@(EmptyCell(_) | BufferCell(_)) =>
-          if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell
-          }
-        case cell: AlgaeCell =>
-          if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae(0) }
-          }
-          if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
-          }
-        case cell: ForaminiferaCell =>
-          if (cell.energy < config.foraminiferaLifeActivityCost) {
-            foraminiferaDeaths += 1
-            foraminiferaTotalLifespan += cell.lifespan
-            newGrid.cells(x)(y) = EmptyCell(cell.smell)
-          } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
-            newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
-            foraminiferaReproductionsCount += 1
-          } else {
-            //moving
-            val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-            val destinations =
-              Grid.SubcellCoordinates
-                .map { case (i, j) => cell.smell(i)(j) }
-                .zipWithIndex
-                .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-                .iterator
-                .map { case (_, idx) =>
-                  val (i, j) = neighbourCellCoordinates(idx)
-                  (i, j, grid.cells(i)(j))
-                }
-
-            destinations
-              .collectFirstOpt {
-                case (i, j, destination: AlgaeCell) =>
-                  consumedAlgaeCount += 1
-                  algaeTotalLifespan += destination.lifespan
-                  (i, j, destination)
-                case (i, j, destination: EmptyCell) =>
-                  val effectiveDestination = newGrid.cells(i)(j) match {
-                    case newAlgae: AlgaeCell =>
-                      consumedAlgaeCount += 1
-                      algaeTotalLifespan += newAlgae.lifespan
-                      newAlgae
-                    case _ => destination
-                  }
-                  (i, j, effectiveDestination)
-              } match {
-              case Opt((i, j, destinationCell)) =>
-                newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
-                newGrid.cells(x)(y) = EmptyCell(cell.smell)
-              case Opt.Empty =>
-                newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
-            }
-          }
-      }
-      newGrid.cells(x)(y) match {
-        case ForaminiferaCell(energy, _, _) =>
-          foraminiferaTotalEnergy += energy.value
-          foraminiferaCount += 1
-        case BufferCell(ForaminiferaCell(energy, _, _)) =>
-          foraminiferaTotalEnergy += energy.value
-          foraminiferaCount += 1
-        case AlgaeCell(_, _) | BufferCell(AlgaeCell(_, _)) =>
-          algaeCount += 1
-        case _ =>
-      }
-    }
-    grid = newGrid
-    val metrics = Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
-    logMetrics(iteration, metrics)
-    metrics
-  }
-
-  private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
-    logger.info(MetricsMarker, "{}:{};{}", id.value.toString, iteration.toString, metrics)
-  }
-
   def stopped: Receive = {
     case NeighboursInitialized(id, neighbours) =>
       this.id = id
@@ -173,31 +51,12 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       grid = Grid.empty(bufferZone)
+      movesController = new MovesController(bufferZone, logger)
       self ! StartIteration(1)
     case StartIteration(1) =>
-      var foraminiferaCount = 0L
-      var algaeCount = 0L
-      for {
-        x <- 0 until config.gridSize
-        y <- 0 until config.gridSize
-        if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
-      } {
-        if (random.nextDouble() < config.spawnChance) {
-          grid.cells(x)(y) =
-            if (random.nextDouble() < config.foraminiferaSpawnChance) {
-              foraminiferaCount += 1
-              EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
-            }
-            else {
-              algaeCount += 1
-              EmptyCell.Instance.withAlgae(0)
-            }
-        }
-      }
+      grid = movesController.initializeGrid()
       propagateSignal()
-      val metrics = Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
-      logMetrics(1, metrics)
-      notifyNeighbours(1, grid, metrics)
+      notifyNeighbours(1, grid)
       unstashAll()
       context.become(started)
     case _: IterationPartFinished =>
@@ -211,8 +70,8 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       finished.remove(i - 1)
       logger.debug(s"$id started $i")
       propagateSignal()
-      val metrics = makeMoves(i)
-      notifyNeighbours(i, grid, metrics)
+      grid = movesController.makeMoves(i, grid)
+      notifyNeighbours(i, grid)
       if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
       val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
@@ -255,7 +114,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
       }
   }
 
-  private def notifyNeighbours(iteration: Long, grid: Grid, metrics: Metrics): Unit = {
+  private def notifyNeighbours(iteration: Long, grid: Grid): Unit = {
     self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
       val bufferArray = ngh.position.bufferZone.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
@@ -297,19 +156,6 @@ object WorkerActor {
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
-  }
-}
-
-final case class Metrics(foraminiferaCount: Long,
-                         algaeCount: Long,
-                         foraminiferaDeaths: Long,
-                         foraminiferaTotalEnergy: Double,
-                         foraminiferaReproductionsCount: Long,
-                         consumedAlgaeCount: Long,
-                         foraminiferaTotalLifespan: Long,
-                         algaeTotalLifespan: Long) {
-  override def toString: String = {
-    s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan;$algaeTotalLifespan"
   }
 }
 
