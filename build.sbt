@@ -33,7 +33,7 @@ inThisBuild(Seq(
   ),
 ))
 
-lazy val formin = project.in(file("formin"))
+lazy val xinuk = project.in(file("xinuk"))
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % Version.Akka,
@@ -41,10 +41,17 @@ lazy val formin = project.in(file("formin"))
       "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
       "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
       "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
-      "ch.qos.logback" % "logback-classic" % Version.Logback,
-      "com.google.guava" % "guava" % Version.Guava,
       "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
       "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
+      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
+      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+    ),
+  )
+
+lazy val formin = project.in(file("formin"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % Version.Logback,
       "com.iheart" %% "ficus" % Version.Ficus,
       "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
       "org.jfree" % "jfreechart" % Version.JFreeChart,
@@ -54,7 +61,7 @@ lazy val formin = project.in(file("formin"))
     mainClass in assembly := Some("pl.edu.agh.formin.Simulation"),
     assemblyJarName in assembly := "formin.jar",
     test in assembly := {},
-  )
+  ).dependsOn(xinuk)
 
 
 
