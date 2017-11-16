@@ -9,6 +9,7 @@ import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
+import pl.edu.agh.xinuk.model.{Cell, Grid}
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable

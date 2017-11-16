@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import pl.edu.agh.formin.WorkerActor.MetricsMarker
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
@@ -30,7 +31,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
         grid.cells(x)(y) =
           if (random.nextDouble() < config.foraminiferaSpawnChance) {
             foraminiferaCount += 1
-            EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+            ForaminiferaAccessible.unapply(EmptyCell.Instance).get(config.foraminiferaStartEnergy, 0)
           }
           else {
             algaeCount += 1
@@ -111,7 +112,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     }
 
     def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
-      reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
+      reproduce(x, y) { case ForaminiferaAccessible(accessible) => accessible(config.foraminiferaStartEnergy, 0) }
       newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
       foraminiferaReproductionsCount += 1
     }
@@ -131,7 +132,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       destinations
     }
 
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, SmellingCell with ForaminiferaAccessible with Product with Serializable)] = {
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, SmellingCell)] = {
       val destinationCell = possibleDestinations
         .collectFirstOpt {
           case (i, j, destination: AlgaeCell) =>
@@ -155,7 +156,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       val destinations = calculatePossibleDestinations(cell, x, y)
       selectDestinationCell(destinations) match {
         case Opt((i, j, destinationCell)) =>
-          newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+          newGrid.cells(i)(j) = ForaminiferaAccessible.unapply(destinationCell).get(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
         case Opt.Empty =>
           newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)

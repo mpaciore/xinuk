@@ -3,8 +3,8 @@ package pl.edu.agh.formin.config
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.readers.ValueReader
-import pl.edu.agh.formin.model.{Energy, Signal}
 import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.model.{Energy, Signal}
 
 import scala.util.Try
 
