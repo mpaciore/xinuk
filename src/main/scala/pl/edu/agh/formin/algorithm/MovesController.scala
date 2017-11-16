@@ -5,7 +5,6 @@ import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import org.slf4j.Logger
 import pl.edu.agh.formin.WorkerActor.MetricsMarker
-import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 
@@ -42,6 +41,38 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     val metrics = Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
     logMetrics(1, metrics)
     grid
+  }
+
+
+  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid : Grid): Iterator[(Int, Int, GridPart)] = {
+    val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
+
+    val destinations = Grid.SubcellCoordinates
+      .map { case (i, j) => cell.smell(i)(j) }
+      .zipWithIndex
+      .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
+      .iterator
+      .map { case (_, idx) =>
+        val (i, j) = neighbourCellCoordinates(idx)
+        (i, j, grid.cells(i)(j))
+      }
+    destinations
+  }
+
+  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid : Grid): commons.Opt[(Int, Int, SmellingCell with ForaminiferaAccessible with Product with Serializable)] = {
+    val destinationCell = possibleDestinations
+      .collectFirstOpt {
+        case (i, j, destination: AlgaeCell) =>
+          (i, j, destination)
+        case (i, j, destination: EmptyCell) =>
+          val effectiveDestination = newGrid.cells(i)(j) match {
+            case newAlgae: AlgaeCell =>
+              newAlgae
+            case _ => destination
+          }
+          (i, j, effectiveDestination)
+      }
+    destinationCell
   }
 
   def makeMoves(iteration: Long, grid: Grid): Grid = {
@@ -117,45 +148,16 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       foraminiferaReproductionsCount += 1
     }
 
-    def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int): Iterator[(Int, Int, GridPart)] = {
-      val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-
-      val destinations = Grid.SubcellCoordinates
-        .map { case (i, j) => cell.smell(i)(j) }
-        .zipWithIndex
-        .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-        .iterator
-        .map { case (_, idx) =>
-          val (i, j) = neighbourCellCoordinates(idx)
-          (i, j, grid.cells(i)(j))
-        }
-      destinations
-    }
-
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, SmellingCell with ForaminiferaAccessible with Product with Serializable)] = {
-      val destinationCell = possibleDestinations
-        .collectFirstOpt {
-          case (i, j, destination: AlgaeCell) =>
-            consumedAlgaeCount += 1
-            algaeTotalLifespan += destination.lifespan
-            (i, j, destination)
-          case (i, j, destination: EmptyCell) =>
-            val effectiveDestination = newGrid.cells(i)(j) match {
-              case newAlgae: AlgaeCell =>
-                consumedAlgaeCount += 1
-                algaeTotalLifespan += newAlgae.lifespan
-                newAlgae
-              case _ => destination
-            }
-            (i, j, effectiveDestination)
-        }
-      destinationCell
-    }
-
     def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
-      val destinations = calculatePossibleDestinations(cell, x, y)
-      selectDestinationCell(destinations) match {
+      val destinations = calculatePossibleDestinations(cell, x, y, grid)
+      selectDestinationCell(destinations, newGrid) match {
         case Opt((i, j, destinationCell)) =>
+          destinationCell match {
+            case AlgaeCell(_, lifespan) =>
+              consumedAlgaeCount += 1
+              algaeTotalLifespan += lifespan
+            case _ =>
+          }
           newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
         case Opt.Empty =>
