@@ -1,4 +1,5 @@
 package pl.edu.agh.formin
+import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import org.slf4j.LoggerFactory
 import pl.edu.agh.formin.algorithm.MovesController
@@ -53,4 +54,53 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     y shouldBe 1
     destination shouldBe grid.cells(1)(1)
   }
+
+  "A selectDestinationCell method" should "return right destination cell for first one correct" in {
+    val movesController = new MovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val cell1 = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(2)(2) = cell1
+    grid.cells(3)(2) = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(2)(3) = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+
+    grid.cells(2)(2).smell(0)(0) = Signal(20)
+    grid.cells(2)(2).smell(0)(2) = Signal(15)
+    grid.cells(2)(2).smell(1)(0) = Signal(-5)
+    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+
+    val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
+    val destination = movesController.selectDestinationCell(destinations,grid)
+
+    destination match {
+      case Opt((i, j, destinationCell)) =>
+        i shouldBe 1
+        j shouldBe 1
+        destinationCell shouldBe grid.cells(1)(1)
+      case Opt.Empty =>
+    }
+  }
+
+  it should "return right destination cell for not first one correct" in {
+    val movesController = new MovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val cell1 = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(2)(2) = cell1
+    grid.cells(3)(2) = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(2)(3) = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+
+    grid.cells(2)(2).smell(0)(0) = Signal(4)
+    grid.cells(2)(2).smell(0)(2) = Signal(15)
+    grid.cells(2)(2).smell(1)(0) = Signal(-5)
+    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+
+    val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
+    val destination = movesController.selectDestinationCell(destinations,grid)
+
+    destination match {
+      case Opt((i, j, destinationCell)) =>
+        i shouldBe 1
+        j shouldBe 3
+        destinationCell shouldBe grid.cells(3)(1)
+      case Opt.Empty =>
+    }
+  }
+
 }
