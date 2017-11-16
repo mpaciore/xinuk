@@ -1,5 +1,6 @@
 package pl.edu.agh.formin
 
+import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.parallel.NeighbourPosition
@@ -22,7 +23,7 @@ class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     algaeInitialSignal = Signal(1),
     guiType = GuiType.None,
     guiCellSize = 4,
-    workersRoot = 1,
+    workersRoot = 3,
     iterationsNumber = 1000,
     isSupervisor = true
   )
@@ -53,5 +54,25 @@ class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     affectedCells(3)._2 shouldBe 1
     affectedCells(4)._1 shouldBe 4
     affectedCells(4)._2 shouldBe 1
+  }
+
+  "An neighbourId method" should "return correct neighbour id for TOP one" in {
+    val topNeighourId = NeighbourPosition.Top.neighbourId(WorkerId(5))
+    topNeighourId shouldBe Opt(WorkerId(2))
+  }
+
+  it should "return correct neighbour id for LEFT one" in {
+    val topNeighourId = NeighbourPosition.Left.neighbourId(WorkerId(5))
+    topNeighourId shouldBe Opt(WorkerId(4))
+  }
+
+  it should "return correct neighbour id for TOP LEFT one" in {
+    val topNeighourId = NeighbourPosition.TopLeft.neighbourId(WorkerId(5))
+    topNeighourId shouldBe Opt(WorkerId(1))
+  }
+
+  it should "return correct neighbour id for BOTTOM RIGHT one" in {
+    val topNeighourId = NeighbourPosition.BottomRight.neighbourId(WorkerId(5))
+    topNeighourId shouldBe Opt(WorkerId(9))
   }
 }

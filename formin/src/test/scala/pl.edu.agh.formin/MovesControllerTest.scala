@@ -70,13 +70,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)
 
-    destination match {
-      case Opt((i, j, destinationCell)) =>
-        i shouldBe 1
-        j shouldBe 1
-        destinationCell shouldBe grid.cells(1)(1)
-      case Opt.Empty =>
-    }
+    destination shouldBe Opt((1, 1, grid.cells(1)(1)))
   }
 
   it should "return right destination cell for not first one correct" in {
@@ -94,13 +88,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)
 
-    destination match {
-      case Opt((i, j, destinationCell)) =>
-        i shouldBe 1
-        j shouldBe 3
-        destinationCell shouldBe grid.cells(3)(1)
-      case Opt.Empty =>
-    }
+    destination shouldBe Opt((1, 3, grid.cells(3)(1)))
   }
 
 }
