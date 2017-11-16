@@ -5,7 +5,6 @@ import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import org.slf4j.Logger
 import pl.edu.agh.formin.WorkerActor.MetricsMarker
-import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 

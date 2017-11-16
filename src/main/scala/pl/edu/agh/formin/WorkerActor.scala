@@ -12,15 +12,12 @@ import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
-import scala.util.Random
 
 class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
 
   private var id: WorkerId = _
 
   private var grid: Grid = _
-
-  private val random = new Random(System.nanoTime())
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 

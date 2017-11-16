@@ -3,7 +3,7 @@ organization := "pl.edu.agh"
 
 version := "1.0"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.12.4"
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
@@ -21,49 +21,39 @@ scalacOptions ++= Seq(
 cancelable in Global := true
 
 lazy val Version = new {
-  lazy val Akka = "2.5.1"
+  lazy val Akka = "2.5.6"
+  lazy val AkkaKryo = "0.5.2"
   lazy val Logback = "1.2.3"
-  lazy val Guava = "21.0"
-  lazy val AvsCommons = "1.20.4"
-  lazy val ScalaTest = "3.0.3"
+  lazy val Guava = "23.0"
+  lazy val AvsCommons = "1.24.0"
+  lazy val ScalaTest = "3.0.4"
   lazy val ScalaLogging = "3.5.0"
-  lazy val Ficus = "1.4.0"
-  lazy val ScalaSwing = "2.0.0"
+  lazy val Ficus = "1.4.3"
+  lazy val ScalaSwing = "2.0.1"
   lazy val JFreeChart = "1.0.19"
-  lazy val Janino = "2.6.1"
 }
 
-dependencyOverrides ++= Set(
+/*dependencyOverrides ++= Set(
   "com.google.guava" % "guava" % Version.Guava
-)
+)*/
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % Version.Akka,
   "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
   "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
   "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
-  "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.0",
+  "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
   "ch.qos.logback" % "logback-classic" % Version.Logback,
-  "org.codehaus.janino" % "janino" % Version.Janino,
   "com.google.guava" % "guava" % Version.Guava,
   "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
   "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
   "com.iheart" %% "ficus" % Version.Ficus,
+  "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+  "org.jfree" % "jfreechart" % Version.JFreeChart,
   "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
   "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
-  "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
-  "org.jfree" % "jfreechart" % Version.JFreeChart
 )
 
 mainClass in assembly := Some("pl.edu.agh.formin.Simulation")
 assemblyJarName in assembly := "formin.jar"
 test in assembly := {}
-
-/*
-assemblyMergeStrategy in assembly := {
-  case "application.conf" => MergeStrategy.concat
-  case "reference.conf" => MergeStrategy.concat
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}*/
