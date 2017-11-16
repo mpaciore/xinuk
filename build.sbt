@@ -1,69 +1,69 @@
-name := "formin"
-organization := "pl.edu.agh"
-
-version := "1.0"
-
-scalaVersion := "2.11.11"
-scalacOptions ++= Seq(
-  "-feature",
-  "-deprecation",
-  "-unchecked",
-  "-language:implicitConversions",
-  "-language:existentials",
-  "-language:dynamics",
-  "-language:experimental.macros",
-  "-language:higherKinds",
-  "-Xfuture",
-  "-Xfatal-warnings",
-  "-Xlint:_,-missing-interpolator,-adapted-args"
-)
-
 cancelable in Global := true
 
-lazy val Version = new {
-  lazy val Akka = "2.5.1"
-  lazy val Logback = "1.2.3"
-  lazy val Guava = "21.0"
-  lazy val AvsCommons = "1.20.4"
-  lazy val ScalaTest = "3.0.3"
-  lazy val ScalaLogging = "3.5.0"
-  lazy val Ficus = "1.4.0"
-  lazy val ScalaSwing = "2.0.0"
-  lazy val JFreeChart = "1.0.19"
-  lazy val Janino = "2.6.1"
+val Version = new {
+  val Akka = "2.5.6"
+  val AkkaKryo = "0.5.2"
+  val Logback = "1.2.3"
+  val Guava = "23.0"
+  val AvsCommons = "1.24.0"
+  val ScalaTest = "3.0.4"
+  val ScalaLogging = "3.5.0"
+  val Ficus = "1.4.3"
+  val ScalaSwing = "2.0.1"
+  val JFreeChart = "1.0.19"
 }
 
-dependencyOverrides ++= Set(
-  "com.google.guava" % "guava" % Version.Guava
-)
+inThisBuild(Seq(
+  organization := "pl.edu.agh",
+  version := "1.1-SNAPSHOT",
+  scalaVersion := "2.12.4",
+  scalacOptions ++= Seq(
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-language:implicitConversions",
+    "-language:existentials",
+    "-language:dynamics",
+    "-language:experimental.macros",
+    "-language:higherKinds",
+    "-Xfuture",
+    "-Xfatal-warnings",
+    "-Xlint:_,-missing-interpolator,-adapted-args"
+  ),
+))
 
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % Version.Akka,
-  "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
-  "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
-  "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
-  "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.0",
-  "ch.qos.logback" % "logback-classic" % Version.Logback,
-  "org.codehaus.janino" % "janino" % Version.Janino,
-  "com.google.guava" % "guava" % Version.Guava,
-  "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
-  "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
-  "com.iheart" %% "ficus" % Version.Ficus,
-  "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
-  "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
-  "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
-  "org.jfree" % "jfreechart" % Version.JFreeChart
-)
+lazy val xinuk = project.in(file("."))
+  .aggregate(`xinuk-core`, formin)
+  .disablePlugins(AssemblyPlugin)
 
-mainClass in assembly := Some("pl.edu.agh.formin.Simulation")
-assemblyJarName in assembly := "formin.jar"
-test in assembly := {}
+lazy val `xinuk-core` = project
+  .settings(
+    name := "xinuk-core",
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor" % Version.Akka,
+      "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
+      "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
+      "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
+      "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
+      "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
+      "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
+      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
+      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+    ),
+  ).disablePlugins(AssemblyPlugin)
 
-/*
-assemblyMergeStrategy in assembly := {
-  case "application.conf" => MergeStrategy.concat
-  case "reference.conf" => MergeStrategy.concat
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}*/
+lazy val formin = project
+  .settings(
+    name := "formin",
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % Version.Logback,
+      "com.iheart" %% "ficus" % Version.Ficus,
+      "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+      "org.jfree" % "jfreechart" % Version.JFreeChart,
+      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
+      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+    ),
+    mainClass in assembly := Some("pl.edu.agh.formin.Simulation"),
+    assemblyJarName in assembly := "formin.jar",
+    test in assembly := {},
+  ).dependsOn(`xinuk-core`)
