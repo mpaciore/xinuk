@@ -1,5 +1,4 @@
 package pl.edu.agh.formin
-import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import org.slf4j.LoggerFactory
 import pl.edu.agh.formin.algorithm.MovesController
@@ -37,7 +36,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
   }
 
   "A calculatePossibleDestinations method" should "return correct possible destination cells" in {
-    var movesController = new MovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val movesController = new MovesController(TreeSet.empty, LoggerFactory.getLogger(""))
     val cell1 = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(2) = cell1
     grid.cells(3)(2) = EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
