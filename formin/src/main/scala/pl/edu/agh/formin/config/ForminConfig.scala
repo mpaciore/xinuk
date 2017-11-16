@@ -4,6 +4,7 @@ import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.formin.model.{Energy, Signal}
+import pl.edu.agh.xinuk.config.XinukConfig
 
 import scala.util.Try
 
@@ -24,27 +25,27 @@ FSSV - foraminifera start signal value; FSSV ∈ [0,1] && FSSV ∈ R.
 ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
  */
 
-final case class ForminConfig private(
-                                       foraminiferaStartEnergy: Energy,
-                                       foraminiferaReproductionCost: Energy,
-                                       foraminiferaReproductionThreshold: Energy,
-                                       foraminiferaLifeActivityCost: Energy,
-                                       algaeReproductionFrequency: Int,
-                                       algaeEnergeticCapacity: Energy,
-                                       signalSpeedRatio: Int,
-                                       //diffractionFactor: Double,
-                                       signalSuppressionFactor: Double,
-                                       gridSize: Int,
-                                       spawnChance: Double,
-                                       foraminiferaSpawnChance: Double,
-                                       foraminiferaInitialSignal: Signal,
-                                       algaeInitialSignal: Signal,
-                                       guiType: GuiType,
-                                       guiCellSize: Int,
-                                       workersRoot: Int,
-                                       iterationsNumber: Long,
-                                       isSupervisor: Boolean
-                 )
+final case class ForminConfig(
+                               foraminiferaStartEnergy: Energy,
+                               foraminiferaReproductionCost: Energy,
+                               foraminiferaReproductionThreshold: Energy,
+                               foraminiferaLifeActivityCost: Energy,
+                               algaeReproductionFrequency: Int,
+                               algaeEnergeticCapacity: Energy,
+                               signalSpeedRatio: Int,
+                               //diffractionFactor: Double,
+                               signalSuppressionFactor: Double,
+                               gridSize: Int,
+                               spawnChance: Double,
+                               foraminiferaSpawnChance: Double,
+                               foraminiferaInitialSignal: Signal,
+                               algaeInitialSignal: Signal,
+                               guiType: GuiType,
+                               guiCellSize: Int,
+                               workersRoot: Int,
+                               iterationsNumber: Long,
+                               isSupervisor: Boolean,
+                             ) extends XinukConfig
 
 object ForminConfig {
 

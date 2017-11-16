@@ -20,6 +20,7 @@ object DefaultConflictResolver extends ConflictResolver {
       case (AlgaeCell(currentSmell, lifespan), AlgaeCell(incomingSmell, incominglifespan)) => AlgaeCell(currentSmell + incomingSmell, math.max(lifespan, incominglifespan))
       case (ForaminiferaCell(currentEnergy, currentSmell, lifespan), ForaminiferaCell(incomingEnergy, incomingSmell, incominglifespan)) => ForaminiferaCell(currentEnergy + incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incominglifespan))
       case (Obstacle, _) => Obstacle
+      case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }
   }
 }
