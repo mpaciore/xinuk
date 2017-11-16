@@ -14,7 +14,6 @@ val Version = new {
 }
 
 inThisBuild(Seq(
-  name := "formin",
   organization := "pl.edu.agh",
   version := "1.1-SNAPSHOT",
   scalaVersion := "2.12.4",
@@ -33,8 +32,13 @@ inThisBuild(Seq(
   ),
 ))
 
-lazy val xinuk = project.in(file("xinuk"))
+lazy val xinuk = project.in(file("."))
+  .aggregate(`xinuk-core`, formin)
+  .disablePlugins(AssemblyPlugin)
+
+lazy val `xinuk-core` = project
   .settings(
+    name := "xinuk-core",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % Version.Akka,
       "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
@@ -46,10 +50,11 @@ lazy val xinuk = project.in(file("xinuk"))
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
     ),
-  )
+  ).disablePlugins(AssemblyPlugin)
 
-lazy val formin = project.in(file("formin"))
+lazy val formin = project
   .settings(
+    name := "formin",
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % Version.Logback,
       "com.iheart" %% "ficus" % Version.Ficus,
@@ -61,7 +66,4 @@ lazy val formin = project.in(file("formin"))
     mainClass in assembly := Some("pl.edu.agh.formin.Simulation"),
     assemblyJarName in assembly := "formin.jar",
     test in assembly := {},
-  ).dependsOn(xinuk)
-
-
-
+  ).dependsOn(`xinuk-core`)
