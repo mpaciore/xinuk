@@ -75,4 +75,32 @@ class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     val topNeighourId = NeighbourPosition.BottomRight.neighbourId(WorkerId(5))
     topNeighourId shouldBe Opt(WorkerId(9))
   }
+
+  "A bufferZone method" should "return correct buffer zone for TOP one" in {
+    val topBufferZone = NeighbourPosition.Top.bufferZone(config).toVector
+    topBufferZone(0)._1 shouldBe 0
+    topBufferZone(0)._2 shouldBe 0
+    topBufferZone(4)._1 shouldBe 0
+    topBufferZone(4)._2 shouldBe 4
+  }
+
+  it should "return correct buffer zone for LEFT one" in {
+    val leftBufferZone = NeighbourPosition.Left.bufferZone(config).toVector
+    leftBufferZone(0)._1 shouldBe 0
+    leftBufferZone(0)._2 shouldBe 0
+    leftBufferZone(4)._1 shouldBe 4
+    leftBufferZone(4)._2 shouldBe 0
+  }
+
+  it should "return correct buffer zone for TOP LEFT one" in {
+    val topLeftBufferZone = NeighbourPosition.TopLeft.bufferZone(config).toVector
+    topLeftBufferZone(0)._1 shouldBe 0
+    topLeftBufferZone(0)._2 shouldBe 0
+  }
+
+  it should "return correct buffer zone for BOTTOM RIGHT one" in {
+    val bottomRightBufferZone = NeighbourPosition.BottomRight.bufferZone(config).toVector
+    bottomRightBufferZone(0)._1 shouldBe 4
+    bottomRightBufferZone(0)._2 shouldBe 4
+  }
 }
