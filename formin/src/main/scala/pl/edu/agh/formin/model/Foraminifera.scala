@@ -4,6 +4,12 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model._
 
+final case class ForaminiferaCell(energy: Energy, smell: SmellArray, lifespan: Long) extends SmellingCell {
+  override type Self = ForaminiferaCell
+
+  override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
+}
+
 
 sealed trait ForaminiferaAccessible {
   def withForaminifera(energy: Energy, lifespan: Long): GridPart
@@ -26,36 +32,4 @@ object ForaminiferaAccessible {
     )
     case _ => None
   }
-}
-
-sealed trait AlgaeAccessible {
-  def withAlgae(lifespan: Long): GridPart
-}
-
-object AlgaeAccessible {
-  private def accessibleFactory(f: Long => GridPart): Some[AlgaeAccessible] = Some(new AlgaeAccessible {
-    override def withAlgae(lifespan: Long): GridPart = f(lifespan)
-  })
-
-  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible] = arg match {
-    case cell@EmptyCell(_) => accessibleFactory(lifespan =>
-      AlgaeCell(cell.smellWith(config.algaeInitialSignal), lifespan)
-    )
-    case cell@BufferCell(_) => accessibleFactory(lifespan =>
-      BufferCell(AlgaeCell(cell.smellWith(config.algaeInitialSignal), lifespan))
-    )
-    case _ => None
-  }
-}
-
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray, lifespan : Long) extends SmellingCell {
-  override type Self = ForaminiferaCell
-
-  override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
-}
-
-final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCell {
-  override type Self = AlgaeCell
-
-  override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 }
