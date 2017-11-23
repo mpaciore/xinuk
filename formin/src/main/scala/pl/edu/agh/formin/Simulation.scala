@@ -60,7 +60,7 @@ object Simulation extends LazyLogging {
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))
         }(collection.breakOut)
-        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours)
+        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours, WorkerRegionRef)
       }
     }
   }

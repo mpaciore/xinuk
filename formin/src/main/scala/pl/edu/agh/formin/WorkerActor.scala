@@ -1,6 +1,6 @@
 package pl.edu.agh.formin
 
-import akka.actor.{Actor, Props, Stash}
+import akka.actor.{Actor, ActorRef, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
@@ -16,6 +16,8 @@ import scala.collection.mutable
 class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
 
   private var id: WorkerId = _
+
+  private var regionRef: ActorRef = _
 
   private var grid: Grid = _
 
@@ -41,7 +43,8 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
   }
 
   def stopped: Receive = {
-    case NeighboursInitialized(id, neighbours) =>
+    case NeighboursInitialized(id, neighbours, regionRef) =>
+      this.regionRef = regionRef
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
@@ -115,7 +118,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
     self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
       val bufferArray = ngh.position.bufferZone.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
-      Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
+      regionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
     }
   }
 }
@@ -128,7 +131,7 @@ object WorkerActor {
 
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
-  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour])
+  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour], regionRef: ActorRef)
 
   final case class StartIteration private(i: Long) extends AnyVal
 
@@ -144,12 +147,12 @@ object WorkerActor {
   private def idToShard(id: WorkerId): String = (id.value % 144).toString
 
   def extractShardId: ExtractShardId = {
-    case NeighboursInitialized(id, _) => idToShard(id)
+    case NeighboursInitialized(id, _, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
-    case msg@NeighboursInitialized(id, _) =>
+    case msg@NeighboursInitialized(id, _, _) =>
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
