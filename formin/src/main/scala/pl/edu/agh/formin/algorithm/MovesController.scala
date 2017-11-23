@@ -35,7 +35,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
           }
           else {
             algaeCount += 1
-            AlgaeAccessible.unapply(EmptyCell.Instance).get.withAlgae(0)
+            AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
           }
       }
     }

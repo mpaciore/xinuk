@@ -11,22 +11,20 @@ final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCe
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 }
 
-sealed trait AlgaeAccessible {
-  def withAlgae(lifespan: Long): GridPart
+trait AlgaeAccessible[+T] {
+  def withAlgae(lifespan: Long): T
 }
-
 object AlgaeAccessible {
-  private def accessibleFactory(f: Long => GridPart): Some[AlgaeAccessible] = Some(new AlgaeAccessible {
-    override def withAlgae(lifespan: Long): GridPart = f(lifespan)
-  })
 
-  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible] = arg match {
-    case cell@EmptyCell(_) => accessibleFactory(lifespan =>
-      AlgaeCell(cell.smellWith(config.algaeInitialSignal), lifespan)
-    )
-    case cell@BufferCell(_) => accessibleFactory(lifespan =>
-      BufferCell(AlgaeCell(cell.smellWith(config.algaeInitialSignal), lifespan))
-    )
+  def unapply(arg: EmptyCell)(implicit config: ForminConfig): AlgaeAccessible[AlgaeCell] =
+    lifespan => AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan)
+
+  def unapply(arg: BufferCell)(implicit config: ForminConfig): AlgaeAccessible[BufferCell] =
+    lifespan => BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan))
+
+  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible[GridPart]] = arg match {
+    case cell@EmptyCell(_) => Some(unapply(cell))
+    case cell@BufferCell(_) => Some(unapply(cell))
     case _ => None
   }
 }
