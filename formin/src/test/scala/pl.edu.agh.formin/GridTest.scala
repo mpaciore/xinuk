@@ -55,7 +55,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   }
 
   it should "propagate signal correctly for one foraminifera cell" in {
-    grid.cells(2)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(2)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(3)(2) = grid.propagatedSignal(3, 2)
     grid.cells(3)(1) = grid.propagatedSignal(3, 1)
 
@@ -84,7 +84,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "propagate signal correctly between algae and foraminifera cells" in {
     grid.cells(2)(2) = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
-    grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val gridCellWithAlgaeAfterSignalPropagation = grid.propagatedSignal(2, 2)
     val gridCellWithForaminiferaAfterSignalPropagation = grid.propagatedSignal(3, 2)
     grid.cells(2)(2) = gridCellWithAlgaeAfterSignalPropagation
@@ -106,7 +106,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   }
 
   it should "not propagate signal on obstacle cell" in {
-    grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+    grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(4)(2) = grid.propagatedSignal(4, 2)
     grid.cells(3)(2).smell(1)(1).value shouldBe -1
     grid.cells(4)(2).smell(0)(1).value shouldBe 0
@@ -129,12 +129,12 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   it should "make correct cell transformations from empty cell" in {
     val emptyCell: EmptyCell = EmptyCell.Instance
     val emptyCellWithForaminiferaInstantiated: GridPart =
-      ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+      ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val emptyCellWithSmell: EmptyCell =
       emptyCell.withSmell(emptyCellWithForaminiferaInstantiated.smell)
     val emptyCellWithForaminifera: ForaminiferaCell =
-      ForaminiferaAccessible.unapply(emptyCell).get.withForaminifera(Energy(20), 3).asInstanceOf[ForaminiferaCell]
+      ForaminiferaAccessible.unapply(emptyCell).withForaminifera(Energy(20), 3)
     val emptyCellWithAlgae: AlgaeCell = AlgaeAccessible.unapply(emptyCell).withAlgae(6)
 
     emptyCellWithSmell.smell shouldBe emptyCellWithForaminiferaInstantiated.smell
@@ -149,7 +149,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "make correct cell transformations from foraminifera cell" in {
     val foraminiferaCell: ForaminiferaCell =
-      ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0).asInstanceOf[ForaminiferaCell]
+      ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val foraminiferaCellWithSmell: ForaminiferaCell =
       foraminiferaCell.withSmell(emptyCellWithAlgaeInstantiated.smell)
@@ -162,12 +162,12 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   it should "make correct cell transformations from algae cell" in {
     val algaeCell: AlgaeCell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val emptyCellWithForaminiferaInstantiated: GridPart =
-      ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+      ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val emptyCell: EmptyCell = EmptyCell.Instance
     val algaeCellWithSmell: AlgaeCell =
       algaeCell.withSmell(emptyCellWithForaminiferaInstantiated.smell)
     val algaeCellWithForaminifera: ForaminiferaCell =
-      ForaminiferaAccessible.unapply(algaeCell).get.withForaminifera(Energy(20), 3).asInstanceOf[ForaminiferaCell]
+      ForaminiferaAccessible.unapply(algaeCell).withForaminifera(Energy(20), 3)
 
     algaeCellWithSmell.smell shouldBe emptyCellWithForaminiferaInstantiated.smell
     algaeCellWithSmell.lifespan shouldBe 0

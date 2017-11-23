@@ -31,7 +31,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
         grid.cells(x)(y) =
           if (random.nextDouble() < config.foraminiferaSpawnChance) {
             foraminiferaCount += 1
-            ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
+            ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
           }
           else {
             algaeCount += 1

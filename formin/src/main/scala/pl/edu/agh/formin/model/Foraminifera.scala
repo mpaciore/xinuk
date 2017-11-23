@@ -10,26 +10,28 @@ final case class ForaminiferaCell(energy: Energy, smell: SmellArray, lifespan: L
   override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
 }
 
-
-sealed trait ForaminiferaAccessible {
-  def withForaminifera(energy: Energy, lifespan: Long): GridPart
+trait ForaminiferaAccessible[+T <: GridPart] {
+  def withForaminifera(energy: Energy, lifespan: Long): T
 }
 
 object ForaminiferaAccessible {
-  private def accessibleFactory(f: (Energy, Long) => GridPart): Some[ForaminiferaAccessible] = Some(new ForaminiferaAccessible {
-    override def withForaminifera(energy: Energy, lifespan: Long): GridPart = f(energy, lifespan)
-  })
+  def unapply(arg: AlgaeCell)(implicit config: ForminConfig): ForaminiferaAccessible[ForaminiferaCell] =
+    (energy, lifespan) =>
+      ForaminiferaCell(energy + config.algaeEnergeticCapacity, arg.smellWith(config.foraminiferaInitialSignal), lifespan)
 
-  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[ForaminiferaAccessible] = arg match {
-    case cell@AlgaeCell(_, _) => accessibleFactory((energy, lifespan) =>
-      ForaminiferaCell(energy + config.algaeEnergeticCapacity, cell.smellWith(config.foraminiferaInitialSignal), lifespan)
-    )
-    case cell@EmptyCell(_) => accessibleFactory((energy, lifespan) =>
-      ForaminiferaCell(energy, cell.smellWith(config.foraminiferaInitialSignal), lifespan)
-    )
-    case cell@BufferCell(_) => accessibleFactory((energy, lifespan) =>
-      BufferCell(ForaminiferaCell(energy, cell.smellWith(config.foraminiferaInitialSignal), lifespan))
-    )
+  def unapply(arg: EmptyCell)(implicit config: ForminConfig): ForaminiferaAccessible[ForaminiferaCell] =
+    (energy, lifespan) =>
+      ForaminiferaCell(energy, arg.smellWith(config.foraminiferaInitialSignal), lifespan)
+
+  def unapply(arg: BufferCell)(implicit config: ForminConfig): ForaminiferaAccessible[BufferCell] =
+    (energy, lifespan) =>
+      BufferCell(ForaminiferaCell(energy, arg.smellWith(config.foraminiferaInitialSignal), lifespan))
+
+
+  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[ForaminiferaAccessible[GridPart]] = arg match {
+    case cell: AlgaeCell => Some(unapply(cell))
+    case cell: EmptyCell => Some(unapply(cell))
+    case cell: BufferCell => Some(unapply(cell))
     case _ => None
   }
 }

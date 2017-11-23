@@ -11,7 +11,7 @@ final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCe
   override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
 }
 
-trait AlgaeAccessible[+T] {
+trait AlgaeAccessible[+T <: GridPart] {
   def withAlgae(lifespan: Long): T
 }
 object AlgaeAccessible {
@@ -23,8 +23,8 @@ object AlgaeAccessible {
     lifespan => BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan))
 
   def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible[GridPart]] = arg match {
-    case cell@EmptyCell(_) => Some(unapply(cell))
-    case cell@BufferCell(_) => Some(unapply(cell))
+    case cell: EmptyCell => Some(unapply(cell))
+    case cell: BufferCell => Some(unapply(cell))
     case _ => None
   }
 }
