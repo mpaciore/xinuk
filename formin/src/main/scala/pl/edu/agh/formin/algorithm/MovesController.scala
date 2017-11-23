@@ -31,11 +31,11 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
         grid.cells(x)(y) =
           if (random.nextDouble() < config.foraminiferaSpawnChance) {
             foraminiferaCount += 1
-            ForaminiferaAccessible.unapply(EmptyCell.Instance).get(config.foraminiferaStartEnergy, 0)
+            ForaminiferaAccessible.unapply(EmptyCell.Instance).get.withForaminifera(config.foraminiferaStartEnergy, 0)
           }
           else {
             algaeCount += 1
-            EmptyCell.Instance.withAlgae(0)
+            AlgaeAccessible.unapply(EmptyCell.Instance).get.withAlgae(0)
           }
       }
     }
@@ -89,7 +89,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae(0) }
+            reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
@@ -112,7 +112,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     }
 
     def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
-      reproduce(x, y) { case ForaminiferaAccessible(accessible) => accessible(config.foraminiferaStartEnergy, 0) }
+      reproduce(x, y) { case ForaminiferaAccessible(accessible) => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
       newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
       foraminiferaReproductionsCount += 1
     }
@@ -156,7 +156,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       val destinations = calculatePossibleDestinations(cell, x, y)
       selectDestinationCell(destinations) match {
         case Opt((i, j, destinationCell)) =>
-          newGrid.cells(i)(j) = ForaminiferaAccessible.unapply(destinationCell).get(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+          newGrid.cells(i)(j) = ForaminiferaAccessible.unapply(destinationCell).get.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
         case Opt.Empty =>
           newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)

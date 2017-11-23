@@ -122,3 +122,24 @@ object Cell {
 case object Obstacle extends Cell {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
+
+final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPart {
+
+  override type Self = BufferCell
+
+  override def smell: SmellArray = cell.smell
+
+  override def withSmell(smell: SmellArray): BufferCell = {
+    BufferCell(cell.withSmell(smell))
+  }
+}
+
+final case class EmptyCell(smell: SmellArray) extends SmellingCell {
+  override type Self = EmptyCell
+
+  override def withSmell(smell: SmellArray): EmptyCell = copy(smell)
+}
+
+object EmptyCell {
+  final val Instance: EmptyCell = EmptyCell(Cell.emptySignal)
+}
