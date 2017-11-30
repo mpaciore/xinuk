@@ -1,5 +1,6 @@
 package pl.edu.agh.formin
 //import com.avsystem.commons.misc.Opt
+import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import org.slf4j.LoggerFactory
 import pl.edu.agh.formin.algorithm.MovesController
@@ -56,7 +57,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     destination shouldBe grid.cells(1)(1)
   }
 
-/*  "A selectDestinationCell method" should "return right destination cell for first one correct" in {
+  "A selectDestinationCell method" should "return right destination cell for first one correct" in {
     val movesController = new MovesController(TreeSet.empty, LoggerFactory.getLogger(""))
     val cell1 = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(2) = cell1
@@ -90,6 +91,6 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     val destination = movesController.selectDestinationCell(destinations,grid)
 
     destination shouldBe Opt((1, 3, grid.cells(3)(1)))
-  }*/
+  }
 
 }

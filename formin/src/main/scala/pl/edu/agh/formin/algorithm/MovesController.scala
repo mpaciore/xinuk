@@ -60,23 +60,19 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     destinations
   }
 
-  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid : Grid): (commons.Opt[(Int, Int, ForaminiferaAccessible[GridPart])], GridPart) = {
-    var returnDestination : GridPart = newGrid.cells(0)(0)
-    val destinationCell = possibleDestinations
+  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid : Grid): commons.Opt[(Int, Int, GridPart)] = {
+    possibleDestinations
       .collectFirstOpt {
         case (i, j, destination: AlgaeCell) =>
-          returnDestination = destination
-          (i, j, ForaminiferaAccessible.unapply(destination))
+          (i, j, destination)
         case (i, j, destination: EmptyCell) =>
-          returnDestination = destination
           val effectiveDestination = newGrid.cells(i)(j) match {
             case newAlgae: AlgaeCell =>
-              ForaminiferaAccessible.unapply(newAlgae)
-            case _ => ForaminiferaAccessible.unapply(destination)
+              newAlgae
+            case _ => destination
           }
           (i, j, effectiveDestination)
       }
-    (destinationCell, returnDestination)
   }
 
   def makeMoves(iteration: Long, grid: Grid): Grid = {
@@ -154,17 +150,20 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
 
     def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
       val destinations = calculatePossibleDestinations(cell, x, y, grid)
-      selectDestinationCell(destinations, newGrid) match {
-        case (Opt((i, j, destinationCell)), destination) =>
-          destination match {
-            case AlgaeCell(_, lifespan) =>
-              consumedAlgaeCount += 1
-              algaeTotalLifespan += lifespan
-            case _ =>
-          }
-          newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+      val destination = selectDestinationCell(destinations, newGrid)
+      destination match {
+        case Opt((_, _, AlgaeCell(_, lifespan))) =>
+          consumedAlgaeCount += 1
+          algaeTotalLifespan += lifespan
+        case _ =>
+      }
+      destination match {
+        case Opt((i, j, ForaminiferaAccessible(destination))) =>
+          newGrid.cells(i)(j) = destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
-        case (Opt.Empty, _) =>
+        case Opt((i, j, inaccessibleDestination)) =>
+          throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
+        case Opt.Empty =>
           newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
       }
     }
@@ -191,8 +190,13 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     newGrid
   }
 
-  private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
-    logger.info(MetricsMarker, "{};{}", {iteration.toString; metrics})
+  private def logMetrics(iteration: Long, metrics: Metrics): Unit
+
+  = {
+    logger.info(MetricsMarker, "{};{}", {
+      iteration.toString;
+      metrics
+    })
   }
 }
 
