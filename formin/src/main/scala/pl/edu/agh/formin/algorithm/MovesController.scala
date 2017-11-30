@@ -132,32 +132,33 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       destinations
     }
 
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, ForaminiferaAccessible[GridPart])] = {
-      val destinationCell = possibleDestinations
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, GridPart)] = {
+      possibleDestinations
         .collectFirstOpt {
           case (i, j, destination: AlgaeCell) =>
             consumedAlgaeCount += 1
             algaeTotalLifespan += destination.lifespan
-            (i, j, ForaminiferaAccessible.unapply(destination))
+            (i, j, destination)
           case (i, j, destination: EmptyCell) =>
             val effectiveDestination = newGrid.cells(i)(j) match {
               case newAlgae: AlgaeCell =>
                 consumedAlgaeCount += 1
                 algaeTotalLifespan += newAlgae.lifespan
-                ForaminiferaAccessible.unapply(newAlgae)
-              case _ => ForaminiferaAccessible.unapply(destination)
+                newAlgae
+              case _ => destination
             }
             (i, j, effectiveDestination)
         }
-      destinationCell
     }
 
     def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
       val destinations = calculatePossibleDestinations(cell, x, y)
       selectDestinationCell(destinations) match {
-        case Opt((i, j, destinationCell)) =>
-          newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+        case Opt((i, j, ForaminiferaAccessible(destination))) =>
+          newGrid.cells(i)(j) = destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
+        case Opt((i, j, inaccessibleDestination)) =>
+          throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
         case Opt.Empty =>
           newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
       }
