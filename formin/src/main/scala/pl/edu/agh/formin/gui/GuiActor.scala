@@ -12,8 +12,9 @@ import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.algorithm.Metrics
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
-import pl.edu.agh.formin.model.Grid.CellArray
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model.Grid.CellArray
+import pl.edu.agh.xinuk.model._
 
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page

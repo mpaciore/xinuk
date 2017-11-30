@@ -1,7 +1,7 @@
 package pl.edu.agh.formin.config
 
 import com.esotericsoftware.kryo.Kryo
-import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model._
 
 class KryoInit {
   def customize(kryo: Kryo): Unit = {

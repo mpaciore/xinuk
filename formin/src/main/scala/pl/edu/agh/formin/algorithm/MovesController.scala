@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import pl.edu.agh.formin.WorkerActor.MetricsMarker
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
@@ -30,11 +31,11 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
         grid.cells(x)(y) =
           if (random.nextDouble() < config.foraminiferaSpawnChance) {
             foraminiferaCount += 1
-            EmptyCell.Instance.withForaminifera(config.foraminiferaStartEnergy, 0)
+            ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
           }
           else {
             algaeCount += 1
-            EmptyCell.Instance.withAlgae(0)
+            AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
           }
       }
     }
@@ -88,7 +89,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
           }
         case cell: AlgaeCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case accessible: AlgaeAccessible => accessible.withAlgae(0) }
+            reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
@@ -111,7 +112,7 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
     }
 
     def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
-      reproduce(x, y) { case accessible: ForaminiferaAccessible => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
+      reproduce(x, y) { case ForaminiferaAccessible(accessible) => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
       newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
       foraminiferaReproductionsCount += 1
     }
@@ -131,8 +132,8 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
       destinations
     }
 
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, SmellingCell with ForaminiferaAccessible with Product with Serializable)] = {
-      val destinationCell = possibleDestinations
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)]): commons.Opt[(Int, Int, GridPart)] = {
+      possibleDestinations
         .collectFirstOpt {
           case (i, j, destination: AlgaeCell) =>
             consumedAlgaeCount += 1
@@ -148,15 +149,16 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
             }
             (i, j, effectiveDestination)
         }
-      destinationCell
     }
 
     def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
       val destinations = calculatePossibleDestinations(cell, x, y)
       selectDestinationCell(destinations) match {
-        case Opt((i, j, destinationCell)) =>
-          newGrid.cells(i)(j) = destinationCell.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
+        case Opt((i, j, ForaminiferaAccessible(destination))) =>
+          newGrid.cells(i)(j) = destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
           newGrid.cells(x)(y) = EmptyCell(cell.smell)
+        case Opt((i, j, inaccessibleDestination)) =>
+          throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
         case Opt.Empty =>
           newGrid.cells(x)(y) = cell.copy(cell.energy - config.foraminiferaLifeActivityCost, lifespan = cell.lifespan + 1)
       }

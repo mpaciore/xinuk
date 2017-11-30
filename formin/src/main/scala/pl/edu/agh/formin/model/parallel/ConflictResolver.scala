@@ -2,6 +2,7 @@ package pl.edu.agh.formin.model.parallel
 
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model.{Cell, EmptyCell, Obstacle, SmellingCell}
 
 trait ConflictResolver {
   def resolveConflict(current: Cell, incoming: SmellingCell)(implicit config: ForminConfig): Cell
@@ -20,6 +21,7 @@ object DefaultConflictResolver extends ConflictResolver {
       case (AlgaeCell(currentSmell, lifespan), AlgaeCell(incomingSmell, incominglifespan)) => AlgaeCell(currentSmell + incomingSmell, math.max(lifespan, incominglifespan))
       case (ForaminiferaCell(currentEnergy, currentSmell, lifespan), ForaminiferaCell(incomingEnergy, incomingSmell, incominglifespan)) => ForaminiferaCell(currentEnergy + incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incominglifespan))
       case (Obstacle, _) => Obstacle
+      case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }
   }
 }
