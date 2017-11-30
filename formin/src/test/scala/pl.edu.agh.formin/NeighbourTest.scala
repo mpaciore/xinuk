@@ -4,7 +4,7 @@ import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.parallel.NeighbourPosition
-import pl.edu.agh.formin.model.{Energy, Signal}
+import pl.edu.agh.xinuk.model._
 
 class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   implicit val config: ForminConfig = ForminConfig(

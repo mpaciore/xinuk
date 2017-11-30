@@ -6,7 +6,7 @@ import org.scalatest.concurrent.{Eventually, PatienceConfiguration, ScalaFutures
 import org.scalatest.{FlatSpecLike, Matchers}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
-import pl.edu.agh.formin.model.{Energy, Signal}
+import pl.edu.agh.xinuk.model._
 
 class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with ScalaFutures {
   implicit val config: ForminConfig = ForminConfig(
