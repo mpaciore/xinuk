@@ -7,8 +7,8 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 import pl.edu.agh.xinuk.model.WorkerId
+import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
 
 import scala.util.{Failure, Success, Try}
 
