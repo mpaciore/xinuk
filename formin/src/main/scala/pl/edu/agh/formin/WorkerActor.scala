@@ -7,7 +7,7 @@ import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.DefaultConflictResolver
+import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.Neighbour
 
@@ -94,7 +94,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
-              grid.cells(x)(y) = DefaultConflictResolver.resolveConflict(currentCell, cell)
+              grid.cells(x)(y) = ForminConflictResolver.resolveConflict(currentCell, cell)
           })
 
           //clean buffers
