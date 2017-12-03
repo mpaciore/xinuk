@@ -8,7 +8,7 @@ import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{DefaultConflictResolver, Neighbour}
-import pl.edu.agh.xinuk.model.{BufferCell, Cell, EmptyCell, Grid}
+import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
@@ -154,12 +154,4 @@ object WorkerActor {
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
   }
-}
-
-final case class WorkerId(value: Int) extends AnyVal {
-  def isValid(implicit config: ForminConfig): Boolean = (value > 0) && (value <= math.pow(config.workersRoot, 2))
-}
-
-object WorkerId {
-  implicit val WorkerOrdering: Ordering[WorkerId] = Ordering.by(_.value)
 }

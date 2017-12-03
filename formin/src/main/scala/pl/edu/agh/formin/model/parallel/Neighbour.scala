@@ -2,8 +2,9 @@ package pl.edu.agh.formin.model.parallel
 
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.{Opt, SealedEnumCompanion}
-import pl.edu.agh.formin.WorkerId
 import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.model.WorkerId
 
 import scala.collection.immutable.TreeSet
 
@@ -27,6 +28,9 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
                                                     (protected[parallel] val bufferZoneAffectedModifier: (Int, Int))
   extends NeighbourPosition {
 
+  private def isValid(id: WorkerId)(implicit config: XinukConfig): Boolean = {
+    (id.value > 0) && (id.value <= math.pow(config.workersRoot, 2))
+  }
 
   override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
     val modifier = idModifier(config)
@@ -39,7 +43,7 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
     of.opt
       .filter(_ => canSkipRow || isSameRow)
       .map(_.copy(of.value + idModifier(config)))
-      .filter(_.isValid)
+      .filter(isValid)
   }
 
   override def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)] = {

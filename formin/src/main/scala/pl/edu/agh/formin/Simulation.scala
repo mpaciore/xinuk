@@ -8,6 +8,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
+import pl.edu.agh.xinuk.model.WorkerId
 
 import scala.util.{Failure, Success, Try}
 
@@ -54,7 +55,7 @@ object Simulation extends LazyLogging {
 
       val workers: Vector[WorkerId] =
         (1 to math.pow(config.workersRoot, 2).toInt)
-          .map(WorkerId(_))(collection.breakOut)
+          .map(WorkerId)(collection.breakOut)
 
       workers.foreach { id =>
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
