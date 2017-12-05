@@ -17,6 +17,8 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
 
   var grid: Grid = _
 
+  var bufferZone: TreeSet[(Int, Int)] = _
+
   private var id: WorkerId = _
 
   private var regionRef: ActorRef = _
@@ -24,8 +26,6 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
   private var neighbours: Map[WorkerId, Neighbour] = _
 
   private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
-
-  private var bufferZone: TreeSet[(Int, Int)] = _
 
   private var logger: Logger = _
 
