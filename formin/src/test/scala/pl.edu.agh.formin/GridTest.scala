@@ -25,7 +25,8 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     guiCellSize = 4,
     workersRoot = 1,
     iterationsNumber = 1000,
-    isSupervisor = true
+    isSupervisor = true,
+    1
   )
 
   private var grid: Grid = _
