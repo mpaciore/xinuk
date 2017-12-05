@@ -15,11 +15,11 @@ import scala.collection.mutable
 
 class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
 
+  var grid: Grid = _
+
   private var id: WorkerId = _
 
   private var regionRef: ActorRef = _
-
-  private var grid: Grid = _
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
