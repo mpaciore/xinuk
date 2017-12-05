@@ -8,6 +8,7 @@ import pl.edu.agh.formin.WorkerActor._
 import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.Neighbour
 
@@ -142,9 +143,9 @@ object WorkerActor {
     Props(new WorkerActor)
   }
 
-  private def idToShard(id: WorkerId): String = (id.value % 144).toString
+  private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
 
-  def extractShardId: ExtractShardId = {
+  def extractShardId(implicit config: ForminConfig): ExtractShardId = {
     case NeighboursInitialized(id, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
   }

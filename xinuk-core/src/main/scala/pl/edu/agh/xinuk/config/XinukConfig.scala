@@ -6,4 +6,6 @@ trait XinukConfig {
   def signalSuppressionFactor: Double
 
   def workersRoot: Int
+
+  def shardingMod: Int
 }
