@@ -4,21 +4,23 @@ import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import org.slf4j.Logger
-import pl.edu.agh.formin.WorkerActor.MetricsMarker
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.formin.simulation.ForminMetrics
+import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
 
-final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(implicit config: ForminConfig) {
+final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(implicit config: ForminConfig) extends MovesController {
 
   private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
 
-  def initializeGrid(): Grid = {
+  override def initialGrid: Grid = {
     grid = Grid.empty(bufferZone)
     var foraminiferaCount = 0L
     var algaeCount = 0L
@@ -39,12 +41,12 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
           }
       }
     }
-    val metrics = Metrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
+    val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
     logMetrics(1, metrics)
     grid
   }
 
-  def makeMoves(iteration: Long, grid: Grid): Grid = {
+  override def makeMoves(iteration: Long, grid: Grid): Grid = {
     this.grid = grid
     val newGrid = Grid.empty(bufferZone)
 
@@ -181,25 +183,15 @@ final class MovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(imp
         case _ =>
       }
     }
-    val metrics = Metrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
+    val metrics = ForminMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
     logMetrics(iteration, metrics)
     newGrid
   }
 
-  private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
-    logger.info(MetricsMarker, "{};{}", {iteration.toString; metrics})
-  }
-}
-
-final case class Metrics(foraminiferaCount: Long,
-                         algaeCount: Long,
-                         foraminiferaDeaths: Long,
-                         foraminiferaTotalEnergy: Double,
-                         foraminiferaReproductionsCount: Long,
-                         consumedAlgaeCount: Long,
-                         foraminiferaTotalLifespan: Long,
-                         algaeTotalLifespan: Long) {
-  override def toString: String = {
-    s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan;$algaeTotalLifespan"
+  private def logMetrics(iteration: Long, metrics: ForminMetrics): Unit = {
+    logger.info(WorkerActor.MetricsMarker, "{};{}", {
+      iteration.toString;
+      metrics
+    })
   }
 }

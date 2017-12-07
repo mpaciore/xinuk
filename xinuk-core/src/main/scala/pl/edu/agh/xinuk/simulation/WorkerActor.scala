@@ -1,21 +1,23 @@
-package pl.edu.agh.formin
+package pl.edu.agh.xinuk.simulation
 
-import akka.actor.{Actor, Props, Stash}
+import akka.actor.{Actor, ActorRef, Props, Stash}
 import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.avsystem.commons.SharedExtensions._
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
-import pl.edu.agh.formin.WorkerActor._
-import pl.edu.agh.formin.algorithm.{Metrics, MovesController}
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.parallel.Neighbour
+import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour}
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 
-class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
+class WorkerActor[ConfigType <: XinukConfig](
+                                              movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
+                                              conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType)
+  extends Actor with Stash {
+
+  import pl.edu.agh.xinuk.simulation.WorkerActor._
 
   private var id: WorkerId = _
 
@@ -23,13 +25,15 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
+  private var regionRef: ActorRef = _
+
   private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
   private var bufferZone: TreeSet[(Int, Int)] = _
 
-  private var logger: Logger = _
-
   private var movesController: MovesController = _
+
+  private var logger: Logger = _
 
   override def receive: Receive = stopped
 
@@ -43,17 +47,18 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
   }
 
   def stopped: Receive = {
-    case NeighboursInitialized(id, neighbours) =>
+    case NeighboursInitialized(id, neighbours, regionRef) =>
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
-      logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
-      bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
+      this.regionRef = regionRef
+      this.bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
+      this.movesController = movesControllerFactory(bufferZone, logger, config)
       grid = Grid.empty(bufferZone)
-      movesController = new MovesController(bufferZone, logger)
+      logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       self ! StartIteration(1)
     case StartIteration(1) =>
-      grid = movesController.initializeGrid()
+      grid = movesController.initialGrid
       propagateSignal()
       notifyNeighbours(1, grid)
       unstashAll()
@@ -95,7 +100,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
-              grid.cells(x)(y) = ForminConflictResolver.resolveConflict(currentCell, cell)
+              grid.cells(x)(y) = conflictResolver.resolveConflict(currentCell, cell)
           })
 
           //clean buffers
@@ -117,7 +122,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
     self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
       val bufferArray = ngh.position.bufferZone.iterator.map { case (x, y) => grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
-      Simulation.WorkerRegionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
+      regionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
     }
   }
 }
@@ -130,7 +135,7 @@ object WorkerActor {
 
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
-  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour])
+  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour], regionRef: ActorRef)
 
   final case class StartIteration private(i: Long) extends AnyVal
 
@@ -139,19 +144,22 @@ object WorkerActor {
 
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
-  def props(implicit config: ForminConfig): Props = {
-    Props(new WorkerActor)
+  def props[ConfigType <: XinukConfig](
+                                        movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
+                                        conflictResolver: ConflictResolver[ConfigType]
+                                      )(implicit config: ConfigType): Props = {
+    Props(new WorkerActor(movesControllerFactory, conflictResolver))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
 
-  def extractShardId(implicit config: ForminConfig): ExtractShardId = {
-    case NeighboursInitialized(id, _) => idToShard(id)
+  def extractShardId(implicit config: XinukConfig): ExtractShardId = {
+    case NeighboursInitialized(id, _, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
-    case msg@NeighboursInitialized(id, _) =>
+    case msg@NeighboursInitialized(id, _, _) =>
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
