@@ -9,12 +9,12 @@ import com.avsystem.commons.SharedExtensions._
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import pl.edu.agh.formin.WorkerActor._
-import pl.edu.agh.formin.algorithm.Metrics
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model._
+import pl.edu.agh.formin.simulation.ForminMetrics
 import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.simulation.WorkerActor._
 
 import scala.swing.BorderPanel.Position._
 import scala.swing.TabbedPane.Page
@@ -43,7 +43,7 @@ class GuiActor private(workers: Vector[ActorRef],
     //selected ! GetStatus
     case IterationPartMetrics(workerId, iteration, metrics) =>
       gui.setWorkerIteration(workerId.value, iteration)
-      if (sender == selected) gui.updatePlot(iteration, metrics)
+      if (sender == selected) gui.updatePlot(iteration, metrics.asInstanceOf[ForminMetrics])
   }
 }
 
@@ -205,7 +205,7 @@ private[gui] class GuiGrid(dimension: Int, guiType: Either[GuiType.Basic.type, G
   private val panel = new ChartPanel(chart)
   chartPanel.layout(swing.Component.wrap(panel)) = Center
 
-  def updatePlot(iteration: Long, metrics: Metrics): Unit = {
+  def updatePlot(iteration: Long, metrics: ForminMetrics): Unit = {
     foraminiferaXYSeries.add(iteration, metrics.foraminiferaCount)
     algaeXYSeries.add(iteration, metrics.algaeCount)
   }

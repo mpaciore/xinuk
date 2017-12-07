@@ -3,8 +3,8 @@ package pl.edu.agh.formin
 import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
-import pl.edu.agh.formin.model.parallel.NeighbourPosition
 import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.model.parallel.NeighbourPosition
 
 class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   implicit val config: ForminConfig = ForminConfig(
@@ -25,7 +25,8 @@ class NeighbourTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     guiCellSize = 4,
     workersRoot = 3,
     iterationsNumber = 1000,
-    isSupervisor = true
+    isSupervisor = true,
+    shardingMod = 1
   )
 
   "An affectedCells method" should "return correct affected cells coordinates for TOP one" in {

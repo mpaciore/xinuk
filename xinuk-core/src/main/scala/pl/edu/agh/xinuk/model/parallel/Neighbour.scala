@@ -1,34 +1,37 @@
-package pl.edu.agh.formin.model.parallel
+package pl.edu.agh.xinuk.model.parallel
 
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.{Opt, SealedEnumCompanion}
-import pl.edu.agh.formin.WorkerId
-import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.model.WorkerId
 
 import scala.collection.immutable.TreeSet
 
 
 sealed trait NeighbourPosition {
 
-  def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId]
+  def neighbourId(of: WorkerId)(implicit config: XinukConfig): Opt[WorkerId]
 
-  def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)]
+  def bufferZone(implicit config: XinukConfig): TreeSet[(Int, Int)]
 
   protected[parallel] def bufferZoneAffectedModifier: (Int, Int)
 
-  def affectedCells(implicit config: ForminConfig): Iterator[(Int, Int)] = {
+  def affectedCells(implicit config: XinukConfig): Iterator[(Int, Int)] = {
     val (xModifier, yModifier) = bufferZoneAffectedModifier
     bufferZone.iterator.map { case (x, y) => (x + xModifier, y + yModifier) }
   }
 
 }
 
-sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
+sealed protected abstract class NeighbourPositionGen(idModifier: XinukConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
                                                     (protected[parallel] val bufferZoneAffectedModifier: (Int, Int))
   extends NeighbourPosition {
 
+  private def isValid(id: WorkerId)(implicit config: XinukConfig): Boolean = {
+    (id.value > 0) && (id.value <= math.pow(config.workersRoot, 2))
+  }
 
-  override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
+  override def neighbourId(of: WorkerId)(implicit config: XinukConfig): Opt[WorkerId] = {
     val modifier = idModifier(config)
     val newValue = of.value + modifier
 
@@ -39,10 +42,10 @@ sealed protected abstract class NeighbourPositionGen(idModifier: ForminConfig =>
     of.opt
       .filter(_ => canSkipRow || isSameRow)
       .map(_.copy(of.value + idModifier(config)))
-      .filter(_.isValid)
+      .filter(isValid)
   }
 
-  override def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)] = {
+  override def bufferZone(implicit config: XinukConfig): TreeSet[(Int, Int)] = {
     gridEdgeRangeToZone(0 until config.gridSize).to[TreeSet]
   }
 
@@ -57,11 +60,11 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
     (x1 + x2, y1 + y2)
   }
 
-  override def neighbourId(of: WorkerId)(implicit config: ForminConfig): Opt[WorkerId] = {
+  override def neighbourId(of: WorkerId)(implicit config: XinukConfig): Opt[WorkerId] = {
     pos1.neighbourId(of).flatMap(pos2.neighbourId)
   }
 
-  override def bufferZone(implicit config: ForminConfig): TreeSet[(Int, Int)] = {
+  override def bufferZone(implicit config: XinukConfig): TreeSet[(Int, Int)] = {
     pos1.bufferZone & pos2.bufferZone
   }
 }

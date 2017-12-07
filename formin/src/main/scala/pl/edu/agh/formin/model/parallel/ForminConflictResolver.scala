@@ -2,13 +2,10 @@ package pl.edu.agh.formin.model.parallel
 
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 import pl.edu.agh.xinuk.model._
 
-trait ConflictResolver {
-  def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: ForminConfig): GridPart
-}
-
-object DefaultConflictResolver extends ConflictResolver {
+object ForminConflictResolver extends ConflictResolver[ForminConfig] {
 
   import Cell._
 

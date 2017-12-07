@@ -4,9 +4,12 @@ import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration, ScalaFutures}
 import org.scalatest.{FlatSpecLike, Matchers}
+import pl.edu.agh.formin.algorithm.ForminMovesController
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
-import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
+import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
+import pl.edu.agh.xinuk.simulation.WorkerActor
 
 class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with ScalaFutures {
   implicit val config: ForminConfig = ForminConfig(
@@ -27,7 +30,8 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     guiCellSize = 4,
     workersRoot = 2,
     iterationsNumber = 3,
-    isSupervisor = true
+    isSupervisor = true,
+    shardingMod = 1
   )
 
   trait Fixture {
@@ -36,7 +40,9 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
   "A WorkerActor" should "start first iteration when neighbours are initialized" in new Fixture {
     val workerRegion = TestProbe("worker1")
-    val worker = system.actorOf(WorkerActor.props(config))
+    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+      new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
+    ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)), workerRegion.ref)
 
@@ -45,9 +51,13 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   }
 
   it should "start next iteration when neighbours finished actual" in new Fixture {
+
     import scala.concurrent.duration._
+
     val workerRegion = TestProbe("worker1")
-    val worker = system.actorOf(WorkerActor.props(config))
+    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+      new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
+    ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)), workerRegion.ref)
 
@@ -71,15 +81,16 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
   it should "shutdown actor system when iterations limit is reached" in new Fixture {
     val workerRegion = TestProbe("worker1")
-    val worker = system.actorOf(WorkerActor.props(config))
+    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+      new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
+    ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(), workerRegion.ref)
 
     import scala.concurrent.duration._
+
     noException shouldBe thrownBy(system.whenTerminated.futureValue(PatienceConfiguration.Timeout(20.seconds)))
   }
-
-
 
 
 }
