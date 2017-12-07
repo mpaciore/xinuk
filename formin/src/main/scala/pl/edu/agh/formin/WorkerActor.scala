@@ -10,12 +10,12 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.parallel.Neighbour
+import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour}
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 
-class WorkerActor private(implicit config: ForminConfig) extends Actor with Stash {
+class WorkerActor(conflictResolver: ConflictResolver[ForminConfig])(implicit config: ForminConfig) extends Actor with Stash {
 
   private var id: WorkerId = _
 
@@ -95,7 +95,7 @@ class WorkerActor private(implicit config: ForminConfig) extends Actor with Stas
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
-              grid.cells(x)(y) = ForminConflictResolver.resolveConflict(currentCell, cell)
+              grid.cells(x)(y) = conflictResolver.resolveConflict(currentCell, cell)
           })
 
           //clean buffers
@@ -140,7 +140,7 @@ object WorkerActor {
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props(implicit config: ForminConfig): Props = {
-    Props(new WorkerActor)
+    Props(new WorkerActor(ForminConflictResolver))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
