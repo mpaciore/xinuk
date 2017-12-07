@@ -2,13 +2,16 @@ package pl.edu.agh.formin
 
 import java.io.File
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
+import pl.edu.agh.formin.algorithm.ForminMovesController
 import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.model.WorkerId
 import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
+import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.util.{Failure, Success, Try}
 
@@ -40,15 +43,19 @@ object Simulation extends LazyLogging {
 
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
+  private val workerProps: Props = WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
+  )
+
   ClusterSharding(system).start(
     typeName = WorkerActor.Name,
-    entityProps = WorkerActor.props,
+    entityProps = workerProps,
     settings = ClusterShardingSettings(system),
     extractShardId = WorkerActor.extractShardId,
     extractEntityId = WorkerActor.extractEntityId
   )
 
-  val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
+  private val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
 
   def main(args: Array[String]): Unit = {
     if (config.isSupervisor) {
@@ -61,7 +68,7 @@ object Simulation extends LazyLogging {
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))
         }(collection.breakOut)
-        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours)
+        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours, WorkerRegionRef)
       }
     }
   }
