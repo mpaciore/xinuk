@@ -5,6 +5,7 @@ import akka.testkit.{TestActorRef, TestProbe}
 import org.scalatest.{FlatSpecLike, Matchers}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
+import pl.edu.agh.formin.model.{AlgaeAccessible, AlgaeCell, ForaminiferaAccessible, ForaminiferaCell}
 import pl.edu.agh.formin.model.parallel.{Neighbour, NeighbourPosition}
 import pl.edu.agh.xinuk.model._
 
@@ -248,6 +249,41 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
+  }
+
+  it should "should make cells migrations correctly" in new Fixture {
+    val workerRegion = TestProbe("worker")
+    val worker1 = TestActorRef(WorkerActor.props(config))
+    val worker2 = TestActorRef(WorkerActor.props(config))
+
+    worker1 ! WorkerActor.NeighboursInitialized(WorkerId(5),
+      Vector(Neighbour(NeighbourPosition.Left)),
+      workerRegion.ref)
+
+    worker2 ! WorkerActor.NeighboursInitialized(WorkerId(4),
+      Vector(Neighbour(NeighbourPosition.Right)),
+      workerRegion.ref)
+
+    val workers1Grid: Grid = worker1.underlyingActor.asInstanceOf[WorkerActor].grid
+    workers1Grid.cells(1)(0) = BufferCell.apply(ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0))
+    workers1Grid.cells(2)(0) = BufferCell.apply(AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0))
+
+    val workers2Grid: Grid = worker2.underlyingActor.asInstanceOf[WorkerActor].grid
+
+    for {
+      x <- 0 until config.gridSize
+      y <- 0 until config.gridSize
+      if x != 0 && x != config.gridSize - 1 && y != 0 && y != config.gridSize - 1
+    } {
+      workers2Grid.cells(x)(y) = EmptyCell.Instance
+    }
+
+    val bufferArray: Array[BufferCell] = NeighbourPosition.Left.bufferZone.iterator.map { case (x, y) => workers1Grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
+
+    worker2 ! WorkerActor.IterationPartFinished(WorkerId(5), WorkerId(4), 1, bufferArray)
+
+    workers2Grid.cells(1)(config.gridSize - 2) shouldBe an[ForaminiferaCell]
+    workers2Grid.cells(2)(config.gridSize - 2) shouldBe an[AlgaeCell]
   }
 
 }
