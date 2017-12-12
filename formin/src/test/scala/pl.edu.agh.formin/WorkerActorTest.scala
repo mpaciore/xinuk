@@ -39,7 +39,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   }
 
   "A WorkerActor" should "start first iteration when neighbours are initialized" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -54,7 +54,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
     import scala.concurrent.duration._
 
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -80,7 +80,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   }
 
   it should "shutdown actor system when iterations limit is reached" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))

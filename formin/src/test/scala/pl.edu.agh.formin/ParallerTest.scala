@@ -40,7 +40,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   "A WorkerActors" should "have defined buffers correctly for worker surrounded by neighbours" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -66,7 +66,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the left top corner of the grid" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -87,7 +87,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the left bottom corner of the grid" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -108,7 +108,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the right bottom corner of the grid" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -129,7 +129,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the right top corner of the grid" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -150,7 +150,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the top line of the grid not in the corner" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -181,7 +181,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the right line of the grid not in the corner" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -212,7 +212,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the left line of the grid not in the corner" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -243,7 +243,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "have defined buffers correctly for worker in the bottom line of the grid not in the corner" in new Fixture {
-    val workerRegion = TestProbe("worker1")
+    val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
@@ -274,7 +274,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
   }
 
   it should "should make cells migrations correctly" in new Fixture {
-    val workerRegion = TestProbe("worker")
+    val workerRegion = TestProbe("workerRegion")
     val worker1 = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
