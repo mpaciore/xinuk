@@ -98,9 +98,7 @@ trait SmellMedium extends GridPart {
   def withSmell(smell: SmellArray): Self
 }
 
-trait Cell extends GridPart
-
-trait SmellingCell extends Cell with SmellMedium {
+trait SmellingCell extends SmellMedium {
   override type Self <: SmellingCell
 }
 
@@ -119,7 +117,7 @@ object Cell {
   def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 
-case object Obstacle extends Cell {
+case object Obstacle extends GridPart {
   override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
 }
 

@@ -3,13 +3,13 @@ package pl.edu.agh.formin.model.parallel
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.xinuk.model.parallel.ConflictResolver
-import pl.edu.agh.xinuk.model.{Cell, EmptyCell, Obstacle, SmellingCell}
+import pl.edu.agh.xinuk.model._
 
 object ForminConflictResolver extends ConflictResolver[ForminConfig] {
 
   import Cell._
 
-  override def resolveConflict(current: Cell, incoming: SmellingCell)(implicit config: ForminConfig): Cell = {
+  override def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: ForminConfig): GridPart = {
     (current, incoming) match {
       case (EmptyCell(currentSmell), incomingCell) => incomingCell.withSmell(incomingCell.smell + currentSmell)
       case (currentCell: SmellingCell, EmptyCell(incomingSmell)) => currentCell.withSmell(currentCell.smell + incomingSmell)

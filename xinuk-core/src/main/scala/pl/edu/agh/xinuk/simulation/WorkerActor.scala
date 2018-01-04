@@ -19,21 +19,21 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
+  var grid: Grid = _
+
+  var bufferZone: TreeSet[(Int, Int)] = _
+
   private var id: WorkerId = _
-
-  private var grid: Grid = _
-
-  private var neighbours: Map[WorkerId, Neighbour] = _
 
   private var regionRef: ActorRef = _
 
+  private var neighbours: Map[WorkerId, Neighbour] = _
+
   private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
-  private var bufferZone: TreeSet[(Int, Int)] = _
+  private var logger: Logger = _
 
   private var movesController: MovesController = _
-
-  private var logger: Logger = _
 
   override def receive: Receive = stopped
 
@@ -48,10 +48,10 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   def stopped: Receive = {
     case NeighboursInitialized(id, neighbours, regionRef) =>
+      this.regionRef = regionRef
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
-      this.regionRef = regionRef
       this.bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       this.movesController = movesControllerFactory(bufferZone, logger, config)
       grid = Grid.empty(bufferZone)
@@ -99,7 +99,7 @@ class WorkerActor[ConfigType <: XinukConfig](
           //todo configurable strategy
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
-              val currentCell = grid.cells(x)(y).asInstanceOf[Cell]
+              val currentCell = grid.cells(x)(y)
               grid.cells(x)(y) = conflictResolver.resolveConflict(currentCell, cell)
           })
 
