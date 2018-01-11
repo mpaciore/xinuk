@@ -193,9 +193,6 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
   }
 
   private def logMetrics(iteration: Long, metrics: ForminMetrics): Unit = {
-    logger.info(WorkerActor.MetricsMarker, "{};{}", {
-      iteration.toString;
-      metrics
-    })
+    logger.info(WorkerActor.MetricsMarker, "{};{}", iteration.toString, metrics: Any)
   }
 }
