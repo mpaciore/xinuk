@@ -1,4 +1,4 @@
-package pl.edu.agh.formin
+/*package pl.edu.agh.formin
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
@@ -93,4 +93,4 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   }
 
 
-}
+}*/

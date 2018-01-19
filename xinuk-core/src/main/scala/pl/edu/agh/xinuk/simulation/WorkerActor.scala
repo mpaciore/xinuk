@@ -14,7 +14,7 @@ import scala.collection.mutable
 
 class WorkerActor[ConfigType <: XinukConfig](
                                               movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
-                                              conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType)
+                                              conflictResolver: ConflictResolver[ConfigType], initialGrid: Grid)(implicit config: ConfigType)
   extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -58,7 +58,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       self ! StartIteration(1)
     case StartIteration(1) =>
-      grid = movesController.initialGrid
+      grid = makeGrid(initialGrid) //movesController.initialGrid
       propagateSignal()
       notifyNeighbours(1, grid)
       unstashAll()
@@ -118,6 +118,29 @@ class WorkerActor[ConfigType <: XinukConfig](
       }
   }
 
+  private def makeGrid(singleWorkerGrid: Grid): Grid = {
+    val cutGrid = movesController.initialGrid
+    val row = (id.value - 1) / config.workersRoot
+    val col = (id.value - 1) % config.workersRoot
+    val gridSize = 258
+    val gridChunkCellsNumber = (gridSize - 2) / config.workersRoot
+    var emptyCount = 0L
+
+    for {
+      x <- 0 until config.gridSize - 1
+      y <- 0 until config.gridSize - 1
+      if x != 0 && y != 0
+    } {
+      cutGrid.cells(x)(y) = singleWorkerGrid.cells(row * gridChunkCellsNumber + x)(col * gridChunkCellsNumber + y)
+      cutGrid.cells(x)(y) match {
+        case EmptyCell(_) => emptyCount += 1
+        case _ =>
+      }
+    }
+    logger.info("Empty cells after grid part "+ emptyCount)
+    cutGrid
+  }
+
   private def notifyNeighbours(iteration: Long, grid: Grid): Unit = {
     self ! IterationPartFinished(id, id, iteration, Array.empty)
     neighbours.foreach { case (neighbourId, ngh) =>
@@ -146,9 +169,9 @@ object WorkerActor {
 
   def props[ConfigType <: XinukConfig](
                                         movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
-                                        conflictResolver: ConflictResolver[ConfigType]
+                                        conflictResolver: ConflictResolver[ConfigType], grid: Grid
                                       )(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(movesControllerFactory, conflictResolver))
+    Props(new WorkerActor(movesControllerFactory, conflictResolver, grid))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString

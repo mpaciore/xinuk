@@ -50,6 +50,16 @@ object Grid {
     Grid(values)
   }
 
+  def emptyWithDefinedSize(bufferZone: Set[(Int, Int)], size: Int)(): Grid = {
+    val n = size
+    val values = Array.tabulate[GridPart](n, n) {
+      case (x, y) if bufferZone.contains((x, y)) => BufferCell(EmptyCell.Instance)
+      case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
+      case _ => EmptyCell.Instance
+    }
+    Grid(values)
+  }
+
   val SubcellCoordinates: Vector[(Int, Int)] = {
     val pos = Vector(0, 1, 2)
     pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })

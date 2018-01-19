@@ -22,7 +22,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
 
   override def initialGrid: Grid = {
     grid = Grid.empty(bufferZone)
-    var foraminiferaCount = 0L
+/*    var foraminiferaCount = 0L
     var algaeCount = 0L
     for {
       x <- 0 until config.gridSize
@@ -40,9 +40,9 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
             AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
           }
       }
-    }
-    val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
-    logMetrics(1, metrics)
+    }*/
+    //val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
+    //logMetrics(1, metrics)
     grid
   }
 

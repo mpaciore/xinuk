@@ -1,4 +1,4 @@
-package pl.edu.agh.formin
+/*package pl.edu.agh.formin
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestProbe}
@@ -312,4 +312,4 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
     workers2Grid.cells(2)(config.gridSize - 2) shouldBe an[AlgaeCell]
   }
 
-}
+}*/

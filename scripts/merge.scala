@@ -57,7 +57,7 @@ object Merge extends App {
     ).buffered
   }
   println("iteration,foraminiferaCount,algaeCount,foraminiferaTotalEnergy,foraminiferaReproductionCount,foraminiferaAverageDeadLifespan,algaeAverageDeadLifespan")
-  var iteration = 1L
+  var iteration = 2L
   while (iterators.exists(_.nonEmpty)) {
     val total = iterators.flatMap { iterator =>
       val currentIteration = ListBuffer.empty[Metrics]
@@ -78,4 +78,3 @@ object Merge extends App {
   }
 }
 
-Merge.main(args)
