@@ -31,7 +31,6 @@ class Simulation[ConfigType <: XinukConfig](
         logger.info("Falling back to reference.conf")
         ConfigFactory.empty()
       }.withFallback(ConfigFactory.load("cluster.conf"))
-      .withFallback(ConfigFactory.load())
 
   private def logHeader: String = s"worker:${metricHeaders.mkString(";")}"
 
