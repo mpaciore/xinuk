@@ -2,7 +2,7 @@ package pl.edu.agh.xinuk
 
 import java.io.File
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
@@ -49,18 +49,14 @@ class Simulation[ConfigType <: XinukConfig](
   }
 
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
-
-  private val workerProps: Props = WorkerActor.props[ConfigType](movesControllerFactory, conflictResolver)
-
-  ClusterSharding(system).start(
-    typeName = WorkerActor.Name,
-    entityProps = workerProps,
-    settings = ClusterShardingSettings(system),
-    extractShardId = WorkerActor.extractShardId,
-    extractEntityId = WorkerActor.extractEntityId
-  )
-
-  private val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
+  private val workerRegionRef: ActorRef =
+    ClusterSharding(system).start(
+      typeName = WorkerActor.Name,
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver),
+      settings = ClusterShardingSettings(system),
+      extractShardId = WorkerActor.extractShardId,
+      extractEntityId = WorkerActor.extractEntityId
+    )
 
   def start(): Unit = {
     if (config.isSupervisor) {
@@ -73,7 +69,7 @@ class Simulation[ConfigType <: XinukConfig](
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))
         }(collection.breakOut)
-        WorkerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours, WorkerRegionRef)
+        workerRegionRef ! WorkerActor.NeighboursInitialized(id, neighbours)
       }
     }
   }

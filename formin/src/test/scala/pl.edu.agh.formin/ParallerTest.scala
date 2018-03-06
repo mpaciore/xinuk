@@ -2,8 +2,8 @@ package pl.edu.agh.formin
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestProbe}
-import org.scalatest.{FlatSpecLike, Matchers}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.{FlatSpecLike, Matchers}
 import pl.edu.agh.formin.algorithm.ForminMovesController
 import pl.edu.agh.formin.config.{ForminConfig, GuiType}
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
@@ -41,7 +41,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   "A WorkerActors" should "have defined buffers correctly for worker surrounded by neighbours" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -52,8 +52,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
         Neighbour(NeighbourPosition.TopRight),
         Neighbour(NeighbourPosition.Left),
         Neighbour(NeighbourPosition.Right),
-        Neighbour(NeighbourPosition.BottomRight)),
-      workerRegion.ref)
+        Neighbour(NeighbourPosition.BottomRight)))
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -67,14 +66,14 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the left top corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.BottomRight)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -88,14 +87,14 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the left bottom corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.TopRight)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -109,14 +108,14 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the right bottom corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.Left),
         Neighbour(NeighbourPosition.TopLeft)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -130,14 +129,14 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the right top corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
         Neighbour(NeighbourPosition.Left),
         Neighbour(NeighbourPosition.BottomLeft)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -151,7 +150,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the top line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -160,7 +159,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.BottomRight),
         Neighbour(NeighbourPosition.BottomLeft)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -182,7 +181,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the right line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -191,7 +190,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopLeft),
         Neighbour(NeighbourPosition.BottomLeft)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -213,7 +212,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the left line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -222,7 +221,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopRight),
         Neighbour(NeighbourPosition.BottomRight)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -244,7 +243,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "have defined buffers correctly for worker in the bottom line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -253,7 +252,7 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopRight),
         Neighbour(NeighbourPosition.TopLeft)),
-      workerRegion.ref)
+    )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
@@ -275,20 +274,20 @@ class ParallerTest extends FlatSpecLike with Matchers with Eventually with Scala
 
   it should "should make cells migrations correctly" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker1 = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker1 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
-    val worker2 = TestActorRef(WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
+    val worker2 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, logger, config) =>
       new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
     ))
 
     worker1 ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Left)),
-      workerRegion.ref)
+    )
 
     worker2 ! WorkerActor.NeighboursInitialized(WorkerId(4),
       Vector(Neighbour(NeighbourPosition.Right)),
-      workerRegion.ref)
+    )
 
     val workers1Grid: Grid = worker1.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
     workers1Grid.cells(1)(0) = BufferCell.apply(ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0))
