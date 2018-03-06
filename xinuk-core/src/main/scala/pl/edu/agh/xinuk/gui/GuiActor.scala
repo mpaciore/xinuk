@@ -61,13 +61,6 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
     background = bgcolor
   }
   private val chartPage = new Page("Plot", chartPanel)
-  private val workersView = new Table(Array.tabulate(config.workersRoot * config.workersRoot)(id =>
-    Array[Any](id + 1, 0)), Seq("Worker", "Iteration")
-  )
-  private val workersPanel = new BorderPanel {
-    background = bgcolor
-    layout(new ScrollPane(workersView)) = Center
-  }
 
   def top = new MainFrame {
     title = "Formin model"
@@ -87,7 +80,6 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
       val contentPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
-        pages += new Page("Workers", workersPanel)
       }
 
       layout(contentPane) = Center
@@ -98,10 +90,6 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
 
   def setNewValues(iteration: Long, grid: Grid): Unit = {
     cellView.set(grid.cells.transpose)
-  }
-
-  def setWorkerIteration(workerId: Int, iteration: Long): Unit = {
-    workersView.update(workerId - 1, 1, iteration)
   }
 
   sealed trait CellArraySettable extends Component {
