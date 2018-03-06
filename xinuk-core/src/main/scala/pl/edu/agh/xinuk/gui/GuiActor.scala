@@ -126,8 +126,8 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
       def generateColor(clazz: Class[_]): Color = {
         val random = new Random(clazz.hashCode())
         val hue = random.nextFloat()
-        val saturation = 0.9f
-        val luminance = 1.0f
+        val saturation = 1.0f
+        val luminance = 0.6f
         Color.getHSBColor(hue, saturation, luminance)
       }
 
