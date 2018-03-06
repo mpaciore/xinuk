@@ -40,12 +40,13 @@ lazy val `xinuk-core` = project
   .settings(
     name := "xinuk-core",
     libraryDependencies ++= Seq(
+      "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
+      "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
+      "com.iheart" %% "ficus" % Version.Ficus,
       "com.typesafe.akka" %% "akka-actor" % Version.Akka,
       "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
       "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
       "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
-      "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
-      "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
       "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
@@ -57,9 +58,8 @@ lazy val formin = project
     name := "formin",
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % Version.Logback,
-      "com.iheart" %% "ficus" % Version.Ficus,
-      "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
       "org.jfree" % "jfreechart" % Version.JFreeChart,
+      "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
     ),

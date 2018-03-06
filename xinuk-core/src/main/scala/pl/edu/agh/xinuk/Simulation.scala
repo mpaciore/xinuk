@@ -6,6 +6,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
+import net.ceedubs.ficus.readers.ValueReader
 import org.slf4j.Logger
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.XinukConfig
@@ -16,13 +17,11 @@ import pl.edu.agh.xinuk.simulation.WorkerActor
 import scala.collection.immutable.TreeSet
 import scala.util.{Failure, Success, Try}
 
-class Simulation[ConfigType <: XinukConfig](
+class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType])(
-  movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController)(
-  //todo remove
-  configFactory: Config => Try[ConfigType]) extends LazyLogging {
+  movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -38,7 +37,9 @@ class Simulation[ConfigType <: XinukConfig](
     val forminConfig = rawConfig.getConfig(configPrefix)
     logger.info(WorkerActor.MetricsMarker, forminConfig.root().render(ConfigRenderOptions.concise()))
     logger.info(WorkerActor.MetricsMarker, logHeader)
-    configFactory(forminConfig) match {
+
+    import net.ceedubs.ficus.Ficus._
+    Try(forminConfig.as[ConfigType]("config")) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>

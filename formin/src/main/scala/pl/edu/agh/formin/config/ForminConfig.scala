@@ -1,12 +1,8 @@
 package pl.edu.agh.formin.config
 
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
-import com.typesafe.config.Config
-import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.{Energy, Signal}
-
-import scala.util.Try
 
 /*
 FSE - foraminifera start energy; FSE ∈ [0,1] && FSE ∈ R.
@@ -47,25 +43,6 @@ final case class ForminConfig(
                                isSupervisor: Boolean,
                                shardingMod: Int
                              ) extends XinukConfig
-
-object ForminConfig {
-
-  implicit val signalReader: ValueReader[Signal] =
-    (config: Config, path: String) => Signal(config.getNumber(path).doubleValue())
-
-  implicit val energyReader: ValueReader[Energy] =
-    (config: Config, path: String) => Energy(config.getNumber(path).doubleValue())
-
-  implicit val guiTypeReader: ValueReader[GuiType] =
-    (config: Config, path: String) => GuiType.byName(config.getString(path))
-
-
-  def fromConfig(config: Config): Try[ForminConfig] = {
-    import net.ceedubs.ficus.Ficus._
-    import net.ceedubs.ficus.readers.ArbitraryTypeReader._
-    Try(config.as[ForminConfig]("config"))
-  }
-}
 
 sealed trait GuiType extends NamedEnum
 
