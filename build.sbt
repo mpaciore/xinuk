@@ -1,16 +1,16 @@
 cancelable in Global := true
 
 val Version = new {
-  val Akka = "2.5.6"
+  val Akka = "2.5.11"
   val AkkaKryo = "0.5.2"
   val Logback = "1.2.3"
   val Guava = "23.0"
-  val AvsCommons = "1.24.0"
-  val ScalaTest = "3.0.4"
-  val ScalaLogging = "3.5.0"
+  val AvsCommons = "1.25.9"
+  val ScalaTest = "3.0.5"
+  val ScalaLogging = "3.8.0"
   val Ficus = "1.4.3"
-  val ScalaSwing = "2.0.1"
-  val JFreeChart = "1.0.19"
+  val ScalaSwing = "2.0.2"
+  val JFreeChart = "1.5.0"
 }
 
 inThisBuild(Seq(
