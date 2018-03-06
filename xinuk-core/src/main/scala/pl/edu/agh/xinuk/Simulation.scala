@@ -1,4 +1,4 @@
-package pl.edu.agh.formin
+package pl.edu.agh.xinuk
 
 import java.io.File
 
@@ -6,32 +6,40 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import org.slf4j.Logger
+import pl.edu.agh.xinuk.algorithm.MovesController
+import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.WorkerId
-import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
+import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
+import scala.collection.immutable.TreeSet
 import scala.util.{Failure, Success, Try}
 
-object Simulation extends LazyLogging {
-  final val ForminConfigPrefix = "formin"
+class Simulation[ConfigType <: XinukConfig](
+  configPrefix: String,
+  metricHeaders: Vector[String],
+  conflictResolver: ConflictResolver[ConfigType])(
+  movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController)(
+  //todo remove
+  configFactory: Config => Try[ConfigType]) extends LazyLogging {
 
   private val rawConfig: Config =
-    Try(ConfigFactory.parseFile(new File("formin.conf")))
-      .filter(_.hasPath(ForminConfigPrefix))
+    Try(ConfigFactory.parseFile(new File("xinuk.conf")))
+      .filter(_.hasPath(configPrefix))
       .getOrElse {
         logger.info("Falling back to reference.conf")
         ConfigFactory.empty()
       }.withFallback(ConfigFactory.load("cluster.conf"))
       .withFallback(ConfigFactory.load())
 
-  implicit val config: ForminConfig = {
-    val forminConfig = rawConfig.getConfig(ForminConfigPrefix)
+  private def logHeader: String = s"worker:${metricHeaders.mkString(";")}"
+
+  implicit val config: ConfigType = {
+    val forminConfig = rawConfig.getConfig(configPrefix)
     logger.info(WorkerActor.MetricsMarker, forminConfig.root().render(ConfigRenderOptions.concise()))
-    logger.info(WorkerActor.MetricsMarker, "worker:foraminiferaCount;algaeCount;foraminiferaDeaths;foraminiferaTotalEnergy;foraminiferaReproductionsCount;consumedAlgaeCount;foraminiferaTotalLifespan;algaeTotalLifespan")
-    ForminConfig.fromConfig(forminConfig) match {
+    logger.info(WorkerActor.MetricsMarker, logHeader)
+    configFactory(forminConfig) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>
@@ -43,9 +51,7 @@ object Simulation extends LazyLogging {
 
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
-  private val workerProps: Props = WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
-    new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
-  )
+  private val workerProps: Props = WorkerActor.props[ConfigType](movesControllerFactory, conflictResolver)
 
   ClusterSharding(system).start(
     typeName = WorkerActor.Name,
@@ -57,7 +63,7 @@ object Simulation extends LazyLogging {
 
   private val WorkerRegionRef: ActorRef = ClusterSharding(system).shardRegion(WorkerActor.Name)
 
-  def main(args: Array[String]): Unit = {
+  def start(): Unit = {
     if (config.isSupervisor) {
 
       val workers: Vector[WorkerId] =
@@ -74,4 +80,3 @@ object Simulation extends LazyLogging {
   }
 
 }
-
