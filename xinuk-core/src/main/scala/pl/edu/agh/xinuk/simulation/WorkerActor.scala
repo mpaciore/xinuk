@@ -6,6 +6,7 @@ import com.avsystem.commons.SharedExtensions._
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour}
 
@@ -13,7 +14,7 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 
 class WorkerActor[ConfigType <: XinukConfig](
-                                              movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
+                                              movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                               conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType)
   extends Actor with Stash {
 
@@ -21,11 +22,15 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   var grid: Grid = _
 
+  var metrics: Metrics = _
+
   var bufferZone: TreeSet[(Int, Int)] = _
 
   private var id: WorkerId = _
 
   private var regionRef: ActorRef = _
+
+  private val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
 
   private var neighbours: Map[WorkerId, Neighbour] = _
 
@@ -47,19 +52,25 @@ class WorkerActor[ConfigType <: XinukConfig](
   }
 
   def stopped: Receive = {
+    case SubscribeGUI(_) =>
+      guiActors += sender()
     case NeighboursInitialized(id, neighbours, regionRef) =>
       this.regionRef = regionRef
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
       this.bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
-      this.movesController = movesControllerFactory(bufferZone, logger, config)
+      this.movesController = movesControllerFactory(bufferZone, config)
       grid = Grid.empty(bufferZone)
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       self ! StartIteration(1)
     case StartIteration(1) =>
-      grid = movesController.initialGrid
+      val (newGrid, newMetrics) = movesController.initialGrid
+      this.grid = newGrid
+      this.metrics = newMetrics
+      logMetrics(1, metrics)
       propagateSignal()
+      guiActors.foreach(_ ! GridInfo(1, grid, metrics))
       notifyNeighbours(1, grid)
       unstashAll()
       context.become(started)
@@ -74,7 +85,10 @@ class WorkerActor[ConfigType <: XinukConfig](
       finished.remove(i - 1)
       logger.debug(s"$id started $i")
       propagateSignal()
-      grid = movesController.makeMoves(i, grid)
+      val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
+      this.grid = newGrid
+      this.metrics = newMetrics
+      logMetrics(i, metrics)
       notifyNeighbours(i, grid)
       if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
@@ -109,6 +123,7 @@ class WorkerActor[ConfigType <: XinukConfig](
           }
 
           currentIteration += 1
+          guiActors.foreach(_ ! GridInfo(iteration, grid, metrics))
           self ! StartIteration(currentIteration)
         }
       } else if (finished(currentIteration).size == neighbours.size + 1) {
@@ -125,6 +140,10 @@ class WorkerActor[ConfigType <: XinukConfig](
       regionRef ! IterationPartFinished(id, neighbourId, iteration, bufferArray)
     }
   }
+
+  private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
+    logger.info(WorkerActor.MetricsMarker, "{};{}", iteration.toString, metrics: Any)
+  }
 }
 
 object WorkerActor {
@@ -139,13 +158,15 @@ object WorkerActor {
 
   final case class StartIteration private(i: Long) extends AnyVal
 
+  final case class SubscribeGUI(id: WorkerId)
+
   //sent to listeners
   final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, incomingBuffer: Array[BufferCell])
 
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props[ConfigType <: XinukConfig](
-                                        movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController,
+                                        movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                         conflictResolver: ConflictResolver[ConfigType]
                                       )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(movesControllerFactory, conflictResolver))
@@ -156,6 +177,7 @@ object WorkerActor {
   def extractShardId(implicit config: XinukConfig): ExtractShardId = {
     case NeighboursInitialized(id, _, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
+    case SubscribeGUI(id) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
@@ -163,5 +185,7 @@ object WorkerActor {
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
+    case msg@SubscribeGUI(id) =>
+      (id.value.toString, msg)
   }
 }

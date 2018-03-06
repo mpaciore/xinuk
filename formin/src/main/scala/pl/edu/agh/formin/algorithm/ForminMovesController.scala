@@ -3,24 +3,22 @@ package pl.edu.agh.formin.algorithm
 import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import org.slf4j.Logger
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.simulation.ForminMetrics
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
 
-final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logger)(implicit config: ForminConfig) extends MovesController {
+final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: ForminConfig) extends MovesController {
 
   private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid: Grid = {
+  override def initialGrid: (Grid, ForminMetrics) = {
     grid = Grid.empty(bufferZone)
     var foraminiferaCount = 0L
     var algaeCount = 0L
@@ -42,12 +40,11 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
       }
     }
     val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
-    logMetrics(1, metrics)
-    grid
+    (grid, metrics)
   }
 
 
-  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid : Grid): Iterator[(Int, Int, GridPart)] = {
+  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
 
     val destinations = Grid.SubcellCoordinates
@@ -62,7 +59,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
     destinations
   }
 
-  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid : Grid): commons.Opt[(Int, Int, GridPart)] = {
+  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
     possibleDestinations
       .collectFirstOpt {
         case (i, j, destination: AlgaeCell) =>
@@ -77,7 +74,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
       }
   }
 
-  override def makeMoves(iteration: Long, grid: Grid): Grid = {
+  override def makeMoves(iteration: Long, grid: Grid): (Grid, ForminMetrics) = {
     this.grid = grid
     val newGrid = Grid.empty(bufferZone)
 
@@ -188,11 +185,6 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)], logger: Logge
       }
     }
     val metrics = ForminMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
-    logMetrics(iteration, metrics)
-    newGrid
-  }
-
-  private def logMetrics(iteration: Long, metrics: ForminMetrics): Unit = {
-    logger.info(WorkerActor.MetricsMarker, "{};{}", iteration.toString, metrics: Any)
+    (newGrid, metrics)
   }
 }

@@ -2,10 +2,10 @@ package pl.edu.agh.formin
 
 import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
-import org.slf4j.LoggerFactory
 import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.{ForminConfig, GuiType}
+import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.ForaminiferaAccessible
+import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
@@ -40,7 +40,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
   }
 
   "A calculatePossibleDestinations method" should "return correct possible destination cells" in {
-    val movesController: ForminMovesController = new ForminMovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val movesController: ForminMovesController = new ForminMovesController(TreeSet.empty)
     val cell1 = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(2) = cell1
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
@@ -59,7 +59,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
   }
 
   "A selectDestinationCell method" should "return right destination cell for first one correct" in {
-    val movesController = new ForminMovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val movesController = new ForminMovesController(TreeSet.empty)
     val cell1 = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(2) = cell1
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
@@ -77,7 +77,7 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
   }
 
   it should "return right destination cell for not first one correct" in {
-    val movesController = new ForminMovesController(TreeSet.empty, LoggerFactory.getLogger(""))
+    val movesController = new ForminMovesController(TreeSet.empty)
     val cell1 = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(2) = cell1
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)

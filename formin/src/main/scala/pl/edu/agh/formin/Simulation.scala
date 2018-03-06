@@ -7,8 +7,10 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.formin.config.{ForminConfig}
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import pl.edu.agh.xinuk.config.GuiType
+import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model.WorkerId
 import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
 import pl.edu.agh.xinuk.simulation.WorkerActor
@@ -43,8 +45,8 @@ object Simulation extends LazyLogging {
 
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
-  private val workerProps: Props = WorkerActor.props[ForminConfig]((bufferZone, logger, config) =>
-    new ForminMovesController(bufferZone, logger)(config), ForminConflictResolver
+  private val workerProps: Props = WorkerActor.props[ForminConfig]((bufferZone, config) =>
+    new ForminMovesController(bufferZone)(config), ForminConflictResolver
   )
 
   ClusterSharding(system).start(
@@ -65,6 +67,9 @@ object Simulation extends LazyLogging {
           .map(WorkerId)(collection.breakOut)
 
       workers.foreach { id =>
+        if (config.guiType != GuiType.None) {
+          system.actorOf(GuiActor.props(WorkerRegionRef, id))
+        }
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))
         }(collection.breakOut)

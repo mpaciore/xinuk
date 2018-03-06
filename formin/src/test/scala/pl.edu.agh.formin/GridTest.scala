@@ -1,8 +1,9 @@
 package pl.edu.agh.formin
 
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
-import pl.edu.agh.formin.config.{ForminConfig, GuiType}
+import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
+import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 
 class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
