@@ -64,7 +64,7 @@ lazy val formin = project
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
     ),
-    mainClass in assembly := Some("pl.edu.agh.formin.Simulation"),
+    mainClass in assembly := Some("pl.edu.agh.formin.Main"),
     assemblyJarName in assembly := "formin.jar",
     test in assembly := {},
   ).dependsOn(`xinuk-core`)
