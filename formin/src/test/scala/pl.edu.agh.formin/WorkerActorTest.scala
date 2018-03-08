@@ -41,11 +41,11 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
   "A WorkerActor" should "start first iteration when neighbours are initialized" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, config) =>
+    val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver
     ))
 
-    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)), workerRegion.ref)
+    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
 
     val msg = workerRegion.expectMsgAnyClassOf(classOf[WorkerActor.IterationPartFinished])
     msg.iteration shouldBe 1
@@ -56,11 +56,11 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     import scala.concurrent.duration._
 
     val workerRegion = TestProbe("workerRegion")
-    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, config) =>
+    val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver
     ))
 
-    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)), workerRegion.ref)
+    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
 
     val msgIteration1 = workerRegion.expectMsgAnyClassOf(classOf[WorkerActor.IterationPartFinished])
     msgIteration1.iteration shouldBe 1
@@ -82,11 +82,11 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
   it should "shutdown actor system when iterations limit is reached" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
-    val worker = system.actorOf(WorkerActor.props[ForminConfig]((bufferZone, config) =>
+    val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver
     ))
 
-    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(), workerRegion.ref)
+    worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector())
 
     import scala.concurrent.duration._
 

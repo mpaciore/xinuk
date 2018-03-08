@@ -9,8 +9,9 @@ trait XinukConfig {
   def workersRoot: Int
   def shardingMod: Int
 
+  def guiType: GuiType
+  def isSupervisor: Boolean
   def signalSpeedRatio: Int
-
   def iterationsNumber: Long
 }
 

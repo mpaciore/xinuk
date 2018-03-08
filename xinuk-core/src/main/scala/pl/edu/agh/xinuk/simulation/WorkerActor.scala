@@ -14,9 +14,9 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 
 class WorkerActor[ConfigType <: XinukConfig](
-                                              movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-                                              conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType)
-  extends Actor with Stash {
+  regionRef: => ActorRef,
+  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+  conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
@@ -26,13 +26,11 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   var id: WorkerId = _
 
-  var regionRef: ActorRef = _
-
   val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
 
   var neighbours: Map[WorkerId, Neighbour] = _
 
-  val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
+  private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
   var logger: Logger = _
 
@@ -52,8 +50,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   def stopped: Receive = {
     case SubscribeGridInfo(_) =>
       guiActors += sender()
-    case NeighboursInitialized(id, neighbours, regionRef) =>
-      this.regionRef = regionRef
+    case NeighboursInitialized(id, neighbours) =>
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
@@ -150,11 +147,11 @@ object WorkerActor {
 
   private final class IncomingNeighbourCells(val cells: Vector[((Int, Int), BufferCell)]) extends AnyVal
 
-  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour], regionRef: ActorRef)
+  final case class NeighboursInitialized(id: WorkerId, neighbours: Vector[Neighbour])
 
   final case class StartIteration private(i: Long) extends AnyVal
 
-  final case class SubscribeGridInfo(id: WorkerId) extends AnyVal
+  final case class SubscribeGridInfo(id: WorkerId)
 
   //sent to listeners
   final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, incomingBuffer: Array[BufferCell])
@@ -162,22 +159,23 @@ object WorkerActor {
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props[ConfigType <: XinukConfig](
-                                        movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-                                        conflictResolver: ConflictResolver[ConfigType]
-                                      )(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(movesControllerFactory, conflictResolver))
+    regionRef: => ActorRef,
+    movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+    conflictResolver: ConflictResolver[ConfigType]
+  )(implicit config: ConfigType): Props = {
+    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
 
   def extractShardId(implicit config: XinukConfig): ExtractShardId = {
-    case NeighboursInitialized(id, _, _) => idToShard(id)
+    case NeighboursInitialized(id, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
     case SubscribeGridInfo(id) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
-    case msg@NeighboursInitialized(id, _, _) =>
+    case msg@NeighboursInitialized(id, _) =>
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
