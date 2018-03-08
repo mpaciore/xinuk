@@ -7,9 +7,9 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
-import org.slf4j.Logger
 import pl.edu.agh.xinuk.algorithm.MovesController
-import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
+import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model.WorkerId
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
 import pl.edu.agh.xinuk.simulation.WorkerActor
@@ -21,7 +21,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType])(
-  movesControllerFactory: (TreeSet[(Int, Int)], Logger, ConfigType) => MovesController) extends LazyLogging {
+  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -67,6 +67,9 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
           .map(WorkerId)(collection.breakOut)
 
       workers.foreach { id =>
+        if (config.guiType != GuiType.None) {
+          system.actorOf(GuiActor.props(workerRegionRef, id))
+        }
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))
         }(collection.breakOut)

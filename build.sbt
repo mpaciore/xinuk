@@ -50,6 +50,8 @@ lazy val `xinuk-core` = project
       "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+      "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+      "org.jfree" % "jfreechart" % Version.JFreeChart,
     ),
   ).disablePlugins(AssemblyPlugin)
 
@@ -58,8 +60,7 @@ lazy val formin = project
     name := "formin",
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % Version.Logback,
-      "org.jfree" % "jfreechart" % Version.JFreeChart,
-      "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+      "com.iheart" %% "ficus" % Version.Ficus,
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
     ),

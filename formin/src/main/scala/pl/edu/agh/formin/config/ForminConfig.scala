@@ -1,7 +1,6 @@
 package pl.edu.agh.formin.config
 
-import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
-import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.{Energy, Signal}
 
 /*
@@ -43,22 +42,3 @@ final case class ForminConfig(
                                isSupervisor: Boolean,
                                shardingMod: Int
                              ) extends XinukConfig
-
-sealed trait GuiType extends NamedEnum
-
-object GuiType extends NamedEnumCompanion[GuiType] {
-
-  case object None extends GuiType {
-    override val name: String = "none"
-  }
-
-  case object Basic extends GuiType {
-    override def name: String = "basic"
-  }
-
-  case object Signal extends GuiType {
-    override def name: String = "signal"
-  }
-
-  override val values: List[GuiType] = caseObjects
-}

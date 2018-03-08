@@ -14,4 +14,9 @@ final case class ForminMetrics(foraminiferaCount: Long,
   override def log: String = {
     s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan;$algaeTotalLifespan"
   }
+
+  override def series: Vector[(String, Double)] = Vector(
+    "Foraminifera" -> foraminiferaCount,
+    "Algae" -> algaeCount
+  )
 }
