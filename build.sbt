@@ -33,7 +33,7 @@ inThisBuild(Seq(
 ))
 
 lazy val xinuk = project.in(file("."))
-  .aggregate(`xinuk-core`, formin)
+  .aggregate(`xinuk-core`, formin, fortwist, torch)
   .disablePlugins(AssemblyPlugin)
 
 lazy val `xinuk-core` = project
@@ -55,16 +55,22 @@ lazy val `xinuk-core` = project
     ),
   ).disablePlugins(AssemblyPlugin)
 
-lazy val formin = project
-  .settings(
-    name := "formin",
-    libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % Version.Logback,
-      "com.iheart" %% "ficus" % Version.Ficus,
-      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
-      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
-    ),
-    mainClass in assembly := Some("pl.edu.agh.formin.Simulation"),
-    assemblyJarName in assembly := "formin.jar",
-    test in assembly := {},
-  ).dependsOn(`xinuk-core`)
+def modelProject(projectName: String)(mainClassName: String): Project = {
+  Project(projectName, file(projectName))
+    .settings(
+      name := projectName,
+      libraryDependencies ++= Seq(
+        "ch.qos.logback" % "logback-classic" % Version.Logback,
+        "com.iheart" %% "ficus" % Version.Ficus,
+        "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
+        "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+      ),
+      mainClass in assembly := Some(mainClassName),
+      assemblyJarName in assembly := s"$projectName.jar",
+      test in assembly := {},
+    ).dependsOn(`xinuk-core`)
+}
+
+lazy val formin = modelProject("formin")("pl.edu.agh.formin.Main")
+lazy val fortwist = modelProject("fortwist")("pl.edu.agh.fortwist.Main")
+lazy val torch = modelProject("torch")("pl.edu.agh.torch.Main")
