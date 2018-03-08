@@ -29,7 +29,7 @@ class GuiActor private(worker: ActorRef, workerId: WorkerId)(
   private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)
 
   override def preStart: Unit = {
-    worker ! SubscribeGUI(workerId)
+    worker ! SubscribeGridInfo(workerId)
     log.info("GUI started")
   }
 

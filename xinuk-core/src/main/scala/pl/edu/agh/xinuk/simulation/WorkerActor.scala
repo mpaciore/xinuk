@@ -22,23 +22,21 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   var grid: Grid = _
 
-  var metrics: Metrics = _
-
   var bufferZone: TreeSet[(Int, Int)] = _
 
-  private var id: WorkerId = _
+  var id: WorkerId = _
 
-  private var regionRef: ActorRef = _
+  var regionRef: ActorRef = _
 
-  private val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
+  val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
 
-  private var neighbours: Map[WorkerId, Neighbour] = _
+  var neighbours: Map[WorkerId, Neighbour] = _
 
-  private val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
+  val finished: mutable.Map[Long, Vector[IncomingNeighbourCells]] = mutable.Map.empty.withDefaultValue(Vector.empty)
 
-  private var logger: Logger = _
+  var logger: Logger = _
 
-  private var movesController: MovesController = _
+  var movesController: MovesController = _
 
   override def receive: Receive = stopped
 
@@ -52,7 +50,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   }
 
   def stopped: Receive = {
-    case SubscribeGUI(_) =>
+    case SubscribeGridInfo(_) =>
       guiActors += sender()
     case NeighboursInitialized(id, neighbours, regionRef) =>
       this.regionRef = regionRef
@@ -67,10 +65,9 @@ class WorkerActor[ConfigType <: XinukConfig](
     case StartIteration(1) =>
       val (newGrid, newMetrics) = movesController.initialGrid
       this.grid = newGrid
-      this.metrics = newMetrics
-      logMetrics(1, metrics)
+      logMetrics(1, newMetrics)
       propagateSignal()
-      guiActors.foreach(_ ! GridInfo(1, grid, metrics))
+      guiActors.foreach(_ ! GridInfo(1, grid, newMetrics))
       notifyNeighbours(1, grid)
       unstashAll()
       context.become(started)
@@ -87,8 +84,8 @@ class WorkerActor[ConfigType <: XinukConfig](
       propagateSignal()
       val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
       this.grid = newGrid
-      this.metrics = newMetrics
-      logMetrics(i, metrics)
+      logMetrics(i, newMetrics)
+      guiActors.foreach(_ ! GridInfo(i, grid, newMetrics))
       notifyNeighbours(i, grid)
       if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
@@ -123,7 +120,6 @@ class WorkerActor[ConfigType <: XinukConfig](
           }
 
           currentIteration += 1
-          guiActors.foreach(_ ! GridInfo(iteration, grid, metrics))
           self ! StartIteration(currentIteration)
         }
       } else if (finished(currentIteration).size == neighbours.size + 1) {
@@ -158,7 +154,7 @@ object WorkerActor {
 
   final case class StartIteration private(i: Long) extends AnyVal
 
-  final case class SubscribeGUI(id: WorkerId)
+  final case class SubscribeGridInfo(id: WorkerId) extends AnyVal
 
   //sent to listeners
   final case class IterationPartFinished private(worker: WorkerId, to: WorkerId, iteration: Long, incomingBuffer: Array[BufferCell])
@@ -177,7 +173,7 @@ object WorkerActor {
   def extractShardId(implicit config: XinukConfig): ExtractShardId = {
     case NeighboursInitialized(id, _, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
-    case SubscribeGUI(id) => idToShard(id)
+    case SubscribeGridInfo(id) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
@@ -185,7 +181,7 @@ object WorkerActor {
       (id.value.toString, msg)
     case msg@IterationPartFinished(_, to, _, _) =>
       (to.value.toString, msg)
-    case msg@SubscribeGUI(id) =>
+    case msg@SubscribeGridInfo(id) =>
       (id.value.toString, msg)
   }
 }
