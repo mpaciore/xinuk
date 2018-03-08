@@ -1,9 +1,9 @@
-package pl.edu.agh.formin.config
+package pl.edu.agh.xinuk.config
 
 import com.esotericsoftware.kryo.Kryo
 import pl.edu.agh.xinuk.model._
 
-class KryoInit {
+final class KryoInit {
   def customize(kryo: Kryo): Unit = {
     kryo.register(classOf[Grid.CellArray])
     kryo.register(classOf[Array[GridPart]])

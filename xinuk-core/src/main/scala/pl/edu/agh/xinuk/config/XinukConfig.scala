@@ -6,7 +6,7 @@ trait XinukConfig {
   def workersRoot: Int
   def shardingMod: Int
 
+  def isSupervisor: Boolean
   def signalSpeedRatio: Int
-
   def iterationsNumber: Long
 }

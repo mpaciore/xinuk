@@ -73,7 +73,7 @@ final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
 }
 
 object Signal {
-  val Zero = Signal(0d)
+  final val Zero = Signal(0d)
 }
 
 final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
