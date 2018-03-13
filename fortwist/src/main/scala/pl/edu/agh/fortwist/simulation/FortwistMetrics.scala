@@ -1,15 +1,14 @@
-package pl.edu.agh.formin.simulation
+package pl.edu.agh.fortwist.simulation
 
 import pl.edu.agh.xinuk.simulation.Metrics
 
-
-final case class ForminMetrics(
+final case class FortwistMetrics(
   foraminiferaCount: Long,
-  algaeCount: Long,
+  algaeCount: Double,
   foraminiferaDeaths: Long,
   foraminiferaTotalEnergy: Double,
   foraminiferaReproductionsCount: Long,
-  consumedAlgaeCount: Long,
+  consumedAlgaeCount: Double,
   foraminiferaTotalLifespan: Long,
   algaeTotalLifespan: Long) extends Metrics {
 
