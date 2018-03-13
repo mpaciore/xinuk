@@ -1,5 +1,16 @@
 package pl.edu.agh.torch.simulation
 
-class TorchMetrics {
+import pl.edu.agh.xinuk.simulation.Metrics
 
+final case class TorchMetrics(peopleCount: Long,
+                              fireCount: Long,
+                              peopleDeaths: Long) extends Metrics {
+  override def log: String = {
+    s"$peopleCount;$fireCount;$peopleDeaths"
+  }
+
+  override def series: Vector[(String, Double)] = Vector(
+    "People" -> peopleCount,
+    "Fire" -> fireCount
+  )
 }
