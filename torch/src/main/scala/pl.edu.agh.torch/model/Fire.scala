@@ -22,11 +22,15 @@ object FireAccessible {
   def unapply(arg: HumanCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     () => FireCell(arg.smellWith(config.fireInitialSignal))
 
+  def unapply(arg: EscapeCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
+    () => FireCell(arg.smellWith(config.fireInitialSignal))
+
   def unapply(arg: BufferCell)(implicit config: TorchConfig): FireAccessible[BufferCell] =
      () => BufferCell(FireCell(arg.smellWith(config.fireInitialSignal)))
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[FireAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
+    case cell: EscapeCell => Some(unapply(cell))
     case cell: BufferCell => Some(unapply(cell))
     case cell: HumanCell => Some(unapply(cell))
     case _ => None
