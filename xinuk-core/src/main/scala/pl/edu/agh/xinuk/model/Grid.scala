@@ -127,9 +127,7 @@ final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPar
 
   override def smell: SmellArray = cell.smell
 
-  override def withSmell(smell: SmellArray): BufferCell = {
-    BufferCell(cell.withSmell(smell))
-  }
+  override def withSmell(smell: SmellArray): BufferCell = copy(cell.withSmell(smell))
 }
 
 final case class EmptyCell(smell: SmellArray) extends SmellingCell {

@@ -11,7 +11,6 @@ FLAC - foraminifera life activities(vegetation and movement) cost; FLAC ∈ [0,1
 ARF - algae reproduction frequency; ARF ∈ N.
 AEC - algae energetic capacity; AEC ∈ [0,1] && AEC ∈ R.
 SSR - signal speed ratio; SSR ∈ N. Foraminifera speed is 1.
-DFF - diffraction factor; DFF ∈ [0,1] && DFF ∈ R.
 SPF - global suppression factor of the signal; SPF ∈ [0,1] && SPF ∈ R.
 GS - grid size; GS ∈ N, where map size is GSxGS.
 SC - spawn chance, SC ∈ [0,1] && SC ∈ R
@@ -21,24 +20,23 @@ ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
  */
 
 final case class ForminConfig(
-                               foraminiferaStartEnergy: Energy,
-                               foraminiferaReproductionCost: Energy,
-                               foraminiferaReproductionThreshold: Energy,
-                               foraminiferaLifeActivityCost: Energy,
-                               algaeReproductionFrequency: Int,
-                               algaeEnergeticCapacity: Energy,
-                               signalSpeedRatio: Int,
-                               //diffractionFactor: Double,
-                               signalSuppressionFactor: Double,
-                               gridSize: Int,
-                               spawnChance: Double,
-                               foraminiferaSpawnChance: Double,
-                               foraminiferaInitialSignal: Signal,
-                               algaeInitialSignal: Signal,
-                               guiType: GuiType,
-                               guiCellSize: Int,
-                               workersRoot: Int,
-                               iterationsNumber: Long,
-                               isSupervisor: Boolean,
-                               shardingMod: Int
-                             ) extends XinukConfig
+  foraminiferaStartEnergy: Energy,
+  foraminiferaReproductionCost: Energy,
+  foraminiferaReproductionThreshold: Energy,
+  foraminiferaLifeActivityCost: Energy,
+  algaeReproductionFrequency: Int,
+  algaeEnergeticCapacity: Energy,
+  signalSpeedRatio: Int,
+  signalSuppressionFactor: Double,
+  gridSize: Int,
+  spawnChance: Double,
+  foraminiferaSpawnChance: Double,
+  foraminiferaInitialSignal: Signal,
+  algaeInitialSignal: Signal,
+  guiType: GuiType,
+  guiCellSize: Int,
+  workersRoot: Int,
+  iterationsNumber: Long,
+  isSupervisor: Boolean,
+  shardingMod: Int
+) extends XinukConfig
