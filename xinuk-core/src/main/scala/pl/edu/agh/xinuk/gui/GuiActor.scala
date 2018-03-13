@@ -9,7 +9,7 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.xinuk.config.XinukConfig
-import pl.edu.agh.xinuk.gui.GuiActor.{GridInfo}
+import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.simulation.Metrics
@@ -106,8 +106,8 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
 
     private val classToColor = mutable.Map[Class[_], Color](
       Obstacle.getClass -> obstacleColor,
-      BufferCell.getClass -> bufferColor,
-      EmptyCell.getClass -> emptyColor,
+      classOf[BufferCell] -> bufferColor,
+      classOf[EmptyCell] -> emptyColor,
     )
 
     def set(cells: CellArray): Unit = {
