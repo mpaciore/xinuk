@@ -7,6 +7,7 @@ val Version = new {
   val Guava = "23.0"
   val AvsCommons = "1.25.9"
   val ScalaTest = "3.0.5"
+  val Mockito = "2.16.0"
   val ScalaLogging = "3.8.0"
   val Ficus = "1.4.3"
   val ScalaSwing = "2.0.2"
@@ -48,10 +49,11 @@ lazy val `xinuk-core` = project
       "com.typesafe.akka" %% "akka-cluster" % Version.Akka,
       "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
       "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
-      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
-      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
       "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
       "org.jfree" % "jfreechart" % Version.JFreeChart,
+      "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
+      "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+      "org.mockito" % "mockito-core" % Version.Mockito % Test,
     ),
   ).disablePlugins(AssemblyPlugin)
 
@@ -64,6 +66,7 @@ def modelProject(projectName: String)(mainClassName: String): Project = {
         "com.iheart" %% "ficus" % Version.Ficus,
         "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
         "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
+        "org.mockito" % "mockito-core" % Version.Mockito % Test,
       ),
       mainClass in assembly := Some(mainClassName),
       assemblyJarName in assembly := s"$projectName.jar",

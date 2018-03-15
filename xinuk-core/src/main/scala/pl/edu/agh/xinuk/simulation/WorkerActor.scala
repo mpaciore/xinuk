@@ -95,7 +95,6 @@ class WorkerActor[ConfigType <: XinukConfig](
             affectedCells.zip(neighbourBuffer.iterator)
               .filterNot { case ((x, y), _) => bufferZone.contains((x, y)) } //at most 8 cells are discarded
               .toVector
-
           new IncomingNeighbourCells(incoming)
         } else {
           new IncomingNeighbourCells(Vector.empty)
@@ -104,11 +103,11 @@ class WorkerActor[ConfigType <: XinukConfig](
       if (config.iterationsNumber > currentIteration) {
         val incomingCells = finished(currentIteration)
         if (incomingCells.size == neighbours.size + 1) {
-          //todo configurable strategy
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y)
-              grid.cells(x)(y) = conflictResolver.resolveConflict(currentCell, cell)
+              val resolved = conflictResolver.resolveConflict(currentCell, cell)
+              grid.cells(x)(y) = resolved
           })
 
           //clean buffers

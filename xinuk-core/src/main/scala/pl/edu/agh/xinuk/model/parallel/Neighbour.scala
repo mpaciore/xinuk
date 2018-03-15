@@ -24,7 +24,7 @@ sealed trait NeighbourPosition {
 }
 
 sealed protected abstract class NeighbourPositionGen(idModifier: XinukConfig => Int)(gridEdgeRangeToZone: Range => Iterator[(Int, Int)])
-                                                    (protected[parallel] val bufferZoneAffectedModifier: (Int, Int))
+  (protected[parallel] val bufferZoneAffectedModifier: (Int, Int))
   extends NeighbourPosition {
 
   private def isValid(id: WorkerId)(implicit config: XinukConfig): Boolean = {
@@ -46,7 +46,16 @@ sealed protected abstract class NeighbourPositionGen(idModifier: XinukConfig => 
   }
 
   override def bufferZone(implicit config: XinukConfig): TreeSet[(Int, Int)] = {
-    gridEdgeRangeToZone(0 until config.gridSize).to[TreeSet]
+    gridEdgeRangeToZone(1 until config.gridSize - 1).to[TreeSet]
+  }
+
+  def extendedZone(implicit config: XinukConfig): TreeSet[(Int, Int)] = {
+    val (xMod, yMod) = bufferZoneAffectedModifier
+    gridEdgeRangeToZone(0 until config.gridSize).map {
+      case (x, y) if xMod < 0 => (x + xMod, y)
+      case (x, y) if yMod < 0 => (x, y + yMod)
+      case other => other
+    }.to[TreeSet]
   }
 
 }
@@ -55,8 +64,8 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
   extends NeighbourPosition {
 
   override protected[parallel] val bufferZoneAffectedModifier: (Int, Int) = {
-    val (x1, y1) = (pos1: NeighbourPosition).bufferZoneAffectedModifier
-    val (x2, y2) = (pos2: NeighbourPosition).bufferZoneAffectedModifier
+    val (x1, y1) = pos1.bufferZoneAffectedModifier
+    val (x2, y2) = pos2.bufferZoneAffectedModifier
     (x1 + x2, y1 + y2)
   }
 
@@ -65,7 +74,7 @@ sealed protected abstract class NeighbourPositionComposite(pos1: NeighbourPositi
   }
 
   override def bufferZone(implicit config: XinukConfig): TreeSet[(Int, Int)] = {
-    pos1.bufferZone & pos2.bufferZone
+    pos1.extendedZone & pos2.extendedZone
   }
 }
 
@@ -73,9 +82,9 @@ object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
 
   case object Top extends NeighbourPositionGen(-_.workersRoot)(_.iterator.map((0, _)))((1, 0))
 
-  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end - 1, _)))((-1, 0))
+  case object Bottom extends NeighbourPositionGen(_.workersRoot)(range => range.iterator.map((range.end, _)))((-1, 0))
 
-  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end - 1)))((0, -1))
+  case object Right extends NeighbourPositionGen(_ => 1)(range => range.iterator.map((_, range.end)))((0, -1))
 
   case object Left extends NeighbourPositionGen(_ => -1)(_.iterator.map((_, 0)))((0, 1))
 
