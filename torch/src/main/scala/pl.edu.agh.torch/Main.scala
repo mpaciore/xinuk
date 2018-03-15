@@ -8,16 +8,11 @@ import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model.{Energy, Signal}
 
 object Main extends LazyLogging {
-  private val configPrefix = "formin"
+  private val configPrefix = "torch"
   private val metricHeaders = Vector(
-    "foraminiferaCount",
-    "algaeCount",
-    "foraminiferaDeaths",
-    "foraminiferaTotalEnergy",
-    "foraminiferaReproductionsCount",
-    "consumedAlgaeCount",
-    "foraminiferaTotalLifespan",
-    "algaeTotalLifespan"
+    "peopleCount",
+    "fireCount",
+    "peopleDeaths"
   )
 
   implicit val guiTypeReader: ValueReader[GuiType] =
@@ -28,7 +23,7 @@ object Main extends LazyLogging {
     (config: Config, path: String) => Energy(config.getNumber(path).doubleValue())
 
   def main(args: Array[String]): Unit = {
-    //new Simulation(configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_)).start()
+   // new Simulation(configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_)).start()
   }
 
 }
