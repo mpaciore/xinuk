@@ -4,8 +4,7 @@ import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 
-
-final case class HumanCell(smell: SmellArray, crowd : List[HumanCell]) extends SmellingCell {
+final case class HumanCell(smell: SmellArray, crowd : List[HumanCell], speed : Int) (implicit config: TorchConfig) extends SmellingCell {
 
   override type Self = HumanCell
 
@@ -13,18 +12,18 @@ final case class HumanCell(smell: SmellArray, crowd : List[HumanCell]) extends S
 }
 
 trait HumanAccessible[+T <: GridPart] {
-  def withHuman(crowd : List[HumanCell]): T
+  def withHuman(crowd : List[HumanCell], speed : Int): T
 }
 object HumanAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): HumanAccessible[HumanCell] =
-    (crowd) => HumanCell(arg.smellWith(config.humanInitialSignal), crowd)
+    (crowd, speed) => HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed)
 
-  def unapply(arg: EscapeCell)(implicit config: TorchConfig): HumanAccessible[EscapeCell] =
-    (_) => EscapeCell(arg.smell)
+  def unapply(arg: EscapeCell): HumanAccessible[EscapeCell] =
+    (_,_) => EscapeCell(arg.smell)
 
   def unapply(arg: BufferCell)(implicit config: TorchConfig): HumanAccessible[BufferCell] =
-    crowd => BufferCell(HumanCell(arg.smellWith(config.humanInitialSignal), crowd))
+    (crowd, speed) => BufferCell(HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed))
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[HumanAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))

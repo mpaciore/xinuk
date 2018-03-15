@@ -67,6 +67,8 @@ object Grid {
 final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
   def +(other: Signal) = Signal(value + other.value)
 
+  def -(other: Signal) = Signal(value - other.value)
+
   def *(factor: Double) = Signal(value * factor)
 
   override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
@@ -93,6 +95,14 @@ trait SmellMedium extends GridPart {
 
   final def smellWith(added: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
+  }
+
+  final def smellWithout(deducted: Signal): SmellArray = {
+    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) - deducted)
+  }
+
+  final def smellWithoutArray(deducted: SmellArray): SmellArray = {
+    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) - deducted(i)(j))
   }
 
   def withSmell(smell: SmellArray): Self

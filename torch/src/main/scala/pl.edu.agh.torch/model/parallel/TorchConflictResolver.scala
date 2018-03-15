@@ -13,13 +13,12 @@ object TorchConflictResolver extends ConflictResolver[TorchConfig] {
     (current, incoming) match {
       case (EmptyCell(currentSmell), incomingCell) => incomingCell.withSmell(incomingCell.smell + currentSmell)
       case (currentCell: SmellingCell, EmptyCell(incomingSmell)) => currentCell.withSmell(currentCell.smell + incomingSmell)
-      case (EscapeCell(currentSmell), HumanCell(_, _)) => EscapeCell(currentSmell)
+      case (EscapeCell(currentSmell), HumanCell(_, _, _)) => EscapeCell(currentSmell)
       case (EscapeCell(_), FireCell(incomingCell)) => FireCell(incomingCell)
-      case (EscapeCell(currentSmell), HumanCell(_, _)) => EscapeCell(currentSmell)
       case (FireCell(currentSmell), FireCell(incomingSmell)) => FireCell(currentSmell + incomingSmell)
-      case (FireCell(currentSmell), HumanCell(incomingSmell, _)) => FireCell(currentSmell + incomingSmell)
-      case (HumanCell(currentSmell, _), FireCell(incomingSmell)) => FireCell(currentSmell + incomingSmell)
-      case (HumanCell(currentSmell, currentCrowd), HumanCell(incomingSmell, incomingCrowd)) => HumanCell(currentSmell + incomingSmell, currentCrowd ++ incomingCrowd)
+      case (FireCell(currentSmell), HumanCell(incomingSmell, _, _)) => FireCell(currentSmell + incomingSmell)
+      case (HumanCell(currentSmell, _, _), FireCell(incomingSmell)) => FireCell(currentSmell + incomingSmell)
+      case (HumanCell(currentSmell, currentCrowd, currentSpeed), HumanCell(incomingSmell, incomingCrowd, _)) => HumanCell(currentSmell + incomingSmell, currentCrowd ++ incomingCrowd, currentSpeed)
       case (Obstacle, _) => Obstacle
       case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }

@@ -3,6 +3,8 @@ package pl.edu.agh.torch
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
+import pl.edu.agh.torch.algorithm.TorchMovesController
+import pl.edu.agh.torch.model.parallel.TorchConflictResolver
 import pl.edu.agh.xinuk.Simulation
 import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model.{Energy, Signal}
@@ -12,6 +14,7 @@ object Main extends LazyLogging {
   private val metricHeaders = Vector(
     "peopleCount",
     "fireCount",
+    "escapeCount",
     "peopleDeaths"
   )
 
@@ -23,7 +26,9 @@ object Main extends LazyLogging {
     (config: Config, path: String) => Energy(config.getNumber(path).doubleValue())
 
   def main(args: Array[String]): Unit = {
-   // new Simulation(configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_)).start()
+    import net.ceedubs.ficus.Ficus._
+    import net.ceedubs.ficus.readers.ArbitraryTypeReader._
+    new Simulation(configPrefix, metricHeaders, TorchConflictResolver)(new TorchMovesController(_)(_)).start()
   }
 
 }
