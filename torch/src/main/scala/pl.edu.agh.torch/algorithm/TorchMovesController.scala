@@ -32,19 +32,23 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         grid.cells(x)(y) =
           if (random.nextDouble() < config.humanSpawnChance) {
             humanCount += 1
-            HumanAccessible.unapply(EmptyCell.Instance).withHuman(List.empty, random.nextInt(config.humanMaxSpeed))
+            val speed = random.nextInt(config.humanMaxSpeed) + 1
+            HumanAccessible.unapply(EmptyCell.Instance).withHuman(List.empty, speed)
           }
           else if (random.nextDouble() < config.escapeSpawnChance) {
             escapesCount += 1
             EscapeAccessible.unapply(EmptyCell.Instance).withEscape()
           }
-          else {
+          else if (random.nextDouble() < config.fireSpawnChance) {
             fireCount += 1
             FireAccessible.unapply(EmptyCell.Instance).withFire()
           }
+          else {
+            grid.cells(x)(y)
+          }
       }
     }
-    val metrics = TorchMetrics(humanCount, fireCount, escapesCount, 0)
+    val metrics = TorchMetrics(humanCount, fireCount, escapesCount, 0, 0)
     (grid, metrics)
   }
 
@@ -79,6 +83,7 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
     var fireCount = 0L
     var escapesCount = 0L
     var peopleDeaths = 0L
+    var peopleEscaped = 0L
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
       grid.cells(i)(j) match {
@@ -99,8 +104,8 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
       if (availableCells.nonEmpty) {
         val (newFireeX, newFireY, newCell) = availableCells(random.nextInt(availableCells.size))
         newGrid.cells(newFireeX)(newFireY) = newCell
-        newCell match {
-          case HumanCell(_,_,_) => peopleDeaths += 1
+        grid.cells(newFireeX)(newFireY) match {
+          case HumanCell(_, _, _) => peopleDeaths += 1
           case _ =>
         }
       }
@@ -122,10 +127,17 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
             newGrid.cells(x)(y) = cell.copy()
           }
         case cell: HumanCell =>
-          if (iteration % config.humanMaxSpeed == 0) {
+          if (iteration % cell.speed == 0) {
             moveHuman(cell, x, y)
+          } else {
+            stayInPlace(cell, x, y)
           }
       }
+    }
+
+    def stayInPlace(cell: HumanCell, x: Int, y: Int): Unit = {
+      newGrid.cells(x)(y) = cell.copy(cell.smell, cell.crowd, cell.speed)
+      grid.cells(x)(y)
     }
 
     def moveHuman(cell: HumanCell, x: Int, y: Int): Unit = {
@@ -135,22 +147,26 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         destination match {
           case Opt((i, j, HumanAccessible(destination))) =>
             newGrid.cells(i)(j) = destination.withHuman(cell.crowd, cell.speed)
+            newGrid.cells(i)(j) match {
+              case EscapeCell(_) => peopleEscaped += 1
+              case _ =>
+            }
             grid.cells(x)(y) = EmptyCell(cell.smell)
           case Opt((i, j, inaccessibleDestination)) =>
             throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
-            newGrid.cells(x)(y) = cell.copy(cell.smell,cell.crowd,cell.speed)
+            newGrid.cells(x)(y) = cell.copy(cell.smell, cell.crowd, cell.speed)
             grid.cells(x)(y)
         }
       } else {
         destination match {
           case Opt((i, j, HumanAccessible(destination))) =>
             newGrid.cells(i)(j) = destination.withHuman(cell.crowd.head.crowd, cell.crowd.head.speed)
-            newGrid.cells(x)(y) = cell.copy(cell.smellWithoutArray(cell.crowd.head.smell),cell.crowd.drop(1),cell.speed)
+            newGrid.cells(x)(y) = cell.copy(cell.smellWithoutArray(cell.crowd.head.smell), cell.crowd.drop(1), cell.speed)
           case Opt((i, j, inaccessibleDestination)) =>
             throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
-            newGrid.cells(x)(y) = cell.copy(cell.smell,cell.crowd,cell.speed)
+            newGrid.cells(x)(y) = cell.copy(cell.smell, cell.crowd, cell.speed)
             grid.cells(x)(y)
         }
       }
@@ -176,7 +192,8 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         case _ =>
       }
     }
-    val metrics = TorchMetrics(humanCount, fireCount, escapesCount, 0)
+    val metrics = TorchMetrics(humanCount, fireCount, escapesCount, peopleDeaths, peopleEscaped)
+    Thread.sleep(0)
     (newGrid, metrics)
   }
 }
