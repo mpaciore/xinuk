@@ -97,9 +97,9 @@ trait GridPart {
 trait SmellMedium extends GridPart {
   type Self <: SmellMedium
 
-  final def smellWith(added: Signal): SmellArray = {
-    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
-  }
+  import Cell._
+
+  final def smellWith(added: Signal): SmellArray = smell + added
 
   def withSmell(smell: SmellArray): Self
 }
@@ -115,6 +115,10 @@ object Cell {
   implicit class SmellArrayOps(private val arr: SmellArray) extends AnyVal {
     def +(other: SmellArray): SmellArray = {
       Array.tabulate(Cell.Size, Cell.Size)((x, y) => arr(x)(y) + other(x)(y))
+    }
+
+    def +(added: Signal): SmellArray = {
+      Array.tabulate(Cell.Size, Cell.Size)((i, j) => arr(i)(j) + added)
     }
   }
 

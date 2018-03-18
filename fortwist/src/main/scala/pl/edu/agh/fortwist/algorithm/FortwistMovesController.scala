@@ -14,6 +14,8 @@ import scala.util.Random
 final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: FortwistConfig)
   extends MovesController {
 
+  import Cell._
+
   private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
@@ -29,7 +31,11 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     } {
       if (random.nextDouble() < config.foraminiferaSpawnChance) {
         val foraminiferas = Vector(Foraminifera.create())
-        val cell = FortwistCell(Cell.emptySignal, foraminiferas, config.algaeStartEnergy)
+        val cell = FortwistCell(
+          smell = Cell.emptySignal + config.foraminiferaInitialSignal + (config.algaeSignalMultiplier * config.algaeStartEnergy.value),
+          foraminiferas = foraminiferas,
+          algae = config.algaeStartEnergy
+        )
         foraminiferaCount += foraminiferas.size
         algaeCount += cell.algae.value
         grid.cells(x)(y) = cell
@@ -58,9 +64,13 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     var consumedAlgaeCount = 0.0
     var foraminiferaTotalLifespan = 0L
     var foraminiferaTotalEnergy = 0.0
+    var movesCount = 0L
 
     def update(x: Int, y: Int)(op: FortwistCell => FortwistCell): Unit = {
-      newGrid.cells(x)(y) = op(newGrid.cells(x)(y).asInstanceOf[FortwistCell]) //the grid is initialized with FC
+      val updated = op(newGrid.cells(x)(y).asInstanceOf[FortwistCell]) //the grid is initialized with FC
+      val smellAdjustment = (config.foraminiferaInitialSignal * updated.foraminiferas.size) +
+        (config.algaeSignalMultiplier * algaeCount)
+      newGrid.cells(x)(y) = updated.copy(smell = updated.smell + smellAdjustment)
     }
 
     def makeMove(x: Int, y: Int): Unit = {
@@ -70,24 +80,28 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
           val (newForaminiferas: Iterator[Foraminifera], moves: Iterator[(Foraminifera, Int, Int)], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft((Iterator[Foraminifera](), Iterator[Move](), algaeEnergy)) {
               case ((currentCellResult, moves, algaeEnergy), formin) =>
-                val action = if (formin.energy < config.foraminiferaLifeActivityCost) {
-                  killForaminifera(formin)
-                } else if (formin.energy > config.foraminiferaReproductionThreshold) {
+                val action = if (formin.energy > config.foraminiferaReproductionThreshold) {
                   reproduceForaminifera(formin)
                 } else if (algaeEnergy > config.algaeEnergeticCapacity) {
                   eatAlgae(formin)
+                } else if (formin.energy < config.foraminiferaLifeActivityCost) {
+                  killForaminifera(formin)
                 } else {
                   moveForaminifera(formin, x, y)
                 }
                 (currentCellResult ++ action.currentCellResult, moves ++ action.moves, algaeEnergy + action.algaeEnergyDiff)
             }
           import Cell._
-          update(x, y)(f => f.copy(f.smell + smell, f.foraminiferas ++ newForaminiferas, f.algae + newAlgaeEnergy + config.algaeRegenerationRate))
+          update(x, y)(f => f.copy(
+            smell = f.smell + smell,
+            foraminiferas = f.foraminiferas ++ newForaminiferas,
+            algae = f.algae + newAlgaeEnergy + config.algaeRegenerationRate)
+          )
           moves.toStream.groupBy {
             case (_, i, j) => (i, j)
           }.mapValues(_.map { case (formin, _, _) => formin })
             .foreach { case ((i, j), formins) =>
-              //todo adjust smell
+              movesCount += 1
               update(i, j)(f => f.copy(foraminiferas = f.foraminiferas ++ formins))
             }
         }
@@ -171,6 +185,8 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       consumedAlgaeCount = consumedAlgaeCount,
       foraminiferaTotalLifespan = foraminiferaTotalLifespan
     )
+    //todo moves count metric
+    println(foraminiferaDeaths, foraminiferaReproductionsCount, movesCount)
     (newGrid, metrics)
   }
 }
