@@ -17,7 +17,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   regionRef: => ActorRef,
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
   conflictResolver: ConflictResolver[ConfigType],
-  emptyCellFactory: ConfigType => SmellingCell = (_: ConfigType) => EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
+  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
@@ -113,7 +113,7 @@ class WorkerActor[ConfigType <: XinukConfig](
 
           //clean buffers
           bufferZone.foreach { case (x, y) =>
-            grid.cells(x)(y) = BufferCell(emptyCellFactory(config))
+            grid.cells(x)(y) = BufferCell(emptyCellFactory)
           }
 
           currentIteration += 1
@@ -162,7 +162,7 @@ object WorkerActor {
     regionRef: => ActorRef,
     movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
     conflictResolver: ConflictResolver[ConfigType],
-    emptyCellFactory: ConfigType => SmellingCell = (_: ConfigType) => EmptyCell.Instance,
+    emptyCellFactory: => SmellingCell = EmptyCell.Instance,
   )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
   }

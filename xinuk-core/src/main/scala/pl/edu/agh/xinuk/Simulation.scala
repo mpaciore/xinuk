@@ -21,7 +21,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
-  emptyCellFactory: ConfigType => SmellingCell = (_: ConfigType) => EmptyCell.Instance)(
+  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
 ) extends LazyLogging {
 

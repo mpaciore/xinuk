@@ -19,7 +19,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
   private val random = new Random(System.nanoTime())
 
   override def initialGrid: (Grid, FortwistMetrics) = {
-    grid = Grid.empty(bufferZone, FortwistCell.create())
+    grid = Grid.empty(bufferZone, FortwistCell(Cell.emptySignal, Vector.empty, config.algaeStartEnergy))
     var foraminiferaCount = 0L
     var algaeCount = 0.0
     for {
@@ -29,7 +29,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     } {
       if (random.nextDouble() < config.foraminiferaSpawnChance) {
         val foraminiferas = Vector(Foraminifera.create())
-        val cell = FortwistCell.create(foraminiferas)
+        val cell = FortwistCell(Cell.emptySignal, foraminiferas, config.algaeStartEnergy)
         foraminiferaCount += foraminiferas.size
         algaeCount += cell.algae.value
         grid.cells(x)(y) = cell
@@ -59,10 +59,14 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     var foraminiferaTotalLifespan = 0L
     var foraminiferaTotalEnergy = 0.0
 
+    def update(x: Int, y: Int)(op: FortwistCell => FortwistCell): Unit = {
+      newGrid.cells(x)(y) = op(newGrid.cells(x)(y).asInstanceOf[FortwistCell]) //the grid is initialized with FC
+    }
+
     def makeMove(x: Int, y: Int): Unit = {
       this.grid.cells(x)(y) match {
         case Obstacle | BufferCell(_) =>
-        case cell@FortwistCell(smell, foraminiferas, algaeEnergy) =>
+        case FortwistCell(smell, foraminiferas, algaeEnergy) => {
           val (newForaminiferas: Iterator[Foraminifera], moves: Iterator[(Foraminifera, Int, Int)], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft((Iterator[Foraminifera](), Iterator[Move](), algaeEnergy)) {
               case ((currentCellResult, moves, algaeEnergy), formin) =>
@@ -77,14 +81,17 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
                 }
                 (currentCellResult ++ action.currentCellResult, moves ++ action.moves, algaeEnergy + action.algaeEnergyDiff)
             }
-          val partial = newGrid.cells(x)(y).asInstanceOf[FortwistCell] //the grid is initialized with FC
-        val updated = partial.copy(
-          smell = smell,
-          foraminiferas = partial.foraminiferas ++ newForaminiferas,
-          algae = newAlgaeEnergy
-        )
-          newGrid.cells(x)(y) = updated
-        //todo handle moves
+          import Cell._
+          //todo handle algae regen
+          update(x, y)(f => f.copy(f.smell + smell, f.foraminiferas ++ newForaminiferas, f.algae + newAlgaeEnergy))
+          moves.toStream.groupBy {
+            case (_, i, j) => (i, j)
+          }.mapValues(_.map { case (formin, _, _) => formin })
+            .foreach { case ((i, j), formins) =>
+              //todo adjust smell
+              update(i, j)(f => f.copy(foraminiferas = f.foraminiferas ++ formins))
+            }
+        }
       }
     }
 
@@ -109,16 +116,16 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       ForminAction(Iterator(parent, child))
     }
 
-    def eatAlgae(cell: Foraminifera): ForminAction = {
+    def eatAlgae(formin: Foraminifera): ForminAction = {
       val energyChange = config.algaeEnergeticCapacity
       consumedAlgaeCount += energyChange.value
-      val afterEating = cell.copy(energy = cell.energy + energyChange, lifespan = cell.lifespan + 1)
-      ForminAction(Iterator(afterEating), energyChange)
+      val afterEating = formin.copy(energy = formin.energy + energyChange, lifespan = formin.lifespan + 1)
+      ForminAction(Iterator(afterEating), -energyChange)
     }
 
     def moveForaminifera(foraminifera: Foraminifera, x: Int, y: Int): ForminAction = {
       val destinations = calculatePossibleDestinations(x, y, grid)
-      val destination = destinations.nextOpt
+      val destination = destinations.filter(_._3 != Obstacle).nextOpt
       val afterMoving = foraminifera.copy(
         energy = foraminifera.energy - config.foraminiferaLifeActivityCost,
         lifespan = foraminifera.lifespan + 1

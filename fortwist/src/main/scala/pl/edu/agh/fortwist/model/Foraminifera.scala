@@ -17,6 +17,6 @@ final case class FortwistCell(smell: SmellArray, foraminiferas: Vector[Foraminif
 }
 
 object FortwistCell {
-  def create(foraminiferas: Vector[Foraminifera] = Vector.empty)(implicit config: FortwistConfig): FortwistCell =
-    FortwistCell(Cell.emptySignal, foraminiferas, config.algaeStartEnergy)
+  def create(foraminiferas: Vector[Foraminifera] = Vector.empty): FortwistCell =
+    FortwistCell(Cell.emptySignal, foraminiferas, Energy.Zero)
 }

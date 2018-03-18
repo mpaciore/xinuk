@@ -21,7 +21,9 @@ object Main extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver, FortwistCell.create()(_))(new FortwistMovesController(_)(_)).start()
+    new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver, FortwistCell.create())(
+      new FortwistMovesController(_)(_)
+    ).start()
   }
 
 }
