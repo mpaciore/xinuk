@@ -10,8 +10,8 @@ import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
-import pl.edu.agh.xinuk.model.WorkerId
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
+import pl.edu.agh.xinuk.model.{EmptyCell, SmellingCell, WorkerId}
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.collection.immutable.TreeSet
@@ -20,8 +20,10 @@ import scala.util.{Failure, Success, Try}
 class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
-  conflictResolver: ConflictResolver[ConfigType])(
-  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController) extends LazyLogging {
+  conflictResolver: ConflictResolver[ConfigType],
+  emptyCellFactory: ConfigType => SmellingCell = (_: ConfigType) => EmptyCell.Instance)(
+  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -53,7 +55,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, emptyCellFactory),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId

@@ -61,8 +61,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
 
     def makeMove(x: Int, y: Int): Unit = {
       this.grid.cells(x)(y) match {
-        case Obstacle =>
-          newGrid.cells(x)(y) = Obstacle
+        case Obstacle | BufferCell(_) =>
         case cell@FortwistCell(smell, foraminiferas, algaeEnergy) =>
           val (newForaminiferas: Iterator[Foraminifera], moves: Iterator[(Foraminifera, Int, Int)], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft((Iterator[Foraminifera](), Iterator[Move](), algaeEnergy)) {

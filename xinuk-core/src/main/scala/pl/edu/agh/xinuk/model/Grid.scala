@@ -40,12 +40,12 @@ final case class Grid(cells: CellArray) extends AnyVal {
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => GridPart = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
+  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
     val n = config.gridSize
     val values = Array.tabulate[GridPart](n, n) {
-      case (x, y) if bufferZone.contains((x, y)) => BufferCell(EmptyCell.Instance)
+      case (x, y) if bufferZone.contains((x, y)) => BufferCell(emptyCellFactory)
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
-      case _ => EmptyCell.Instance
+      case _ => emptyCellFactory
     }
     Grid(values)
   }
