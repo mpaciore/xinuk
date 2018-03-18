@@ -1,6 +1,6 @@
 package pl.edu.agh.fortwist.algorithm
 
-import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons._
 import com.avsystem.commons.misc.Opt
 import pl.edu.agh.fortwist.config.FortwistConfig
 import pl.edu.agh.fortwist.model.{Foraminifera, FortwistCell}
@@ -77,19 +77,22 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       this.grid.cells(x)(y) match {
         case Obstacle | BufferCell(_) =>
         case FortwistCell(smell, foraminiferas, algaeEnergy) => {
-          val (newForaminiferas: Iterator[Foraminifera], moves: Iterator[(Foraminifera, Int, Int)], newAlgaeEnergy: Energy) =
-            foraminiferas.foldLeft((Iterator[Foraminifera](), Iterator[Move](), algaeEnergy)) {
-              case ((currentCellResult, moves, algaeEnergy), formin) =>
-                val action = if (formin.energy > config.foraminiferaReproductionThreshold) {
-                  reproduceForaminifera(formin)
-                } else if (algaeEnergy > config.algaeEnergeticCapacity) {
-                  eatAlgae(formin)
-                } else if (formin.energy < config.foraminiferaLifeActivityCost) {
-                  killForaminifera(formin)
-                } else {
-                  moveForaminifera(formin, x, y)
-                }
-                (currentCellResult ++ action.currentCellResult, moves ++ action.moves, algaeEnergy + action.algaeEnergyDiff)
+          val (newForaminiferas: Iterator[Foraminifera], moves: BMap[(Int, Int), Stream[Foraminifera]], newAlgaeEnergy: Energy) =
+            foraminiferas.foldLeft(
+              (Iterator[Foraminifera](), MMap.empty[(Int, Int), Stream[Foraminifera]].withDefaultValue(Stream.empty), algaeEnergy)
+            ) { case ((currentCellResult, moves, algaeEnergy), formin) =>
+              val action = if (formin.energy > config.foraminiferaReproductionThreshold) {
+                reproduceForaminifera(formin)
+              } else if (algaeEnergy > config.algaeEnergeticCapacity) {
+                eatAlgae(formin)
+              } else if (formin.energy < config.foraminiferaLifeActivityCost) {
+                killForaminifera(formin)
+              } else {
+                //todo use moves to avoid grouping
+                moveForaminifera(formin, x, y)
+              }
+              action.moves.foreach { case ((x, y), movingFormin) => moves((x, y)) = moves((x, y)) :+ movingFormin }
+              (currentCellResult ++ action.currentCellResult, moves, algaeEnergy + action.algaeEnergyDiff)
             }
           import Cell._
           update(x, y)(f => f.copy(
@@ -97,23 +100,18 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
             foraminiferas = f.foraminiferas ++ newForaminiferas,
             algae = f.algae + newAlgaeEnergy + config.algaeRegenerationRate)
           )
-          moves.toStream.groupBy {
-            case (_, i, j) => (i, j)
-          }.mapValues(_.map { case (formin, _, _) => formin })
-            .foreach { case ((i, j), formins) =>
-              movesCount += 1
-              update(i, j)(f => f.copy(foraminiferas = f.foraminiferas ++ formins))
-            }
+          moves.foreach { case ((i, j), formins) =>
+            movesCount += formins.size
+            update(i, j)(f => f.copy(foraminiferas = f.foraminiferas ++ formins))
+          }
         }
       }
     }
 
-    type Move = (Foraminifera, Int, Int)
-
     final case class ForminAction(
       currentCellResult: Iterator[Foraminifera],
       algaeEnergyDiff: Energy = Energy.Zero,
-      moves: Iterator[Move] = Iterator.empty,
+      moves: Iterator[((Int, Int), Foraminifera)] = Iterator.empty,
     )
 
     def killForaminifera(foraminifera: Foraminifera): ForminAction = {
@@ -146,7 +144,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       val (currentCell, moves) = destination match {
         case Opt((i, j, _)) =>
           val oldPlace = Iterator.empty
-          val newPlace = Iterator((afterMoving, i, j))
+          val newPlace = Iterator(((i, j), afterMoving))
           (oldPlace, newPlace)
         case Opt.Empty =>
           (Iterator(afterMoving), Iterator.empty)
