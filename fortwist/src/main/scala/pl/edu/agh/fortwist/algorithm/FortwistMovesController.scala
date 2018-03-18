@@ -1,6 +1,5 @@
 package pl.edu.agh.fortwist.algorithm
 
-import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
 import pl.edu.agh.fortwist.config.FortwistConfig
@@ -46,15 +45,6 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       foraminiferaTotalLifespan = 0
     )
     (grid, metrics)
-  }
-
-  def selectDestinationCell(
-    possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
-    possibleDestinations
-      .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
-      .collectFirstOpt {
-        case x => ???
-      }
   }
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, FortwistMetrics) = {
@@ -147,7 +137,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
 
     def moveForaminifera(foraminifera: Foraminifera, x: Int, y: Int): ForminAction = {
       val destinations = calculatePossibleDestinations(x, y, grid)
-      val destination = selectDestinationCell(destinations, newGrid)
+      val destination = destinations.nextOpt
       val afterMoving = foraminifera.copy(
         energy = foraminifera.energy - config.foraminiferaLifeActivityCost,
         lifespan = foraminifera.lifespan + 1
