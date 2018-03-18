@@ -84,6 +84,10 @@ final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
   def +(other: Energy): Energy = Energy(value + other.value)
 }
 
+object Energy {
+  final val Zero = Energy(0)
+}
+
 trait GridPart {
   def smell: SmellArray
 }
