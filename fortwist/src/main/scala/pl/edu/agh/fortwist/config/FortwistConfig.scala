@@ -32,6 +32,7 @@ final case class FortwistConfig(
   gridSize: Int,
   foraminiferaSpawnChance: Double,
   foraminiferaInitialSignal: Signal,
+  algaeSignalMultiplier: Signal,
   guiType: GuiType,
   guiCellSize: Int,
   workersRoot: Int,
