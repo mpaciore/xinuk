@@ -82,8 +82,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
                 (currentCellResult ++ action.currentCellResult, moves ++ action.moves, algaeEnergy + action.algaeEnergyDiff)
             }
           import Cell._
-          //todo handle algae regen
-          update(x, y)(f => f.copy(f.smell + smell, f.foraminiferas ++ newForaminiferas, f.algae + newAlgaeEnergy))
+          update(x, y)(f => f.copy(f.smell + smell, f.foraminiferas ++ newForaminiferas, f.algae + newAlgaeEnergy + config.algaeRegenerationRate))
           moves.toStream.groupBy {
             case (_, i, j) => (i, j)
           }.mapValues(_.map { case (formin, _, _) => formin })
