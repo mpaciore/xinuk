@@ -19,7 +19,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
   private val random = new Random(System.nanoTime())
 
   override def initialGrid: (Grid, FortwistMetrics) = {
-    grid = Grid.empty(bufferZone)
+    grid = Grid.empty(bufferZone, FortwistCell.create())
     var foraminiferaCount = 0L
     var algaeCount = 0.0
     for {
@@ -27,13 +27,13 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       y <- 0 until config.gridSize
       if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
     } {
-      val foraminiferas: Vector[Foraminifera] =
-        if (random.nextDouble() < config.foraminiferaSpawnChance) Vector(Foraminifera.create())
-        else Vector.empty
-      val cell = FortwistCell.create(foraminiferas)
-      foraminiferaCount += foraminiferas.size
-      algaeCount += cell.algae.value
-      grid.cells(x)(y) = cell
+      if (random.nextDouble() < config.foraminiferaSpawnChance) {
+        val foraminiferas = Vector(Foraminifera.create())
+        val cell = FortwistCell.create(foraminiferas)
+        foraminiferaCount += foraminiferas.size
+        algaeCount += cell.algae.value
+        grid.cells(x)(y) = cell
+      }
     }
     val metrics = FortwistMetrics(
       foraminiferaCount = foraminiferaCount,
@@ -49,7 +49,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, FortwistMetrics) = {
     this.grid = grid
-    val newGrid = Grid.empty(bufferZone)
+    val newGrid = Grid.empty(bufferZone, FortwistCell.create())
 
     var foraminiferaCount = 0L
     var algaeCount = 0.0
@@ -60,21 +60,10 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     var foraminiferaTotalEnergy = 0.0
 
     def makeMove(x: Int, y: Int): Unit = {
-      def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
-        grid.cells(i)(j) match {
-          case EmptyCell(_) | BufferCell(EmptyCell(_)) => true
-          case _ => false
-        }
-      }
-
       this.grid.cells(x)(y) match {
         case Obstacle =>
           newGrid.cells(x)(y) = Obstacle
-        case cell@(EmptyCell(_) | BufferCell(_)) =>
-          if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell
-          }
-        case FortwistCell(smell, foraminiferas, algaeEnergy) =>
+        case cell@FortwistCell(smell, foraminiferas, algaeEnergy) =>
           val (newForaminiferas: Iterator[Foraminifera], moves: Iterator[(Foraminifera, Int, Int)], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft((Iterator[Foraminifera](), Iterator[Move](), algaeEnergy)) {
               case ((currentCellResult, moves, algaeEnergy), formin) =>
@@ -89,21 +78,14 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
                 }
                 (currentCellResult ++ action.currentCellResult, moves ++ action.moves, algaeEnergy + action.algaeEnergyDiff)
             }
-        /*case cell: AlgaeCell =>
-          if (iteration % config.algaeReproductionFrequency == 0) {
-            reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
-          }
-          if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
-          }
-        case cell: ForaminiferaCell =>
-          if (cell.energy < config.foraminiferaLifeActivityCost) {
-            killForaminifera(cell, x, y)
-          } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-            reproduceForaminifera(cell, x, y)
-          } else {
-            moveForaminifera(cell, x, y)
-          }*/
+          val partial = newGrid.cells(x)(y).asInstanceOf[FortwistCell] //the grid is initialized with FC
+        val updated = partial.copy(
+          smell = smell,
+          foraminiferas = partial.foraminiferas ++ newForaminiferas,
+          algae = newAlgaeEnergy
+        )
+          newGrid.cells(x)(y) = updated
+        //todo handle moves
       }
     }
 
