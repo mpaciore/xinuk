@@ -69,7 +69,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     def update(x: Int, y: Int)(op: FortwistCell => FortwistCell): Unit = {
       val updated = op(newGrid.cells(x)(y).asInstanceOf[FortwistCell]) //the grid is initialized with FC
       val smellAdjustment = (config.foraminiferaInitialSignal * updated.foraminiferas.size) +
-        (config.algaeSignalMultiplier * algaeCount)
+        (config.algaeSignalMultiplier * updated.algae.value)
       newGrid.cells(x)(y) = updated.copy(smell = updated.smell + smellAdjustment)
     }
 
@@ -80,25 +80,24 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
           val (newForaminiferas: Iterator[Foraminifera], moves: BMap[(Int, Int), Stream[Foraminifera]], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft(
               (Iterator[Foraminifera](), MMap.empty[(Int, Int), Stream[Foraminifera]].withDefaultValue(Stream.empty), algaeEnergy)
-            ) { case ((currentCellResult, moves, algaeEnergy), formin) =>
+            ) { case ((currentCellResult, pendingMoves, runningAlgaeEnergy), formin) =>
               val action = if (formin.energy > config.foraminiferaReproductionThreshold) {
                 reproduceForaminifera(formin)
-              } else if (algaeEnergy > config.algaeEnergeticCapacity) {
+              } else if (runningAlgaeEnergy > config.algaeEnergeticCapacity) {
                 eatAlgae(formin)
               } else if (formin.energy < config.foraminiferaLifeActivityCost) {
                 killForaminifera(formin)
               } else {
-                //todo use moves to avoid grouping
-                moveForaminifera(formin, x, y)
+                moveForaminifera(formin, x, y, pendingMoves)
               }
-              action.moves.foreach { case ((x, y), movingFormin) => moves((x, y)) = moves((x, y)) :+ movingFormin }
-              (currentCellResult ++ action.currentCellResult, moves, algaeEnergy + action.algaeEnergyDiff)
+              action.moves.foreach { case ((x, y), movingFormin) => pendingMoves((x, y)) = pendingMoves((x, y)) :+ movingFormin }
+              (currentCellResult ++ action.currentCellResult, pendingMoves, runningAlgaeEnergy + action.algaeEnergyDiff)
             }
           import Cell._
-          update(x, y)(f => f.copy(
-            smell = f.smell + smell,
-            foraminiferas = f.foraminiferas ++ newForaminiferas,
-            algae = f.algae + newAlgaeEnergy + config.algaeRegenerationRate)
+          update(x, y)(cell => cell.copy(
+            smell = cell.smell + smell,
+            foraminiferas = cell.foraminiferas ++ newForaminiferas,
+            algae = cell.algae + newAlgaeEnergy + config.algaeRegenerationRate)
           )
           moves.foreach { case ((i, j), formins) =>
             movesCount += formins.size
@@ -134,14 +133,26 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       ForminAction(Iterator(afterEating), -energyChange)
     }
 
-    def moveForaminifera(foraminifera: Foraminifera, x: Int, y: Int): ForminAction = {
+    def moveForaminifera(foraminifera: Foraminifera, x: Int, y: Int, moves: BMap[(Int, Int), Stream[Foraminifera]]): ForminAction = {
+      def calculatePossibleDestinations(x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
+        val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
+        Grid.SubcellCoordinates
+          .map { case (i, j) => grid.cells(x)(y).smell(i)(j) + moves.get((x, y)).map(formins => config.foraminiferaInitialSignal * formins.size).getOrElse(Signal.Zero) }
+          .zipWithIndex
+          .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
+          .iterator
+          .map { case (_, idx) =>
+            val (i, j) = neighbourCellCoordinates(idx)
+            (i, j, grid.cells(i)(j))
+          }
+      }
       val destinations = calculatePossibleDestinations(x, y, grid)
       val destination = destinations.filter(_._3 != Obstacle).nextOpt
       val afterMoving = foraminifera.copy(
         energy = foraminifera.energy - config.foraminiferaLifeActivityCost,
         lifespan = foraminifera.lifespan + 1
       )
-      val (currentCell, moves) = destination match {
+      val (currentCell, outgoingMoves) = destination match {
         case Opt((i, j, _)) =>
           val oldPlace = Iterator.empty
           val newPlace = Iterator(((i, j), afterMoving))
@@ -149,7 +160,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
         case Opt.Empty =>
           (Iterator(afterMoving), Iterator.empty)
       }
-      ForminAction(currentCell, moves = moves)
+      ForminAction(currentCell, moves = outgoingMoves)
     }
 
     for {
