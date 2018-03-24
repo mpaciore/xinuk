@@ -9,10 +9,11 @@ final case class FortwistMetrics(
   foraminiferaTotalEnergy: Double,
   foraminiferaReproductionsCount: Long,
   consumedAlgaeCount: Double,
-  foraminiferaTotalLifespan: Long) extends Metrics {
+  foraminiferaTotalLifespan: Long,
+  foraminiferaMoves: Long) extends Metrics {
 
   override def log: String = {
-    s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan"
+    s"$foraminiferaCount;$algaeCount;$foraminiferaDeaths;$foraminiferaTotalEnergy;$foraminiferaReproductionsCount;$consumedAlgaeCount;$foraminiferaTotalLifespan;$foraminiferaMoves"
   }
 
   override def series: Vector[(String, Double)] = Vector(

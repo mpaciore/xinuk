@@ -48,7 +48,8 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       foraminiferaTotalEnergy = config.foraminiferaStartEnergy.value * foraminiferaCount,
       foraminiferaReproductionsCount = 0,
       consumedAlgaeCount = 0,
-      foraminiferaTotalLifespan = 0
+      foraminiferaTotalLifespan = 0,
+      foraminiferaMoves = 0,
     )
     (grid, metrics)
   }
@@ -168,7 +169,6 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       y <- 0 until config.gridSize
     } makeMove(x, y)
 
-    //todo metrics before a move
     for {
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
@@ -192,10 +192,9 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       foraminiferaTotalEnergy = foraminiferaTotalEnergy,
       foraminiferaReproductionsCount = foraminiferaReproductionsCount,
       consumedAlgaeCount = consumedAlgaeCount,
-      foraminiferaTotalLifespan = foraminiferaTotalLifespan
+      foraminiferaTotalLifespan = foraminiferaTotalLifespan,
+      foraminiferaMoves = movesCount,
     )
-    //todo moves count metric
-    println(foraminiferaDeaths, foraminiferaReproductionsCount, movesCount)
     (newGrid, metrics)
   }
 }

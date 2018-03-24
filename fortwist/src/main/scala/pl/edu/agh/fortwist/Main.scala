@@ -17,6 +17,7 @@ object Main extends LazyLogging {
     "foraminiferaReproductionsCount",
     "consumedAlgaeCount",
     "foraminiferaTotalLifespan",
+    "foraminiferaMoves",
   )
 
   def main(args: Array[String]): Unit = {
