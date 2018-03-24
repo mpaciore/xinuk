@@ -9,6 +9,7 @@ final case class TorchConfig(
                                fireSpeadingFrequency: Int,
                                signalSpeedRatio: Int,
                                signalSuppressionFactor: Double,
+                               signalAttenuationFactor: Double,
                                gridSize: Int,
                                spawnChance: Double,
                                humanSpawnChance: Double,

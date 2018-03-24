@@ -30,6 +30,7 @@ final case class ForminConfig(
                                signalSpeedRatio: Int,
                                //diffractionFactor: Double,
                                signalSuppressionFactor: Double,
+                               signalAttenuationFactor: Double,
                                gridSize: Int,
                                spawnChance: Double,
                                foraminiferaSpawnChance: Double,

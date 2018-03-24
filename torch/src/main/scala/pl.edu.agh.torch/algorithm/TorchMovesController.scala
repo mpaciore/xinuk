@@ -48,6 +48,7 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
           }
       }
     }
+
     val metrics = TorchMetrics(humanCount, fireCount, escapesCount, 0, 0)
     (grid, metrics)
   }
@@ -115,9 +116,13 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
       this.grid.cells(x)(y) match {
         case Obstacle =>
           newGrid.cells(x)(y) = Obstacle
-        case cell@(EmptyCell(_) | BufferCell(_) | EscapeCell(_)) =>
+        case cell@(EmptyCell(_) | BufferCell(_)) =>
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
+          }
+        case cell: EscapeCell =>
+          if (isEmptyIn(newGrid)(x, y)) {
+            newGrid.cells(x)(y) = EscapeAccessible.unapply(EmptyCell.Instance).withEscape()
           }
         case cell: FireCell =>
           if (iteration % config.fireSpeadingFrequency == 0) {
@@ -151,12 +156,10 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
               case EscapeCell(_) => peopleEscaped += 1
               case _ =>
             }
-            grid.cells(x)(y) = EmptyCell(cell.smell)
           case Opt((i, j, inaccessibleDestination)) =>
-            throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
+            throw new RuntimeException(s"Human selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
             newGrid.cells(x)(y) = cell.copy(cell.smell, cell.crowd, cell.speed)
-            grid.cells(x)(y)
         }
       } else {
         destination match {
@@ -164,10 +167,9 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
             newGrid.cells(i)(j) = destination.withHuman(cell.crowd.head.crowd, cell.crowd.head.speed)
             newGrid.cells(x)(y) = cell.copy(cell.smellWithoutArray(cell.crowd.head.smell), cell.crowd.drop(1), cell.speed)
           case Opt((i, j, inaccessibleDestination)) =>
-            throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
+            throw new RuntimeException(s"Human selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
             newGrid.cells(x)(y) = cell.copy(cell.smell, cell.crowd, cell.speed)
-            grid.cells(x)(y)
         }
       }
 
@@ -192,8 +194,8 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         case _ =>
       }
     }
+
     val metrics = TorchMetrics(humanCount, fireCount, escapesCount, peopleDeaths, peopleEscaped)
-    Thread.sleep(0)
     (newGrid, metrics)
   }
 }

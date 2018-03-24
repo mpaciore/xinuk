@@ -28,7 +28,7 @@ final case class Grid(cells: CellArray) extends AnyVal {
         }
         val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
-          cell(i)(j) = currentSmell(i)(j) + signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor
+          cell(i)(j) = currentSmell(i)(j)*config.signalAttenuationFactor + signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor
           (cell, index + 1)
         }
         newSmell(1)(1) = Signal.Zero
@@ -70,6 +70,8 @@ final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
   def -(other: Signal) = Signal(value - other.value)
 
   def *(factor: Double) = Signal(value * factor)
+
+  def /(divider: Double) = Signal(value / divider)
 
   override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
 }

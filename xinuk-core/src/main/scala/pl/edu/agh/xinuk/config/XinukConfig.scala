@@ -6,6 +6,7 @@ trait XinukConfig {
   def gridSize: Int
   def guiCellSize: Int
   def signalSuppressionFactor: Double
+  def signalAttenuationFactor: Double
   def workersRoot: Int
   def shardingMod: Int
 
