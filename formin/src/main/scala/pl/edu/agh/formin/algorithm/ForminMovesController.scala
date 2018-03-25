@@ -154,7 +154,9 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       destination match {
         case Opt((i, j, ForaminiferaAccessible(destination))) =>
           newGrid.cells(i)(j) = destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
-          grid.cells(x)(y) = EmptyCell(cell.smell)
+          val vacated = EmptyCell(cell.smell)
+          newGrid.cells(x)(y) = vacated
+          grid.cells(x)(y) = vacated
         case Opt((i, j, inaccessibleDestination)) =>
           throw new RuntimeException(s"Foraminifera selected inaccessible destination ($i,$j): $inaccessibleDestination")
         case Opt.Empty =>

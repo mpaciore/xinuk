@@ -1,4 +1,4 @@
-package pl.edu.agh.formin.config
+package pl.edu.agh.fortwist.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.{Energy, Signal}
@@ -19,20 +19,20 @@ FSSV - foraminifera start signal value; FSSV ∈ [0,1] && FSSV ∈ R.
 ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
  */
 
-final case class ForminConfig(
+final case class FortwistConfig(
   foraminiferaStartEnergy: Energy,
   foraminiferaReproductionCost: Energy,
   foraminiferaReproductionThreshold: Energy,
   foraminiferaLifeActivityCost: Energy,
-  algaeReproductionFrequency: Int,
+  algaeStartEnergy: Energy,
+  algaeRegenerationRate: Energy,
   algaeEnergeticCapacity: Energy,
   signalSpeedRatio: Int,
   signalSuppressionFactor: Double,
   gridSize: Int,
-  spawnChance: Double,
   foraminiferaSpawnChance: Double,
   foraminiferaInitialSignal: Signal,
-  algaeInitialSignal: Signal,
+  algaeSignalMultiplier: Signal,
   guiType: GuiType,
   guiCellSize: Int,
   workersRoot: Int,

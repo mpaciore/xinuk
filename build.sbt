@@ -29,7 +29,7 @@ inThisBuild(Seq(
     "-language:higherKinds",
     "-Xfuture",
     "-Xfatal-warnings",
-    "-Xlint:_,-missing-interpolator,-adapted-args"
+    "-Xlint:-missing-interpolator,-adapted-args,-unused,_"
   ),
 ))
 
@@ -63,7 +63,6 @@ def modelProject(projectName: String)(mainClassName: String): Project = {
       name := projectName,
       libraryDependencies ++= Seq(
         "ch.qos.logback" % "logback-classic" % Version.Logback,
-        "com.iheart" %% "ficus" % Version.Ficus,
         "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
         "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
         "org.mockito" % "mockito-core" % Version.Mockito % Test,
