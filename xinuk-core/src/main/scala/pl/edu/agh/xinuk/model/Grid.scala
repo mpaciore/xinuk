@@ -40,12 +40,12 @@ final case class Grid(cells: CellArray) extends AnyVal {
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  def empty(bufferZone: Set[(Int, Int)])(implicit config: XinukConfig): Grid = {
+  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
     val n = config.gridSize
     val values = Array.tabulate[GridPart](n, n) {
-      case (x, y) if bufferZone.contains((x, y)) => BufferCell(EmptyCell.Instance)
+      case (x, y) if bufferZone.contains((x, y)) => BufferCell(emptyCellFactory)
       case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
-      case _ => EmptyCell.Instance
+      case _ => emptyCellFactory
     }
     Grid(values)
   }
@@ -86,6 +86,12 @@ final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
   def -(other: Energy): Energy = Energy(value - other.value)
 
   def +(other: Energy): Energy = Energy(value + other.value)
+
+  def unary_- : Energy = Energy(-value)
+}
+
+object Energy {
+  final val Zero = Energy(0)
 }
 
 trait GridPart {
@@ -95,9 +101,9 @@ trait GridPart {
 trait SmellMedium extends GridPart {
   type Self <: SmellMedium
 
-  final def smellWith(added: Signal): SmellArray = {
-    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) + added)
-  }
+  import Cell._
+
+  final def smellWith(added: Signal): SmellArray = smell + added
 
   final def smellWithout(deducted: Signal): SmellArray = {
     Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) - deducted)
@@ -122,6 +128,10 @@ object Cell {
     def +(other: SmellArray): SmellArray = {
       Array.tabulate(Cell.Size, Cell.Size)((x, y) => arr(x)(y) + other(x)(y))
     }
+
+    def +(added: Signal): SmellArray = {
+      Array.tabulate(Cell.Size, Cell.Size)((i, j) => arr(i)(j) + added)
+    }
   }
 
   final val Size: Int = 3
@@ -139,9 +149,7 @@ final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPar
 
   override def smell: SmellArray = cell.smell
 
-  override def withSmell(smell: SmellArray): BufferCell = {
-    BufferCell(cell.withSmell(smell))
-  }
+  override def withSmell(smell: SmellArray): BufferCell = copy(cell.withSmell(smell))
 }
 
 final case class EmptyCell(smell: SmellArray) extends SmellingCell {

@@ -16,7 +16,8 @@ import scala.collection.mutable
 class WorkerActor[ConfigType <: XinukConfig](
   regionRef: => ActorRef,
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-  conflictResolver: ConflictResolver[ConfigType])(implicit config: ConfigType) extends Actor with Stash {
+  conflictResolver: ConflictResolver[ConfigType],
+  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
@@ -112,7 +113,7 @@ class WorkerActor[ConfigType <: XinukConfig](
 
           //clean buffers
           bufferZone.foreach { case (x, y) =>
-            grid.cells(x)(y) = BufferCell(EmptyCell.Instance)
+            grid.cells(x)(y) = BufferCell(emptyCellFactory)
           }
 
           currentIteration += 1
@@ -160,9 +161,10 @@ object WorkerActor {
   def props[ConfigType <: XinukConfig](
     regionRef: => ActorRef,
     movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-    conflictResolver: ConflictResolver[ConfigType]
+    conflictResolver: ConflictResolver[ConfigType],
+    emptyCellFactory: => SmellingCell = EmptyCell.Instance,
   )(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver))
+    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString

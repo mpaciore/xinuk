@@ -11,7 +11,6 @@ FLAC - foraminifera life activities(vegetation and movement) cost; FLAC ∈ [0,1
 ARF - algae reproduction frequency; ARF ∈ N.
 AEC - algae energetic capacity; AEC ∈ [0,1] && AEC ∈ R.
 SSR - signal speed ratio; SSR ∈ N. Foraminifera speed is 1.
-DFF - diffraction factor; DFF ∈ [0,1] && DFF ∈ R.
 SPF - global suppression factor of the signal; SPF ∈ [0,1] && SPF ∈ R.
 GS - grid size; GS ∈ N, where map size is GSxGS.
 SC - spawn chance, SC ∈ [0,1] && SC ∈ R
@@ -28,7 +27,6 @@ final case class ForminConfig(
                                algaeReproductionFrequency: Int,
                                algaeEnergeticCapacity: Energy,
                                signalSpeedRatio: Int,
-                               //diffractionFactor: Double,
                                signalSuppressionFactor: Double,
                                signalAttenuationFactor: Double,
                                gridSize: Int,
