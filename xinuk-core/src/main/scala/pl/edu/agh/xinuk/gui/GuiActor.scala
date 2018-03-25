@@ -2,9 +2,9 @@ package pl.edu.agh.xinuk.gui
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import javax.swing.{ImageIcon, UIManager}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import javax.swing.{ImageIcon, UIManager}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
@@ -21,12 +21,13 @@ import scala.swing.TabbedPane.Page
 import scala.swing._
 import scala.util.{Random, Try}
 
-class GuiActor private(worker: ActorRef, workerId: WorkerId)(
-  implicit config: XinukConfig) extends Actor with ActorLogging {
+class GuiActor private(
+  worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color]
+)(implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(config.gridSize)
+  private lazy val gui: GuiGrid = new GuiGrid(cellToColor)
 
   override def preStart: Unit = {
     worker ! SubscribeGridInfo(workerId)
@@ -44,19 +45,19 @@ object GuiActor {
 
   final case class GridInfo private(iteration: Long, grid: Grid, metrics: Metrics)
 
-  def props(worker: ActorRef, workerId: WorkerId)
+  def props(worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color])
            (implicit config: XinukConfig): Props = {
-    Props(new GuiActor(worker, workerId))
+    Props(new GuiActor(worker, workerId, cellToColor))
   }
 
 }
 
-private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends SimpleSwingApplication {
+private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val cellView = new ParticleCanvas(dimension, config.guiCellSize)
+  private val cellView = new ParticleCanvas(config.gridSize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
     background = bgcolor
   }
@@ -92,11 +93,8 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
     cellView.set(grid.cells.transpose)
   }
 
-  sealed trait CellArraySettable extends Component {
-    def set(cells: CellArray): Unit
-  }
+  private class ParticleCanvas(dimension: Int, guiCellSize: Int) extends Label {
 
-  private class ParticleCanvas(dimension: Int, guiCellSize: Int) extends Label with CellArraySettable {
     private val obstacleColor = new swing.Color(0, 0, 0)
     private val bufferColor = new swing.Color(163, 163, 194)
     private val emptyColor = new swing.Color(255, 255, 255)
@@ -111,8 +109,8 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
     )
 
     def set(cells: CellArray): Unit = {
-      def generateColor(clazz: Class[_]): Color = {
-        val random = new Random(clazz.hashCode())
+      def generateColor(cell: GridPart): Color = {
+        val random = new Random(cell.getClass.hashCode())
         val hue = random.nextFloat()
         val saturation = 1.0f
         val luminance = 0.6f
@@ -120,7 +118,7 @@ private[gui] class GuiGrid(dimension: Int)(implicit config: XinukConfig) extends
       }
 
       val rgbArray = cells.map(_.map(cell =>
-        classToColor.getOrElseUpdate(cell.getClass, generateColor(cell.getClass)))
+        classToColor.getOrElseUpdate(cell.getClass, cellToColor.applyOrElse(cell, generateColor)))
       )
 
       for {
