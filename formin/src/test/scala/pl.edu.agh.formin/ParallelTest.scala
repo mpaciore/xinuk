@@ -25,6 +25,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     algaeEnergeticCapacity = Energy(0.4),
     signalSpeedRatio = 2,
     signalSuppressionFactor = 0.5,
+    signalAttenuationFactor = 1,
     gridSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
