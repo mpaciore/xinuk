@@ -117,9 +117,9 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implic
         Color.getHSBColor(hue, saturation, luminance)
       }
 
-      val rgbArray = cells.map(_.map(cell =>
-        classToColor.getOrElseUpdate(cell.getClass, cellToColor.applyOrElse(cell, generateColor)))
-      )
+      val rgbArray: Array[Array[Color]] = cells.map(_.map(cell =>
+        cellToColor.applyOrElse(cell, (_: GridPart) => classToColor.getOrElseUpdate(cell.getClass, generateColor(cell)))
+      ))
 
       for {
         x <- cells.indices

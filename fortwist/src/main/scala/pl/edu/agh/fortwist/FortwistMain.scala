@@ -1,5 +1,7 @@
 package pl.edu.agh.fortwist
 
+import java.awt.Color
+
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.fortwist.algorithm.FortwistMovesController
 import pl.edu.agh.fortwist.config.FortwistConfig
@@ -20,10 +22,18 @@ object FortwistMain extends LazyLogging {
     "foraminiferaMoves",
   )
 
+  private def cellToColor(cell: FortwistCell): Color = {
+    val hue = 0.11f
+    val saturation = 0.69f
+    val luminance = cell.foraminiferas.size / 10f
+    Color.getHSBColor(hue, saturation, luminance)
+  }
+
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver, FortwistCell.create())(
-      new FortwistMovesController(_)(_)
+      new FortwistMovesController(_)(_),
+      { case cell: FortwistCell => cellToColor(cell) }
     ).start()
   }
 
