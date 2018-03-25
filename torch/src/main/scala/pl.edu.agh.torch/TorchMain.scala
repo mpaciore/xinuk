@@ -5,7 +5,7 @@ import pl.edu.agh.torch.algorithm.TorchMovesController
 import pl.edu.agh.torch.model.parallel.TorchConflictResolver
 import pl.edu.agh.xinuk.Simulation
 
-object Main extends LazyLogging {
+object TorchMain extends LazyLogging {
   private val configPrefix = "torch"
   private val metricHeaders = Vector(
     "peopleCount",

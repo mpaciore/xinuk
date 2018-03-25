@@ -7,7 +7,7 @@ import pl.edu.agh.fortwist.model.FortwistCell
 import pl.edu.agh.fortwist.model.parallel.FortwistConflictResolver
 import pl.edu.agh.xinuk.Simulation
 
-object Main extends LazyLogging {
+object FortwistMain extends LazyLogging {
   private val configPrefix = "fortwist"
   private val metricHeaders = Vector(
     "foraminiferaCount",

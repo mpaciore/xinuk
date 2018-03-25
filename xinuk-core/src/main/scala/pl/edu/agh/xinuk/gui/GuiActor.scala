@@ -64,7 +64,7 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implic
   private val chartPage = new Page("Plot", chartPanel)
 
   def top = new MainFrame {
-    title = "Formin model"
+    title = "Xinuk"
     background = bgcolor
 
     val mainPanel = new BorderPanel {
