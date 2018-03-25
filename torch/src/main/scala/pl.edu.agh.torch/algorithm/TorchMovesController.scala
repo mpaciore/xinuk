@@ -30,21 +30,29 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
     } {
       if (random.nextDouble() < config.spawnChance) {
         grid.cells(x)(y) =
-          if (random.nextDouble() < config.humanSpawnChance) {
-            humanCount += 1
-            val speed = random.nextInt(config.humanMaxSpeed) + 1
-            HumanAccessible.unapply(EmptyCell.Instance).withHuman(List.empty, speed)
-          }
-          else if (random.nextDouble() < config.escapeSpawnChance) {
-            escapesCount += 1
-            EscapeAccessible.unapply(EmptyCell.Instance).withEscape()
-          }
-          else if (random.nextDouble() < config.fireSpawnChance) {
-            fireCount += 1
-            FireAccessible.unapply(EmptyCell.Instance).withFire()
-          }
-          else {
-            grid.cells(x)(y)
+          random.nextInt(3) match {
+            case 0 =>
+              if (random.nextDouble() < config.humanSpawnChance) {
+                humanCount += 1
+                val speed = random.nextInt(config.humanMaxSpeed) + 1
+                HumanAccessible.unapply(EmptyCell.Instance).withHuman(List.empty, speed)
+              } else {
+                grid.cells(x)(y)
+              }
+            case 1 =>
+              if (random.nextDouble() < config.escapeSpawnChance) {
+                escapesCount += 1
+                EscapeAccessible.unapply(EmptyCell.Instance).withEscape()
+              } else {
+                grid.cells(x)(y)
+              }
+            case 2 =>
+              if (random.nextDouble() < config.fireSpawnChance) {
+                fireCount += 1
+                FireAccessible.unapply(EmptyCell.Instance).withFire()
+              } else {
+                grid.cells(x)(y)
+              }
           }
       }
     }
