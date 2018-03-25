@@ -65,7 +65,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2).smell(0)(0).value shouldBe -1
     grid.cells(2)(2).smell(0)(1).value shouldBe -1
     grid.cells(2)(2).smell(0)(2).value shouldBe -1
-    grid.cells(3)(2).smell(0)(1).value shouldBe -1.5
+    grid.cells(3)(2).smell(0)(1).value shouldBe -0.5
 
     grid.cells(2)(2).smell(0)(2).value shouldBe -1
     grid.cells(3)(1).smell(0)(2).value shouldBe -0.5
@@ -79,7 +79,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2).smell(0)(0).value shouldBe 1
     grid.cells(2)(2).smell(0)(1).value shouldBe 1
     grid.cells(2)(2).smell(0)(2).value shouldBe 1
-    grid.cells(3)(2).smell(0)(1).value shouldBe 1.5
+    grid.cells(3)(2).smell(0)(1).value shouldBe 0.5
 
     grid.cells(2)(2).smell(0)(2).value shouldBe 1
     grid.cells(3)(1).smell(0)(2).value shouldBe 0.5
@@ -93,7 +93,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2) = gridCellWithAlgaeAfterSignalPropagation
     grid.cells(3)(2) = gridCellWithForaminiferaAfterSignalPropagation
 
-    grid.cells(2)(2).smell(2)(1).value shouldBe -0.5
+    grid.cells(2)(2).smell(2)(1).value shouldBe 0.5
     grid.cells(2)(2).smell(2)(0).value shouldBe 1
     grid.cells(2)(2).smell(2)(2).value shouldBe 1
     grid.cells(2)(2).smell(0)(0).value shouldBe 1
@@ -101,7 +101,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2).smell(0)(2).value shouldBe 1
 
     grid.cells(3)(2).smell(0)(0).value shouldBe -1
-    grid.cells(3)(2).smell(0)(1).value shouldBe 0.5
+    grid.cells(3)(2).smell(0)(1).value shouldBe -0.5
     grid.cells(3)(2).smell(0)(2).value shouldBe -1
     grid.cells(3)(2).smell(2)(0).value shouldBe -1
     grid.cells(3)(2).smell(2)(1).value shouldBe -1
