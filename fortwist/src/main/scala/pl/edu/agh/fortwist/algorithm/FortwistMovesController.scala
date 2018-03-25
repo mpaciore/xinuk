@@ -98,7 +98,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
           update(x, y)(cell => cell.copy(
             smell = cell.smell + smell,
             foraminiferas = cell.foraminiferas ++ newForaminiferas,
-            algae = cell.algae + newAlgaeEnergy + config.algaeRegenerationRate)
+            algae = newAlgaeEnergy * (1.0 + config.algaeRegenerationRate))
           )
           moves.foreach { case ((i, j), formins) =>
             movesCount += formins.size

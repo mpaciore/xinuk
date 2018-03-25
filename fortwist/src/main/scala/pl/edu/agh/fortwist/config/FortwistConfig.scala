@@ -25,7 +25,7 @@ final case class FortwistConfig(
                                  foraminiferaReproductionThreshold: Energy,
                                  foraminiferaLifeActivityCost: Energy,
                                  algaeStartEnergy: Energy,
-                                 algaeRegenerationRate: Energy,
+  algaeRegenerationRate: Double,
                                  algaeEnergeticCapacity: Energy,
                                  signalSpeedRatio: Int,
                                  signalSuppressionFactor: Double,
