@@ -21,7 +21,7 @@ final case class Grid(cells: CellArray) extends AnyVal {
         val addends = SubcellCoordinates.map {
           case (i, j) if i == 1 || j == 1 =>
             destinationCellSignal(i, j).map(signal =>
-              signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)
+              (signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)) / 3
             )
           case (i, j) =>
             destinationCellSignal(i, j).map(_.apply(i)(j))
@@ -71,7 +71,7 @@ final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
 
   def *(factor: Double) = Signal(value * factor)
 
-  def /(divider: Double) = Signal(value / divider)
+  def /(divisor: Double) = Signal(value / divisor)
 
   override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
 }
