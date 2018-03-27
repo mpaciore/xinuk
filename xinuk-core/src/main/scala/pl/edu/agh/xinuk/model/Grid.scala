@@ -87,6 +87,8 @@ final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
 
   def +(other: Energy): Energy = Energy(value + other.value)
 
+  def *(factor: Double): Energy = Energy(value * factor)
+
   def unary_- : Energy = Energy(-value)
 }
 

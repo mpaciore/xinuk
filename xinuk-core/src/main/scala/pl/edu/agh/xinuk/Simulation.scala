@@ -1,5 +1,6 @@
 package pl.edu.agh.xinuk
 
+import java.awt.Color
 import java.io.File
 
 import akka.actor.{ActorRef, ActorSystem}
@@ -11,7 +12,7 @@ import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
-import pl.edu.agh.xinuk.model.{EmptyCell, SmellingCell, WorkerId}
+import pl.edu.agh.xinuk.model.{EmptyCell, GridPart, SmellingCell, WorkerId}
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.collection.immutable.TreeSet
@@ -23,6 +24,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   conflictResolver: ConflictResolver[ConfigType],
   emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+  cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
 ) extends LazyLogging {
 
   private val rawConfig: Config =
@@ -70,7 +72,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
       workers.foreach { id =>
         if (config.guiType != GuiType.None) {
-          system.actorOf(GuiActor.props(workerRegionRef, id))
+          system.actorOf(GuiActor.props(workerRegionRef, id, cellToColor))
         }
         val neighbours: Vector[Neighbour] = NeighbourPosition.values.flatMap { pos =>
           pos.neighbourId(id).map(_ => Neighbour(pos))

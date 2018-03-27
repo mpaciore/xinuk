@@ -5,7 +5,7 @@ import pl.edu.agh.formin.algorithm.ForminMovesController
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.Simulation
 
-object Main extends LazyLogging {
+object ForminMain extends LazyLogging {
   private val configPrefix = "formin"
   private val metricHeaders = Vector(
     "foraminiferaCount",
