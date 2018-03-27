@@ -25,6 +25,7 @@ object FortwistMain extends LazyLogging {
   private def cellToColor(cell: FortwistCell): Color = {
     val hue = 0.11f
     val saturation = 0.69f
+    //val luminance = cell.algae.value.floatValue()
     val luminance = cell.foraminiferas.size / 10f
     Color.getHSBColor(hue, saturation, luminance)
   }
