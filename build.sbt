@@ -73,6 +73,6 @@ def modelProject(projectName: String)(mainClassName: String): Project = {
     ).dependsOn(`xinuk-core`)
 }
 
-lazy val formin = modelProject("formin")("pl.edu.agh.formin.Main")
-lazy val fortwist = modelProject("fortwist")("pl.edu.agh.fortwist.Main")
-lazy val torch = modelProject("torch")("pl.edu.agh.torch.Main")
+lazy val formin = modelProject("formin")("pl.edu.agh.formin.ForminMain")
+lazy val fortwist = modelProject("fortwist")("pl.edu.agh.fortwist.FortwistMain")
+lazy val torch = modelProject("torch")("pl.edu.agh.torch.TorchMain")
