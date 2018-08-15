@@ -68,10 +68,17 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     var movesCount = 0L
 
     def update(x: Int, y: Int)(op: FortwistCell => FortwistCell): Unit = {
-      val updated = op(newGrid.cells(x)(y).asInstanceOf[FortwistCell]) //the grid is initialized with FC
-      val smellAdjustment = (config.foraminiferaInitialSignal * updated.foraminiferas.size) +
-        (config.algaeSignalMultiplier * updated.algae.value)
-      newGrid.cells(x)(y) = updated.copy(smell = updated.smell + smellAdjustment)
+      def updated(cell: FortwistCell): FortwistCell = {
+        val afterOp = op(cell)
+        val smellAdjustment = (config.foraminiferaInitialSignal * afterOp.foraminiferas.size) +
+          (config.algaeSignalMultiplier * afterOp.algae.value)
+        afterOp.copy(smell = afterOp.smell + smellAdjustment)
+      }
+
+      newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+        case cell: FortwistCell => updated(cell)
+        case BufferCell(cell: FortwistCell) => BufferCell(updated(cell))
+      }
     }
 
     def makeMove(x: Int, y: Int): Unit = {
@@ -147,6 +154,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
             (i, j, grid.cells(i)(j))
           }
       }
+
       val destinations = calculatePossibleDestinations(x, y, grid)
       val destination = destinations.filter(_._3 != Obstacle).nextOpt
       val afterMoving = foraminifera.copy(
@@ -195,7 +203,6 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       foraminiferaTotalLifespan = foraminiferaTotalLifespan,
       foraminiferaMoves = movesCount,
     )
-    println(foraminiferaReproductionsCount, foraminiferaDeaths, movesCount)
     (newGrid, metrics)
   }
 }
