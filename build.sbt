@@ -2,10 +2,10 @@ cancelable in Global := true
 
 val Version = new {
   val Akka = "2.5.11"
-  val AkkaKryo = "0.5.2"
+  val AkkaKryo = "0.5.0"
   val Logback = "1.2.3"
   val Guava = "23.0"
-  val AvsCommons = "1.25.9"
+  val AvsCommons = "1.29.0"
   val ScalaTest = "3.0.5"
   val Mockito = "2.16.0"
   val ScalaLogging = "3.8.0"
@@ -17,7 +17,7 @@ val Version = new {
 inThisBuild(Seq(
   organization := "pl.edu.agh",
   version := "1.1-SNAPSHOT",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.11.12",
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",

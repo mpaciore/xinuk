@@ -105,7 +105,7 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implic
     private val classToColor = mutable.Map[Class[_], Color](
       Obstacle.getClass -> obstacleColor,
       classOf[BufferCell] -> bufferColor,
-      classOf[EmptyCell] -> emptyColor,
+      classOf[EmptyCell] -> emptyColor
     )
 
     def set(cells: CellArray): Unit = {

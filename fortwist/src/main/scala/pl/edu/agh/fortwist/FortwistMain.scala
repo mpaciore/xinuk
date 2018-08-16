@@ -19,7 +19,7 @@ object FortwistMain extends LazyLogging {
     "foraminiferaReproductionsCount",
     "consumedAlgaeCount",
     "foraminiferaTotalLifespan",
-    "foraminiferaMoves",
+    "foraminiferaMoves"
   )
 
   private def cellToColor(cell: FortwistCell): Color = {

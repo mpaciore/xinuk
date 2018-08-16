@@ -17,13 +17,19 @@ trait HumanAccessible[+T <: GridPart] {
 object HumanAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): HumanAccessible[HumanCell] =
-    (crowd, speed) => HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed)
+    new HumanAccessible[HumanCell] {
+      override def withHuman(crowd: List[HumanCell], speed: Int): HumanCell = HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed)
+    }
 
   def unapply(arg: EscapeCell): HumanAccessible[EscapeCell] =
-    (_,_) => EscapeCell(arg.smell)
+    new HumanAccessible[EscapeCell] {
+      override def withHuman(crowd: List[HumanCell], speed: Int): EscapeCell = EscapeCell(arg.smell)
+    }
 
   def unapply(arg: BufferCell)(implicit config: TorchConfig): HumanAccessible[BufferCell] =
-    (crowd, speed) => BufferCell(HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed))
+    new HumanAccessible[BufferCell] {
+      override def withHuman(crowd: List[HumanCell], speed: Int): BufferCell = BufferCell(HumanCell(arg.smellWith(config.humanInitialSignal), crowd, speed))
+    }
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[HumanAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))

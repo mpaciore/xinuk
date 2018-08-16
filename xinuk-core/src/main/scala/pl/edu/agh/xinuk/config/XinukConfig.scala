@@ -1,6 +1,6 @@
 package pl.edu.agh.xinuk.config
 
-import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion}
+import com.avsystem.commons.misc.{AbstractNamedEnumCompanion, NamedEnum}
 
 trait XinukConfig {
   def gridSize: Int
@@ -18,7 +18,7 @@ trait XinukConfig {
 
 sealed trait GuiType extends NamedEnum
 
-object GuiType extends NamedEnumCompanion[GuiType] {
+object GuiType extends AbstractNamedEnumCompanion[GuiType] {
 
   case object None extends GuiType {
     override val name: String = "none"

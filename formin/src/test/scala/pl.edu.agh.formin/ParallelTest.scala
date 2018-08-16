@@ -76,7 +76,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
         Neighbour(NeighbourPosition.Right),
-        Neighbour(NeighbourPosition.BottomRight)),
+        Neighbour(NeighbourPosition.BottomRight))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -97,7 +97,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.Right),
-        Neighbour(NeighbourPosition.TopRight)),
+        Neighbour(NeighbourPosition.TopRight))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -118,7 +118,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.Left),
-        Neighbour(NeighbourPosition.TopLeft)),
+        Neighbour(NeighbourPosition.TopLeft))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -139,7 +139,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
         Neighbour(NeighbourPosition.Left),
-        Neighbour(NeighbourPosition.BottomLeft)),
+        Neighbour(NeighbourPosition.BottomLeft))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -162,7 +162,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
         Neighbour(NeighbourPosition.Left),
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.BottomRight),
-        Neighbour(NeighbourPosition.BottomLeft)),
+        Neighbour(NeighbourPosition.BottomLeft))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -193,7 +193,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
         Neighbour(NeighbourPosition.Left),
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopLeft),
-        Neighbour(NeighbourPosition.BottomLeft)),
+        Neighbour(NeighbourPosition.BottomLeft))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -224,7 +224,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopRight),
-        Neighbour(NeighbourPosition.BottomRight)),
+        Neighbour(NeighbourPosition.BottomRight))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -255,7 +255,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
         Neighbour(NeighbourPosition.Right),
         Neighbour(NeighbourPosition.Top),
         Neighbour(NeighbourPosition.TopRight),
-        Neighbour(NeighbourPosition.TopLeft)),
+        Neighbour(NeighbourPosition.TopLeft))
     )
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
@@ -286,11 +286,11 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     ))
 
     worker1 ! WorkerActor.NeighboursInitialized(WorkerId(5),
-      Vector(Neighbour(NeighbourPosition.Left)),
+      Vector(Neighbour(NeighbourPosition.Left))
     )
 
     worker2 ! WorkerActor.NeighboursInitialized(WorkerId(4),
-      Vector(Neighbour(NeighbourPosition.Right)),
+      Vector(Neighbour(NeighbourPosition.Right))
     )
 
     val workers1Grid: Grid = worker1.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid

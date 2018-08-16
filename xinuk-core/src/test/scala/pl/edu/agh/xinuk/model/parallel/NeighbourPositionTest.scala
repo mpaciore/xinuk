@@ -2,6 +2,8 @@ package pl.edu.agh.xinuk.model.parallel
 
 import com.avsystem.commons.misc.Opt
 import org.mockito.Mockito
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 import pl.edu.agh.xinuk.config.XinukConfig
@@ -9,8 +11,12 @@ import pl.edu.agh.xinuk.model.WorkerId
 
 class NeighbourPositionTest extends FlatSpec with Matchers with BeforeAndAfter with MockitoSugar {
   implicit val config: XinukConfig = mock[XinukConfig]
-  Mockito.when(config.gridSize).thenAnswer(_ => 5)
-  Mockito.when(config.workersRoot).thenAnswer(_ => 3)
+  Mockito.when(config.gridSize).thenAnswer(new Answer[Int] {
+    override def answer(invocation: InvocationOnMock): Int = 5
+  })
+  Mockito.when(config.workersRoot).thenAnswer(new Answer[Int] {
+    override def answer(invocation: InvocationOnMock): Int = 3
+  })
 
   "An affectedCells method" should "return correct affected cells coordinates for TOP one" in {
     val affectedCells = NeighbourPosition.Top.affectedCells.toVector
