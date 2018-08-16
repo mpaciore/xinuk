@@ -162,7 +162,7 @@ object WorkerActor {
     regionRef: => ActorRef,
     movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
     conflictResolver: ConflictResolver[ConfigType],
-    emptyCellFactory: => SmellingCell = EmptyCell.Instance,
+    emptyCellFactory: => SmellingCell = EmptyCell.Instance
   )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
   }
