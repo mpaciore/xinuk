@@ -2,6 +2,7 @@ package pl.edu.agh.formin
 
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.formin.algorithm.ForminMovesController
+import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.Simulation
 
@@ -20,7 +21,7 @@ object ForminMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation(configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_)).start()
+    new Simulation[ForminConfig](configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_)).start()
   }
 
 }
