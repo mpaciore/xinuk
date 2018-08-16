@@ -6,6 +6,7 @@ import com.avsystem.commons.SharedExtensions._
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour}
 
@@ -25,6 +26,8 @@ class WorkerActor[ConfigType <: XinukConfig](
   var bufferZone: TreeSet[(Int, Int)] = _
 
   var id: WorkerId = _
+
+  val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
 
   var neighbours: Map[WorkerId, Neighbour] = _
 
@@ -46,6 +49,8 @@ class WorkerActor[ConfigType <: XinukConfig](
   }
 
   def stopped: Receive = {
+    case SubscribeGridInfo(_) =>
+      guiActors += sender()
     case NeighboursInitialized(id, neighbours) =>
       this.id = id
       this.logger = LoggerFactory.getLogger(id.value.toString)
@@ -60,6 +65,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       this.grid = newGrid
       logMetrics(1, newMetrics)
       propagateSignal()
+      guiActors.foreach(_ ! GridInfo(1, grid, newMetrics))
       notifyNeighbours(1, grid)
       unstashAll()
       context.become(started)
@@ -77,6 +83,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
       this.grid = newGrid
       logMetrics(i, newMetrics)
+      guiActors.foreach(_ ! GridInfo(i, grid, newMetrics))
       notifyNeighbours(i, grid)
       if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
@@ -152,10 +159,10 @@ object WorkerActor {
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props[ConfigType <: XinukConfig](
-                                        regionRef: => ActorRef,
-                                        movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-                                        conflictResolver: ConflictResolver[ConfigType],
-                                        emptyCellFactory: => SmellingCell = EmptyCell.Instance
+    regionRef: => ActorRef,
+    movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+    conflictResolver: ConflictResolver[ConfigType],
+    emptyCellFactory: => SmellingCell = EmptyCell.Instance,
   )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
   }

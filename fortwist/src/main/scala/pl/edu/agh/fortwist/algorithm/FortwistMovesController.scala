@@ -116,9 +116,9 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     }
 
     final case class ForminAction(
-                                   currentCellResult: Iterator[Foraminifera],
-                                   algaeEnergyDiff: Energy = Energy.Zero,
-                                   moves: Iterator[((Int, Int), Foraminifera)] = Iterator.empty
+      currentCellResult: Iterator[Foraminifera],
+      algaeEnergyDiff: Energy = Energy.Zero,
+      moves: Iterator[((Int, Int), Foraminifera)] = Iterator.empty
     )
 
     def killForaminifera(foraminifera: Foraminifera): ForminAction = {
