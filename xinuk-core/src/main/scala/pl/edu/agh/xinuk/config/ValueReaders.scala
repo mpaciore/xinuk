@@ -7,9 +7,15 @@ import pl.edu.agh.xinuk.model.{Energy, Signal}
 
 object ValueReaders extends FicusInstances with ArbitraryTypeReader {
   implicit val guiTypeReader: ValueReader[GuiType] =
-    (config: Config, path: String) => GuiType.byName(config.getString(path))
+    new ValueReader[GuiType] {
+      override def read(config: Config, path: String): GuiType = GuiType.byName(config.getString(path))
+    }
   implicit val signalReader: ValueReader[Signal] =
-    (config: Config, path: String) => Signal(config.getNumber(path).doubleValue())
+    new ValueReader[Signal] {
+      override def read(config: Config, path: String): Signal = Signal(config.getNumber(path).doubleValue())
+    }
   implicit val energyReader: ValueReader[Energy] =
-    (config: Config, path: String) => Energy(config.getNumber(path).doubleValue())
+    new ValueReader[Energy] {
+      override def read(config: Config, path: String): Energy = Energy(config.getNumber(path).doubleValue())
+    }
 }

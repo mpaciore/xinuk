@@ -17,10 +17,14 @@ trait AlgaeAccessible[+T <: GridPart] {
 object AlgaeAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: ForminConfig): AlgaeAccessible[AlgaeCell] =
-    lifespan => AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan)
+    new AlgaeAccessible[AlgaeCell] {
+      override def withAlgae(lifespan: Long): AlgaeCell = AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan)
+    }
 
   def unapply(arg: BufferCell)(implicit config: ForminConfig): AlgaeAccessible[BufferCell] =
-    lifespan => BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan))
+    new AlgaeAccessible[BufferCell] {
+      override def withAlgae(lifespan: Long): BufferCell = BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan))
+    }
 
   def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))

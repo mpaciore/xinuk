@@ -16,7 +16,9 @@ trait EscapeAccessible[+T <: GridPart] {
 object EscapeAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): EscapeAccessible[EscapeCell] =
-    () => EscapeCell(arg.smellWith(config.escapeInitialSignal))
+    new EscapeAccessible[EscapeCell] {
+      override def withEscape(): EscapeCell = EscapeCell(arg.smellWith(config.escapeInitialSignal))
+    }
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[EscapeAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))

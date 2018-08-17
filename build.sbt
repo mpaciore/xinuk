@@ -2,10 +2,9 @@ cancelable in Global := true
 
 val Version = new {
   val Akka = "2.5.11"
-  val AkkaKryo = "0.5.2"
   val Logback = "1.2.3"
   val Guava = "23.0"
-  val AvsCommons = "1.25.9"
+  val AvsCommons = "1.29.0"
   val ScalaTest = "3.0.5"
   val Mockito = "2.16.0"
   val ScalaLogging = "3.8.0"
@@ -14,10 +13,14 @@ val Version = new {
   val JFreeChart = "1.5.0"
 }
 
+val akkaKryoVersion = SettingKey[String]("akkaKryoVersion")
+
 inThisBuild(Seq(
   organization := "pl.edu.agh",
   version := "1.1-SNAPSHOT",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.6",
+  crossScalaVersions := Seq("2.11.12", "2.12.6"),
+
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -40,9 +43,13 @@ lazy val xinuk = project.in(file("."))
 lazy val `xinuk-core` = project
   .settings(
     name := "xinuk-core",
+    akkaKryoVersion := (scalaBinaryVersion.value match {
+      case "2.11" => "0.5.0"
+      case "2.12" => "0.5.2"
+    }),
     libraryDependencies ++= Seq(
       "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
-      "com.github.romix.akka" %% "akka-kryo-serialization" % Version.AkkaKryo,
+      "com.github.romix.akka" %% "akka-kryo-serialization" % akkaKryoVersion.value,
       "com.iheart" %% "ficus" % Version.Ficus,
       "com.typesafe.akka" %% "akka-actor" % Version.Akka,
       "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
