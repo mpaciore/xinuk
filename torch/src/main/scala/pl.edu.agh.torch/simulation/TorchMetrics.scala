@@ -17,4 +17,21 @@ final case class TorchMetrics(peopleCount: Long,
     "Escape" -> escapeCount,
     "PeopleDeaths" -> peopleDeaths
   )
+
+  override def +(other: Metrics): TorchMetrics = {
+    other match {
+      case TorchMetrics.EMPTY => this
+      case TorchMetrics(otherPeopleCount, otherFireCount, otherEscapeCount, otherPeopleDeaths, otherPeopleEscaped) =>
+        TorchMetrics(peopleCount + otherPeopleCount, fireCount + otherFireCount, escapeCount + otherEscapeCount,
+          peopleDeaths + otherPeopleDeaths, peopleEscaped + otherPeopleEscaped)
+      case null => this
+      case _ => throw new UnsupportedOperationException(s"Cannot add: non-TorchMetrics to TorchMetrics")
+    }
+  }
+}
+
+object TorchMetrics {
+  private val EMPTY = TorchMetrics(0, 0, 0, 0, 0)
+
+  def empty(): TorchMetrics = EMPTY
 }

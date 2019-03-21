@@ -4,7 +4,6 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 
-
 final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCell {
   override type Self = AlgaeCell
 
@@ -14,6 +13,7 @@ final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCe
 trait AlgaeAccessible[+T <: GridPart] {
   def withAlgae(lifespan: Long): T
 }
+
 object AlgaeAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: ForminConfig): AlgaeAccessible[AlgaeCell] =

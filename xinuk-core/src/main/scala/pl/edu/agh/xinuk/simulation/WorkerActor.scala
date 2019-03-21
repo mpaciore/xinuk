@@ -14,10 +14,10 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable
 
 class WorkerActor[ConfigType <: XinukConfig](
-  regionRef: => ActorRef,
-  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-  conflictResolver: ConflictResolver[ConfigType],
-  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
+                                              regionRef: => ActorRef,
+                                              movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+                                              conflictResolver: ConflictResolver[ConfigType],
+                                              emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
@@ -36,6 +36,8 @@ class WorkerActor[ConfigType <: XinukConfig](
   var logger: Logger = _
 
   var movesController: MovesController = _
+
+  var conflictResolutionMetrics: Metrics = _
 
   override def receive: Receive = stopped
 
@@ -64,8 +66,8 @@ class WorkerActor[ConfigType <: XinukConfig](
       val (newGrid, newMetrics) = movesController.initialGrid
       this.grid = newGrid
       logMetrics(1, newMetrics)
-      propagateSignal()
       guiActors.foreach(_ ! GridInfo(1, grid, newMetrics))
+      propagateSignal()
       notifyNeighbours(1, grid)
       unstashAll()
       context.become(started)
@@ -79,12 +81,14 @@ class WorkerActor[ConfigType <: XinukConfig](
     case StartIteration(i) =>
       finished.remove(i - 1)
       logger.debug(s"$id started $i")
-      propagateSignal()
       val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
-      this.grid = newGrid
-      logMetrics(i, newMetrics)
-      guiActors.foreach(_ ! GridInfo(i, grid, newMetrics))
+      grid = newGrid
+      val metrics = newMetrics + conflictResolutionMetrics
+      logMetrics(i, metrics)
+      guiActors.foreach(_ ! GridInfo(i, grid, metrics))
+      propagateSignal()
       notifyNeighbours(i, grid)
+      conflictResolutionMetrics = null
       if (i % 100 == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
       val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
@@ -107,7 +111,8 @@ class WorkerActor[ConfigType <: XinukConfig](
           incomingCells.foreach(_.cells.foreach {
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y)
-              val resolved = conflictResolver.resolveConflict(currentCell, cell)
+              val (resolved, partialResolvingMetrics) = conflictResolver.resolveConflict(currentCell, cell)
+              conflictResolutionMetrics = partialResolvingMetrics + conflictResolutionMetrics
               grid.cells(x)(y) = resolved
           })
 
@@ -159,11 +164,11 @@ object WorkerActor {
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
   def props[ConfigType <: XinukConfig](
-    regionRef: => ActorRef,
-    movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-    conflictResolver: ConflictResolver[ConfigType],
-    emptyCellFactory: => SmellingCell = EmptyCell.Instance
-  )(implicit config: ConfigType): Props = {
+                                        regionRef: => ActorRef,
+                                        movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+                                        conflictResolver: ConflictResolver[ConfigType],
+                                        emptyCellFactory: => SmellingCell = EmptyCell.Instance
+                                      )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
   }
 
