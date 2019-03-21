@@ -83,7 +83,9 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
 
     def makeMove(x: Int, y: Int): Unit = {
       this.grid.cells(x)(y) match {
-        case Obstacle | BufferCell(_) =>
+        case Obstacle =>
+        case BufferCell(FortwistCell(smell, _, _)) =>
+          update(x, y)(cell => cell.copy(smell = cell.smell + smell))
         case FortwistCell(smell, foraminiferas, algaeEnergy) => {
           val (newForaminiferas: Iterator[Foraminifera], moves: BMap[(Int, Int), Stream[Foraminifera]], newAlgaeEnergy: Energy) =
             foraminiferas.foldLeft(
@@ -116,10 +118,10 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     }
 
     final case class ForminAction(
-      currentCellResult: Iterator[Foraminifera],
-      algaeEnergyDiff: Energy = Energy.Zero,
-      moves: Iterator[((Int, Int), Foraminifera)] = Iterator.empty
-    )
+                                   currentCellResult: Iterator[Foraminifera],
+                                   algaeEnergyDiff: Energy = Energy.Zero,
+                                   moves: Iterator[((Int, Int), Foraminifera)] = Iterator.empty
+                                 )
 
     def killForaminifera(foraminifera: Foraminifera): ForminAction = {
       foraminiferaDeaths += 1
@@ -175,24 +177,25 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     for {
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
-    } makeMove(x, y)
-
-    for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
     } {
-      newGrid.cells(x)(y) match {
-        case FortwistCell(smell, foraminiferas, algae) =>
+      this.grid.cells(x)(y) match {
+        case FortwistCell(_, foraminiferas, algae) =>
           foraminiferaTotalEnergy += foraminiferas.iterator.map(_.energy.value).sum
           foraminiferaCount += foraminiferas.size
           algaeCount += algae.value
-        case BufferCell(FortwistCell(smell, foraminiferas, algae)) =>
+        case BufferCell(FortwistCell(_, foraminiferas, algae)) =>
           foraminiferaTotalEnergy += foraminiferas.iterator.map(_.energy.value).sum
           foraminiferaCount += foraminiferas.size
           algaeCount += algae.value
         case _ =>
       }
     }
+
+    for {
+      x <- 0 until config.gridSize
+      y <- 0 until config.gridSize
+    } makeMove(x, y)
+
     val metrics = FortwistMetrics(
       foraminiferaCount = foraminiferaCount,
       algaeCount = algaeCount,

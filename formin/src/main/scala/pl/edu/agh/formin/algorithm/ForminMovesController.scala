@@ -61,7 +61,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     possibleDestinations
       .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
       .collectFirstOpt {
-        case (i, j, currentCell@ForaminiferaAccessible(_), newCell@ForaminiferaAccessible(_)) =>
+        case (i, j, currentCell@ForaminiferaAccessible(_), ForaminiferaAccessible(_)) =>
           (i, j, currentCell)
       }
   }
@@ -130,7 +130,9 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     def killForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
       foraminiferaDeaths += 1
       foraminiferaTotalLifespan += cell.lifespan
-      newGrid.cells(x)(y) = EmptyCell(cell.smell)
+      val vacated = EmptyCell(cell.smell)
+      newGrid.cells(x)(y) = vacated
+      grid.cells(x)(y) = vacated
     }
 
     def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
@@ -168,14 +170,8 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     for {
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
-    } makeMove(x, y)
-
-    //todo metrics before a move
-    for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
     } {
-      newGrid.cells(x)(y) match {
+      this.grid.cells(x)(y) match {
         case ForaminiferaCell(energy, _, _) =>
           foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
@@ -187,6 +183,12 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
         case _ =>
       }
     }
+
+    for {
+      x <- 0 until config.gridSize
+      y <- 0 until config.gridSize
+    } makeMove(x, y)
+
     val metrics = ForminMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
     (newGrid, metrics)
   }
