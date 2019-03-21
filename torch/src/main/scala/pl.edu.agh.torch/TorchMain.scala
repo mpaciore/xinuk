@@ -11,7 +11,8 @@ object TorchMain extends LazyLogging {
     "peopleCount",
     "fireCount",
     "escapeCount",
-    "peopleDeaths"
+    "peopleDeaths",
+    "peopleEscapes"
   )
 
   def main(args: Array[String]): Unit = {
