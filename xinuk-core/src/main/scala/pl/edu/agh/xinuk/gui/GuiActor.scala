@@ -1,7 +1,7 @@
 package pl.edu.agh.xinuk.gui
 
-import java.awt.Color
 import java.awt.image.BufferedImage
+import java.awt.{Color, Dimension}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import javax.swing.{ImageIcon, UIManager}
@@ -22,12 +22,12 @@ import scala.swing._
 import scala.util.{Random, Try}
 
 class GuiActor private(
-  worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color]
-)(implicit config: XinukConfig) extends Actor with ActorLogging {
+                        worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color]
+                      )(implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(cellToColor)
+  private lazy val gui: GuiGrid = new GuiGrid(cellToColor, workerId)
 
   override def preStart: Unit = {
     worker ! SubscribeGridInfo(workerId)
@@ -52,7 +52,7 @@ object GuiActor {
 
 }
 
-private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implicit config: XinukConfig) extends SimpleSwingApplication {
+private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)(implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
@@ -62,10 +62,13 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implic
     background = bgcolor
   }
   private val chartPage = new Page("Plot", chartPanel)
+  private val (alignedLocation, alignedSize) = alignFrame()
 
   def top = new MainFrame {
     title = "Xinuk"
     background = bgcolor
+    location = alignedLocation
+    preferredSize = alignedSize
 
     val mainPanel = new BorderPanel {
 
@@ -87,6 +90,16 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color])(implic
     }
 
     contents = mainPanel
+  }
+
+  private def alignFrame(): (Point, Dimension) = {
+    val xOffset = 100
+    val yOffset = 100
+    val width = config.gridSize * config.guiCellSize + 25
+    val height = config.gridSize * config.guiCellSize + 75
+    val xPos = (workerId.value - 1) % config.workersRoot
+    val yPos = (workerId.value - 1) / config.workersRoot
+    (new Point(xOffset + xPos * width, yOffset + yPos * height), new Dimension(width, height))
   }
 
   def setNewValues(iteration: Long, grid: Grid): Unit = {
