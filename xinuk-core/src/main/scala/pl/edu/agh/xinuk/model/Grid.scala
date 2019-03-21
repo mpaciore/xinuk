@@ -8,24 +8,51 @@ final case class Grid(cells: CellArray) extends AnyVal {
 
   import Grid._
 
-  def propagatedSignal(x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
+  private def calculateSmellAddendsPaper(x: Int, y: Int) = {
     @inline def destinationCellSignal(i: Int, j: Int): Option[SmellArray] = {
       cells.lift(x + i - 1).flatMap(_.lift(y + j - 1).map(_.smell))
     }
 
+    SubcellCoordinates.map {
+      case (i, j) if i == 1 || j == 1 =>
+        destinationCellSignal(i, j).map(signal =>
+          signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)
+        )
+      case (i, j) =>
+        destinationCellSignal(i, j).map(_.apply(i)(j))
+    }
+  }
+
+  private def calculateSmellAddendsCircular(x: Int, y: Int) = {
+    def sideToSide = 1.0 / 3
+    def sideToCorner = 1.0 / Math.sqrt(10)
+    def cornerToSide = 1.0 / Math.sqrt(13)
+    def cornerToCorner = 1.0 / (3 * Math.sqrt(2))
+
+    @inline def destinationCellSignal(i: Int, j: Int): Option[SmellArray] = {
+      cells.lift(x + i - 1).flatMap(_.lift(y + j - 1).map(_.smell))
+    }
+
+    SubcellCoordinates.map {
+      case (i, j) if i == 1 || j == 1 =>
+        destinationCellSignal(i, j).map(signal =>
+          signal(i)(j) * sideToSide + (signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)) * cornerToSide
+        )
+      case (i, j) =>
+        destinationCellSignal(i, j).map(signal =>
+          signal(i)(j) * cornerToCorner + (signal(i)(1) + signal(1)(j)) * sideToCorner
+        )
+    }
+  }
+
+  def propagatedSignal(x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
     val current = cells(x)(y)
     current match {
       case Obstacle => current
       case smelling: SmellMedium =>
         val currentSmell = current.smell
-        val addends = SubcellCoordinates.map {
-          case (i, j) if i == 1 || j == 1 =>
-            destinationCellSignal(i, j).map(signal =>
-              (signal(i)(j) + signal(i + j - 1)(i + j - 1) + signal(i - j + 1)(j - i + 1)) / 3
-            )
-          case (i, j) =>
-            destinationCellSignal(i, j).map(_.apply(i)(j))
-        }
+        val calculateSmellAddendsFunction = calculateSmellAddendsPaper _
+        val addends = calculateSmellAddendsFunction(x, y)
         val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
           val (i, j) = SubcellCoordinates(index)
           cell(i)(j) = (currentSmell(i)(j) * config.signalAttenuationFactor) + (signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor)
