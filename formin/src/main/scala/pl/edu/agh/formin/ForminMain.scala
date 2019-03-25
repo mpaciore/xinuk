@@ -8,7 +8,7 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.formin.model.{AlgaeCell, ForaminiferaCell}
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.SmellingCell
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, SmellingCell}
 
 object ForminMain extends LazyLogging {
   private val configPrefix = "formin"
@@ -33,7 +33,8 @@ object ForminMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation[ForminConfig](configPrefix, metricHeaders, ForminConflictResolver)(new ForminMovesController(_)(_),
+    new Simulation[ForminConfig](configPrefix, metricHeaders, ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard)(new ForminMovesController(_)(_),
       { case cell: SmellingCell => cellToColor(cell) }
     ).start()
   }

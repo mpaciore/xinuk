@@ -7,7 +7,7 @@ import pl.edu.agh.torch.algorithm.TorchMovesController
 import pl.edu.agh.torch.model.parallel.TorchConflictResolver
 import pl.edu.agh.torch.model.{EscapeCell, FireCell, HumanCell}
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.SmellingCell
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, SmellingCell}
 
 object TorchMain extends LazyLogging {
   private val configPrefix = "torch"
@@ -30,7 +30,8 @@ object TorchMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation(configPrefix, metricHeaders, TorchConflictResolver)(new TorchMovesController(_)(_),
+    new Simulation(configPrefix, metricHeaders, TorchConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard)(new TorchMovesController(_)(_),
       { case cell: SmellingCell => cellToColor(cell) }
     ).start()
   }

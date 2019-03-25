@@ -8,7 +8,7 @@ import pl.edu.agh.mock.model.MockNonEmptyCell
 import pl.edu.agh.mock.model.parallel.MockConflictResolver
 import pl.edu.agh.xinuk.Simulation
 import pl.edu.agh.xinuk.model.Cell.SmellArray
-import pl.edu.agh.xinuk.model.{Obstacle, SmellingCell}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
@@ -59,7 +59,8 @@ object MockMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation(configPrefix, metricHeaders, MockConflictResolver)(new MockMovesController(_)(_), {
+    new Simulation(configPrefix, metricHeaders, MockConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_), {
       case MockNonEmptyCell(_) => Color.WHITE
       case Obstacle => Color.BLUE
       case cell: SmellingCell => cellToColorRegions(maxSmell)(cell)

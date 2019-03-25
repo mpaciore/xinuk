@@ -17,11 +17,11 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     val grid = Grid.empty(bufferZone)
 
     def inBox(distance: Int, topClosed: Boolean, bottomClosed: Boolean, leftClosed: Boolean, rightClosed: Boolean)(x: Int, y: Int): Boolean = {
-      val altDistance = config.gridSize - distance
-      (x == distance && y >= distance && y <= altDistance && topClosed) ||
-        (x == altDistance && y >= distance && y <= altDistance && bottomClosed) ||
-        (y == distance && x >= distance && x <= altDistance && leftClosed) ||
-        (y == altDistance && x >= distance && x <= altDistance && rightClosed)
+      val oppDistance = config.gridSize - distance
+      (x == distance && y >= distance && y <= oppDistance && topClosed) ||
+        (x == oppDistance && y >= distance && y <= oppDistance && bottomClosed) ||
+        (y == distance && x >= distance && x <= oppDistance && leftClosed) ||
+        (y == oppDistance && x >= distance && x <= oppDistance && rightClosed)
     }
 
     val gridSizeQuarter = config.gridSize / 4

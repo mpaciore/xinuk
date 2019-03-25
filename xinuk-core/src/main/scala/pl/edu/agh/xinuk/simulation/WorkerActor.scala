@@ -7,6 +7,7 @@ import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
+import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour}
 
@@ -17,6 +18,7 @@ class WorkerActor[ConfigType <: XinukConfig](
                                               regionRef: => ActorRef,
                                               movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                               conflictResolver: ConflictResolver[ConfigType],
+                                              smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
                                               emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -44,7 +46,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def propagateSignal(): Unit = {
     (0 until config.signalSpeedRatio).foreach { _ =>
       val cells = Array.tabulate(config.gridSize, config.gridSize)((x, y) =>
-        grid.propagatedSignal(x, y)
+        grid.propagatedSignal(smellPropagationFunction, x, y)
       )
       grid = Grid(cells)
     }
@@ -167,9 +169,10 @@ object WorkerActor {
                                         regionRef: => ActorRef,
                                         movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                         conflictResolver: ConflictResolver[ConfigType],
+                                        smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
                                         emptyCellFactory: => SmellingCell = EmptyCell.Instance
                                       )(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, emptyCellFactory))
+    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString

@@ -11,8 +11,9 @@ import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
+import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
-import pl.edu.agh.xinuk.model.{EmptyCell, GridPart, SmellingCell, WorkerId}
+import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.collection.immutable.TreeSet
@@ -22,6 +23,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
+  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
   emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
   cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
@@ -57,7 +59,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, emptyCellFactory),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId

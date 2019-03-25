@@ -43,7 +43,8 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   "A WorkerActor" should "start first iteration when neighbours are initialized" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
@@ -58,7 +59,8 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
 
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
@@ -84,7 +86,8 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
   it should "shutdown actor system when iterations limit is reached" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector())

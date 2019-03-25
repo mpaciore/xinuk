@@ -46,7 +46,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   "A WorkerActors" should "have defined buffers correctly for worker surrounded by neighbours" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -71,7 +72,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the left top corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -92,7 +94,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the left bottom corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
@@ -113,7 +116,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the right bottom corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
@@ -134,7 +138,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the right top corner of the grid" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -155,7 +160,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the top line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -186,7 +192,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the right line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -217,7 +224,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the left line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -248,7 +256,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "have defined buffers correctly for worker in the bottom line of the grid not in the corner" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Left),
@@ -279,10 +288,12 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
   it should "should make cells migrations correctly" in new Fixture {
     val workerRegion = TestProbe("workerRegion")
     val worker1 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
     val worker2 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
-      new ForminMovesController(bufferZone)(config), ForminConflictResolver
+      new ForminMovesController(bufferZone)(config), ForminConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard
     ))
 
     worker1 ! WorkerActor.NeighboursInitialized(WorkerId(5),
@@ -294,7 +305,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     )
 
     val workers1Grid: Grid = worker1.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
-    workers1Grid.cells(1)(0) = BufferCell.apply(ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0))
+    workers1Grid.cells(1)(0) = BufferCell.apply(ForaminiferaAccessible.unapply(EmptyCell.Instance)
+      .withForaminifera(config.foraminiferaStartEnergy, 0))
     workers1Grid.cells(2)(0) = BufferCell.apply(AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0))
 
     val workers2Grid: Grid = worker2.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
@@ -307,7 +319,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
       workers2Grid.cells(x)(y) = EmptyCell.Instance
     }
 
-    val bufferArray: Array[BufferCell] = NeighbourPosition.Left.bufferZone.iterator.map { case (x, y) => workers1Grid.cells(x)(y).asInstanceOf[BufferCell] }.toArray
+    val bufferArray: Array[BufferCell] = NeighbourPosition.Left.bufferZone.iterator.map {
+      case (x, y) => workers1Grid.cells(x)(y).asInstanceOf[BufferCell]
+    }.toArray
 
     worker2 ! WorkerActor.IterationPartFinished(WorkerId(5), WorkerId(4), 1, bufferArray)
 

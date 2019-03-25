@@ -8,6 +8,7 @@ import pl.edu.agh.fortwist.config.FortwistConfig
 import pl.edu.agh.fortwist.model.FortwistCell
 import pl.edu.agh.fortwist.model.parallel.FortwistConflictResolver
 import pl.edu.agh.xinuk.Simulation
+import pl.edu.agh.xinuk.model.DefaultSmellPropagation
 
 object FortwistMain extends LazyLogging {
   private val configPrefix = "fortwist"
@@ -32,7 +33,8 @@ object FortwistMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver, FortwistCell.create())(
+    new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard, FortwistCell.create())(
       new FortwistMovesController(_)(_),
       { case cell: FortwistCell => cellToColor(cell) }
     ).start()
