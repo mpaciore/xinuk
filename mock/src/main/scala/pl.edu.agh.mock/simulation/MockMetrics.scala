@@ -16,5 +16,6 @@ final case class MockMetrics() extends Metrics {
 
 object MockMetrics {
   private val EMPTY = MockMetrics()
+
   def empty(): MockMetrics = EMPTY
 }

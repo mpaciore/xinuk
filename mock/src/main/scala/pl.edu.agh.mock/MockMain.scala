@@ -4,31 +4,31 @@ import java.awt.Color
 
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.mock.algorithm.MockMovesController
-import pl.edu.agh.mock.model.MockNonEmptyCell
+import pl.edu.agh.mock.model.MockCell
 import pl.edu.agh.mock.model.parallel.MockConflictResolver
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
   private val metricHeaders = Vector()
 
-
-  private def maxSmell(smell: SmellArray): Float = {
-    smell.map(_.map(_.value).max).max.toFloat
+  def main(args: Array[String]): Unit = {
+    import pl.edu.agh.xinuk.config.ValueReaders._
+    new Simulation(
+      configPrefix,
+      metricHeaders,
+      MockConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_),
+      {
+        case MockCell(_) => Color.WHITE
+        case Obstacle => Color.BLUE
+        case cell: SmellingCell => cellToColorRegions(cell)
+      }).start()
   }
 
-  private def sumSmell(smell: SmellArray): Float = {
-    smell.map(_.map(_.value).sum).sum.toFloat
-  }
-
-  private def smellFrom(i: Int, j: Int)(smell: SmellArray): Float = {
-    smell(i)(j).value.toFloat
-  }
-
-  private def cellToColorRegions(smellExtractor: SmellArray => Float)(cell: SmellingCell): Color = {
-    val smellValue = smellExtractor(cell.smell)
+  private def cellToColorRegions(cell: SmellingCell): Color = {
+    val smellValue = cell.smell.map(_.map(_.value).max).max.toFloat
     val brightness = Math.pow(smellValue, 0.1).toFloat
     if (smellValue < 0.00001) {
       val hue = 1f
@@ -49,22 +49,12 @@ object MockMain extends LazyLogging {
     }
   }
 
-  private def cellToColor(smellExtractor: SmellArray => Float)(cell: SmellingCell): Color = {
-    val smellValue = smellExtractor(cell.smell)
+  private def cellToColor(cell: SmellingCell): Color = {
+    val smellValue = cell.smell.map(_.map(_.value).max).max.toFloat
     val brightness = Math.pow(smellValue, 0.1).toFloat
     val hue = 1f
     val saturation = 0.69f
     Color.getHSBColor(hue, saturation, brightness)
-  }
-
-  def main(args: Array[String]): Unit = {
-    import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation(configPrefix, metricHeaders, MockConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_), {
-      case MockNonEmptyCell(_) => Color.WHITE
-      case Obstacle => Color.BLUE
-      case cell: SmellingCell => cellToColorRegions(maxSmell)(cell)
-    }).start()
   }
 
 }

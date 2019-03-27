@@ -16,24 +16,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid: (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone)
 
-    def inBox(distance: Int, topClosed: Boolean, bottomClosed: Boolean, leftClosed: Boolean, rightClosed: Boolean)(x: Int, y: Int): Boolean = {
-      val oppDistance = config.gridSize - distance
-      (x == distance && y >= distance && y <= oppDistance && topClosed) ||
-        (x == oppDistance && y >= distance && y <= oppDistance && bottomClosed) ||
-        (y == distance && x >= distance && x <= oppDistance && leftClosed) ||
-        (y == oppDistance && x >= distance && x <= oppDistance && rightClosed)
-    }
-
-    val gridSizeQuarter = config.gridSize / 4
-    for {
-      x <- grid.cells.indices
-      y <- grid.cells.indices
-    } if (inBox(gridSizeQuarter + 5, topClosed = true, bottomClosed = false, leftClosed = true, rightClosed = true)(x, y)
-      || inBox(gridSizeQuarter, topClosed = false, bottomClosed = true, leftClosed = true, rightClosed = true)(x, y)
-      || inBox(gridSizeQuarter - 5, topClosed = true, bottomClosed = false, leftClosed = true, rightClosed = true)(x, y)) {
-      grid.cells(x)(y) = Obstacle
-    }
-    if (random.nextInt(4) == 0) grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockNonEmptyCell.create(config.mockInitialSignal)
+    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -49,7 +32,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
       val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
       val vacatedCell = EmptyCell(cell.smell)
-      val occupiedCell = MockNonEmptyCell.create(config.mockInitialSignal)
+      val occupiedCell = MockCell.create(config.mockInitialSignal)
 
       newGrid.cells(destination._1)(destination._2) match {
         case EmptyCell(_) =>
@@ -67,7 +50,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
     } yield (x, y, grid.cells(x)(y))).partition({
-      case (_, _, MockNonEmptyCell(_)) => true
+      case (_, _, MockCell(_)) => true
       case (_, _, _) => false
     })
 
