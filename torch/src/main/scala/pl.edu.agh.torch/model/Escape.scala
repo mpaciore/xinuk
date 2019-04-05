@@ -3,6 +3,7 @@ package pl.edu.agh.torch.model
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{EmptyCell, GridPart, SmellingCell}
+import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
 final case class EscapeCell(smell: SmellArray) extends SmellingCell {
   override type Self = EscapeCell
@@ -17,7 +18,7 @@ object EscapeAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): EscapeAccessible[EscapeCell] =
     new EscapeAccessible[EscapeCell] {
-      override def withEscape(): EscapeCell = EscapeCell(arg.smellWith(config.escapeInitialSignal))
+      override def withEscape(): EscapeCell = EscapeCell(arg.smellWith(config.escapeInitialSignal.toSignalVector))
     }
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[EscapeAccessible[GridPart]] = arg match {

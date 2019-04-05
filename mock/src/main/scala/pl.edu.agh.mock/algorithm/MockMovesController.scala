@@ -8,6 +8,7 @@ import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
+import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
@@ -16,7 +17,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid: (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone)
 
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal)
+    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal.toSignalVector)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -32,7 +33,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
       val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
       val vacatedCell = EmptyCell(cell.smell)
-      val occupiedCell = MockCell.create(config.mockInitialSignal)
+      val occupiedCell = MockCell.create(config.mockInitialSignal.toSignalVector)
 
       newGrid.cells(destination._1)(destination._2) match {
         case EmptyCell(_) =>

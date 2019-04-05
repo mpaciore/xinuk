@@ -16,5 +16,6 @@ final case class MockConfig(
                              signalSpeedRatio: Int,
                              iterationsNumber: Long,
 
-                             mockInitialSignal: Signal
+                             mockInitialSignal: List[Signal],
+                             mockPursuedSignalIndex: Int
                            ) extends XinukConfig

@@ -64,13 +64,13 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
     grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
 
-    grid.cells(2)(2).smell(0)(0).value shouldBe -1
-    grid.cells(2)(2).smell(0)(1).value shouldBe -1
-    grid.cells(2)(2).smell(0)(2).value shouldBe -1
+    grid.cells(2)(2).smell(0)(0).value(0).value shouldBe -1
+    grid.cells(2)(2).smell(0)(1).value(0).value shouldBe -1
+    grid.cells(2)(2).smell(0)(2).value(0).value shouldBe -1
 
-    grid.cells(3)(2).smell(0)(1).value shouldBe -1.5
+    grid.cells(3)(2).smell(0)(1).value(0).value shouldBe -1.5
 
-    grid.cells(3)(1).smell(0)(2).value shouldBe -0.5
+    grid.cells(3)(1).smell(0)(2).value(0).value shouldBe -0.5
   }
 
   it should "propagate signal correctly for one algae cell" in {
@@ -78,13 +78,13 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
     grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
 
-    grid.cells(2)(2).smell(0)(0).value shouldBe 1
-    grid.cells(2)(2).smell(0)(1).value shouldBe 1
-    grid.cells(2)(2).smell(0)(2).value shouldBe 1
+    grid.cells(2)(2).smell(0)(0).value(0).value shouldBe 1
+    grid.cells(2)(2).smell(0)(1).value(0).value shouldBe 1
+    grid.cells(2)(2).smell(0)(2).value(0).value shouldBe 1
 
-    grid.cells(3)(2).smell(0)(1).value shouldBe 1.5
+    grid.cells(3)(2).smell(0)(1).value(0).value shouldBe 1.5
 
-    grid.cells(3)(1).smell(0)(2).value shouldBe 0.5
+    grid.cells(3)(1).smell(0)(2).value(0).value shouldBe 0.5
   }
 
   it should "propagate signal correctly between algae and foraminifera cells" in {
@@ -95,26 +95,26 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2) = gridCellWithAlgaeAfterSignalPropagation
     grid.cells(3)(2) = gridCellWithForaminiferaAfterSignalPropagation
 
-    grid.cells(2)(2).smell(2)(1).value shouldBe -0.5
-    grid.cells(2)(2).smell(2)(0).value shouldBe 1
-    grid.cells(2)(2).smell(2)(2).value shouldBe 1
-    grid.cells(2)(2).smell(0)(0).value shouldBe 1
-    grid.cells(2)(2).smell(0)(1).value shouldBe 1
-    grid.cells(2)(2).smell(0)(2).value shouldBe 1
+    grid.cells(2)(2).smell(2)(1).value(0).value  shouldBe -0.5
+    grid.cells(2)(2).smell(2)(0).value(0).value  shouldBe 1
+    grid.cells(2)(2).smell(2)(2).value(0).value  shouldBe 1
+    grid.cells(2)(2).smell(0)(0).value(0).value  shouldBe 1
+    grid.cells(2)(2).smell(0)(1).value(0).value  shouldBe 1
+    grid.cells(2)(2).smell(0)(2).value(0).value  shouldBe 1
 
-    grid.cells(3)(2).smell(0)(0).value shouldBe -1
-    grid.cells(3)(2).smell(0)(1).value shouldBe 0.5
-    grid.cells(3)(2).smell(0)(2).value shouldBe -1
-    grid.cells(3)(2).smell(2)(0).value shouldBe -1
-    grid.cells(3)(2).smell(2)(1).value shouldBe -1
-    grid.cells(3)(2).smell(2)(2).value shouldBe -1
+    grid.cells(3)(2).smell(0)(0).value(0).value  shouldBe -1
+    grid.cells(3)(2).smell(0)(1).value(0).value  shouldBe 0.5
+    grid.cells(3)(2).smell(0)(2).value(0).value  shouldBe -1
+    grid.cells(3)(2).smell(2)(0).value(0).value  shouldBe -1
+    grid.cells(3)(2).smell(2)(1).value(0).value  shouldBe -1
+    grid.cells(3)(2).smell(2)(2).value(0).value  shouldBe -1
   }
 
   it should "not propagate signal on obstacle cell" in {
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(4)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 4, 2)
-    grid.cells(3)(2).smell(1)(1).value shouldBe -1
-    grid.cells(4)(2).smell(0)(1).value shouldBe 0
+    grid.cells(3)(2).smell(1)(1).value(0).value  shouldBe -1
+    grid.cells(4)(2).smell(0)(1).value(0).value  shouldBe 0
   }
 
   it should "calculate neighbour cells correctly for middle one" in {
