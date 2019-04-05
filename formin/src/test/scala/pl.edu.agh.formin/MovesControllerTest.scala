@@ -24,8 +24,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     gridSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
-    foraminiferaInitialSignal = Signal(-1),
-    algaeInitialSignal = Signal(1),
+    foraminiferaInitialSignal = List(Signal(-1), Signal(0)),
+    foraminiferaPursuedSignalIndex = 0,
+    algaeInitialSignal = List(Signal(1), Signal(0)),
+    algaePursuedSignalIndex = 0,
     guiType = GuiType.None,
     guiCellSize = 4,
     workersRoot = 1,
@@ -47,10 +49,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(20)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).smell(0)(0) = SignalVector(Array(Signal(20), Signal(0)))
+    grid.cells(2)(2).smell(0)(2) = SignalVector(Array(Signal(15), Signal(0)))
+    grid.cells(2)(2).smell(1)(0) = SignalVector(Array(Signal(-5), Signal(0)))
+    grid.cells(2)(2).smell(2)(2) = SignalVector(Array(Signal(-666), Signal(0)))
 
     val (x, y, destination) = movesController.calculatePossibleDestinations(cell1, 2, 2, grid).next()
 
@@ -66,10 +68,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(20)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).smell(0)(0) = SignalVector(Array(Signal(20), Signal(0)))
+    grid.cells(2)(2).smell(0)(2) = SignalVector(Array(Signal(15), Signal(0)))
+    grid.cells(2)(2).smell(1)(0) = SignalVector(Array(Signal(-5), Signal(0)))
+    grid.cells(2)(2).smell(2)(2) = SignalVector(Array(Signal(-666), Signal(0)))
 
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)
@@ -84,10 +86,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(4)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).smell(0)(0) = SignalVector(Array(Signal(4), Signal(0)))
+    grid.cells(2)(2).smell(0)(2) = SignalVector(Array(Signal(15), Signal(0)))
+    grid.cells(2)(2).smell(1)(0) = SignalVector(Array(Signal(-5), Signal(0)))
+    grid.cells(2)(2).smell(2)(2) = SignalVector(Array(Signal(-666), Signal(0)))
 
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)

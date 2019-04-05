@@ -5,7 +5,7 @@ import pl.edu.agh.xinuk.model.Grid.{CellArray, SubcellCoordinates}
 
 object DefaultSmellPropagation {
 
-  def calculateSmellAddendsStandard(cells: CellArray, x: Int, y: Int): Vector[Option[Signal]] = {
+  def calculateSmellAddendsStandard(cells: CellArray, x: Int, y: Int): Vector[Option[SignalVector]] = {
     @inline def destinationCellSignal(i: Int, j: Int): Option[SmellArray] = {
       cells.lift(x + i - 1).flatMap(_.lift(y + j - 1).map(_.smell))
     }
@@ -20,7 +20,7 @@ object DefaultSmellPropagation {
     }
   }
 
-  def calculateSmellAddendsCircular(cells: CellArray, x: Int, y: Int): Vector[Option[Signal]] = {
+  def calculateSmellAddendsCircular(cells: CellArray, x: Int, y: Int): Vector[Option[SignalVector]] = {
     def sideToSide = 1.0 / 3
     def sideToCorner = 1.0 / Math.sqrt(10)
     def cornerToSide = 1.0 / Math.sqrt(13)

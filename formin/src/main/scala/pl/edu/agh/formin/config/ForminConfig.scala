@@ -1,7 +1,7 @@
 package pl.edu.agh.formin.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
-import pl.edu.agh.xinuk.model.{Energy, Signal}
+import pl.edu.agh.xinuk.model.{Energy, Signal, SignalVector}
 
 /*
 FSE - foraminifera start energy; FSE ∈ [0,1] && FSE ∈ R.
@@ -32,8 +32,10 @@ final case class ForminConfig(
                                gridSize: Int,
                                spawnChance: Double,
                                foraminiferaSpawnChance: Double,
-                               foraminiferaInitialSignal: Signal,
-                               algaeInitialSignal: Signal,
+                               foraminiferaInitialSignal: List[Signal],
+                               foraminiferaPursuedSignalIndex: Int,
+                               algaeInitialSignal: List[Signal],
+                               algaePursuedSignalIndex: Int,
                                guiType: GuiType,
                                guiCellSize: Int,
                                workersRoot: Int,

@@ -26,7 +26,7 @@ object ForminMain extends LazyLogging {
   private def cellToColor(cell: SmellingCell): Color = {
     cell match {
       case AlgaeCell(_, _) => new Color(0, 128, 0)
-      case ForaminiferaCell(_, _, _) => new Color(139, 69, 19)
+      case ForaminiferaCell(_, _, _, _) => new Color(139, 69, 19)
       case _ => Color.WHITE
     }
   }

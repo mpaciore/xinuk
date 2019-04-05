@@ -49,6 +49,9 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     Grid.SubcellCoordinates
       .map { case (i, j) => cell.smell(i)(j) }
       .zipWithIndex
+      .map {
+        case (signalVector, index) => (signalVector(cell.pursuedSignalIndex), index)
+      }
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
       .iterator
       .map { case (_, idx) =>
@@ -172,10 +175,10 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       y <- 0 until config.gridSize
     } {
       this.grid.cells(x)(y) match {
-        case ForaminiferaCell(energy, _, _) =>
+        case ForaminiferaCell(energy, _, _, _) =>
           foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
-        case BufferCell(ForaminiferaCell(energy, _, _)) =>
+        case BufferCell(ForaminiferaCell(energy, _, _, _)) =>
           foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
         case AlgaeCell(_, _) | BufferCell(AlgaeCell(_, _)) =>

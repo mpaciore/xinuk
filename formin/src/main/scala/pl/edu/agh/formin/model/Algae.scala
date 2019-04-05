@@ -3,6 +3,7 @@ package pl.edu.agh.formin.model
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
+import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
 final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCell {
   override type Self = AlgaeCell
@@ -18,12 +19,12 @@ object AlgaeAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: ForminConfig): AlgaeAccessible[AlgaeCell] =
     new AlgaeAccessible[AlgaeCell] {
-      override def withAlgae(lifespan: Long): AlgaeCell = AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan)
+      override def withAlgae(lifespan: Long): AlgaeCell = AlgaeCell(arg.smellWith(config.algaeInitialSignal.toSignalVector), lifespan)
     }
 
   def unapply(arg: BufferCell)(implicit config: ForminConfig): AlgaeAccessible[BufferCell] =
     new AlgaeAccessible[BufferCell] {
-      override def withAlgae(lifespan: Long): BufferCell = BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal), lifespan))
+      override def withAlgae(lifespan: Long): BufferCell = BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal.toSignalVector), lifespan))
     }
 
   def unapply(arg: GridPart)(implicit config: ForminConfig): Option[AlgaeAccessible[GridPart]] = arg match {

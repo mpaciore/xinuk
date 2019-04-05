@@ -23,7 +23,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
+  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[SignalVector]],
   emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
   cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty

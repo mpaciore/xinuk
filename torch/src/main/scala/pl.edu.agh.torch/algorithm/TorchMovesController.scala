@@ -67,6 +67,9 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         case (i, j) => cell.smell(i)(j)
       }
       .zipWithIndex
+      .map {
+        case (signalVector, index) => (signalVector(cell.pursuedSignalIndex), index)
+      }
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
       .iterator
       .map {
