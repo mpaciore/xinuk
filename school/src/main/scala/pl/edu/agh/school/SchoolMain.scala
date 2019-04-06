@@ -1,18 +1,18 @@
-package pl.edu.agh.formin
+package pl.edu.agh.school
 
 import java.awt.Color
 
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.ForminConflictResolver
-import pl.edu.agh.formin.model.{AlgaeCell, ForaminiferaCell}
+import pl.edu.agh.school.algorithm.SchoolMovesController
+import pl.edu.agh.school.config.SchoolConfig
+import pl.edu.agh.school.model.parallel.SchoolConflictResolver
+import pl.edu.agh.school.model.{AlgaeCell, ForaminiferaCell}
 import pl.edu.agh.xinuk.Simulation
 import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, SmellingCell}
 
-object ForminMain extends LazyLogging {
+object SchoolMain extends LazyLogging {
   private val configPrefix = "formin"
-  private val metricHeaders = Vector(
+  private val metricHeaders = Vector( // TODO metric headers (it's just for information, but nonetheless...)
     "foraminiferaCount",
     "algaeCount",
     "foraminiferaDeaths",
@@ -33,8 +33,8 @@ object ForminMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    new Simulation[ForminConfig](configPrefix, metricHeaders, ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard)(new ForminMovesController(_)(_),
+    new Simulation[SchoolConfig](configPrefix, metricHeaders, SchoolConflictResolver,
+      DefaultSmellPropagation.calculateSmellAddendsStandard)(new SchoolMovesController(_)(_),
       { case cell: SmellingCell => cellToColor(cell) }
     ).start()
   }

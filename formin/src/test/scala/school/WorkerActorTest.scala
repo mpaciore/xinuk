@@ -1,12 +1,12 @@
-package pl.edu.agh.formin
+package pl.edu.agh.school
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration, ScalaFutures}
 import org.scalatest.{FlatSpecLike, Matchers}
-import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import pl.edu.agh.school.algorithm.ForminMovesController
+import pl.edu.agh.school.config.ForminConfig
+import pl.edu.agh.school.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}

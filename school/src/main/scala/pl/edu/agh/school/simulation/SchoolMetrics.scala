@@ -1,8 +1,8 @@
-package pl.edu.agh.formin.simulation
+package pl.edu.agh.school.simulation
 
 import pl.edu.agh.xinuk.simulation.Metrics
 
-final case class ForminMetrics(foraminiferaCount: Long,
+final case class SchoolMetrics(foraminiferaCount: Long,
                                algaeCount: Long,
                                foraminiferaDeaths: Long,
                                foraminiferaTotalEnergy: Double,
@@ -20,13 +20,13 @@ final case class ForminMetrics(foraminiferaCount: Long,
     "Algae" -> algaeCount
   )
 
-  override def +(other: Metrics): ForminMetrics = {
+  override def +(other: Metrics): SchoolMetrics = {
     other match {
-      case ForminMetrics.EMPTY => this
-      case ForminMetrics(otherForaminiferaCount, otherAlgaeCount, otherForaminiferaDeaths, otherForaminiferaTotalEnergy,
+      case SchoolMetrics.EMPTY => this
+      case SchoolMetrics(otherForaminiferaCount, otherAlgaeCount, otherForaminiferaDeaths, otherForaminiferaTotalEnergy,
       otherForaminiferaReproductionsCount, otherConsumedAlgaeCount, otherForaminiferaTotalLifespan,
       otherAlgaeTotalLifespan) =>
-        ForminMetrics(foraminiferaCount + otherForaminiferaCount, algaeCount + otherAlgaeCount,
+        SchoolMetrics(foraminiferaCount + otherForaminiferaCount, algaeCount + otherAlgaeCount,
           foraminiferaDeaths + otherForaminiferaDeaths, foraminiferaTotalEnergy + otherForaminiferaTotalEnergy,
           foraminiferaReproductionsCount + otherForaminiferaReproductionsCount,
           consumedAlgaeCount + otherConsumedAlgaeCount, foraminiferaTotalLifespan + otherForaminiferaTotalLifespan,
@@ -37,8 +37,8 @@ final case class ForminMetrics(foraminiferaCount: Long,
   }
 }
 
-object ForminMetrics {
-  private val EMPTY = ForminMetrics(0, 0, 0, 0, 0, 0, 0, 0)
+object SchoolMetrics {
+  private val EMPTY = SchoolMetrics(0, 0, 0, 0, 0, 0, 0, 0)
 
-  def empty(): ForminMetrics = EMPTY
+  def empty(): SchoolMetrics = EMPTY
 }

@@ -1,8 +1,8 @@
-package pl.edu.agh.formin
+package pl.edu.agh.school
 
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model._
+import pl.edu.agh.school.config.ForminConfig
+import pl.edu.agh.school.model._
 import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 

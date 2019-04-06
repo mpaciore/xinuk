@@ -1,24 +1,24 @@
-package pl.edu.agh.formin.algorithm
+package pl.edu.agh.school.algorithm
 
 import com.avsystem.commons
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.Opt
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.simulation.ForminMetrics
+import pl.edu.agh.school.config.SchoolConfig
+import pl.edu.agh.school.model._
+import pl.edu.agh.school.simulation.SchoolMetrics
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
 
-final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: ForminConfig) extends MovesController {
+final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: SchoolConfig) extends MovesController {
 
   private var grid: Grid = _
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid: (Grid, ForminMetrics) = {
+  override def initialGrid: (Grid, SchoolMetrics) = {
     grid = Grid.empty(bufferZone)
     var foraminiferaCount = 0L
     var algaeCount = 0L
@@ -39,7 +39,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
           }
       }
     }
-    val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
+    val metrics = SchoolMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
     (grid, metrics)
   }
 
@@ -69,7 +69,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
   }
 
-  override def makeMoves(iteration: Long, grid: Grid): (Grid, ForminMetrics) = {
+  override def makeMoves(iteration: Long, grid: Grid): (Grid, SchoolMetrics) = {
     this.grid = grid
     val newGrid = Grid.empty(bufferZone)
 
@@ -192,7 +192,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       y <- 0 until config.gridSize
     } makeMove(x, y)
 
-    val metrics = ForminMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
+    val metrics = SchoolMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)
     (newGrid, metrics)
   }
 }

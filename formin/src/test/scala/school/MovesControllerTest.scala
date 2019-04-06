@@ -1,10 +1,10 @@
-package pl.edu.agh.formin
+package pl.edu.agh.school
 
 import com.avsystem.commons.misc.Opt
 import org.scalatest.{BeforeAndAfter, FlatSpecLike, Matchers}
-import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.ForaminiferaAccessible
+import pl.edu.agh.school.algorithm.ForminMovesController
+import pl.edu.agh.school.config.ForminConfig
+import pl.edu.agh.school.model.ForaminiferaAccessible
 import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 

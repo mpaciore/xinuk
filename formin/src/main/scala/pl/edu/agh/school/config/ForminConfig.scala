@@ -1,4 +1,4 @@
-package pl.edu.agh.formin.config
+package pl.edu.agh.school.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.{Energy, Signal, SignalVector}

@@ -1,6 +1,6 @@
-package pl.edu.agh.formin.model
+package pl.edu.agh.school.model
 
-import pl.edu.agh.formin.config.ForminConfig
+import pl.edu.agh.school.config.ForminConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps

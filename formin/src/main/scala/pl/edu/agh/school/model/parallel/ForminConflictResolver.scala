@@ -1,8 +1,8 @@
-package pl.edu.agh.formin.model.parallel
+package pl.edu.agh.school.model.parallel
 
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model._
-import pl.edu.agh.formin.simulation.ForminMetrics
+import pl.edu.agh.school.config.ForminConfig
+import pl.edu.agh.school.model._
+import pl.edu.agh.school.simulation.ForminMetrics
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 
