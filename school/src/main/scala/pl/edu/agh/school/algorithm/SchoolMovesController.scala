@@ -44,13 +44,13 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
   }
 
 
-  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
+  def calculatePossibleDestinations(cell: DirtCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
     Grid.SubcellCoordinates
       .map { case (i, j) => cell.smell(i)(j) }
       .zipWithIndex
       .map {
-        case (signalVector, index) => (signalVector(cell.pursuedSignalIndex), index)
+        case (signalVector, index) => (signalVector(cell.signalIndex), index)
       }
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
       .iterator
@@ -112,14 +112,14 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell
           }
-        case cell: AlgaeCell =>
+        case cell: StudentCell =>
           if (iteration % config.algaeReproductionFrequency == 0) {
             reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
           }
           if (isEmptyIn(newGrid)(x, y)) {
             newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
           }
-        case cell: ForaminiferaCell =>
+        case cell: DirtCell =>
           if (cell.energy < config.foraminiferaLifeActivityCost) {
             killForaminifera(cell, x, y)
           } else if (cell.energy > config.foraminiferaReproductionThreshold) {
@@ -130,7 +130,7 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
     }
 
-    def killForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+    def killForaminifera(cell: DirtCell, x: Int, y: Int): Unit = {
       foraminiferaDeaths += 1
       foraminiferaTotalLifespan += cell.lifespan
       val vacated = EmptyCell(cell.smell)
@@ -138,20 +138,20 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       grid.cells(x)(y) = vacated
     }
 
-    def reproduceForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+    def reproduceForaminifera(cell: DirtCell, x: Int, y: Int): Unit = {
       reproduce(x, y) { case ForaminiferaAccessible(accessible) => accessible.withForaminifera(config.foraminiferaStartEnergy, 0) }
       newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
       foraminiferaReproductionsCount += 1
     }
 
-    def moveForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
+    def moveForaminifera(cell: DirtCell, x: Int, y: Int): Unit = {
       val destinations = calculatePossibleDestinations(cell, x, y, grid)
       val destination = selectDestinationCell(destinations, newGrid)
       destination match {
-        case Opt((_, _, AlgaeCell(_, lifespan))) =>
+        case Opt((_, _, StudentCell(_, lifespan, _))) =>
           consumedAlgaeCount += 1
           algaeTotalLifespan += lifespan
-        case Opt((_, _, BufferCell(AlgaeCell(_, lifespan)))) =>
+        case Opt((_, _, BufferCell(StudentCell(_, lifespan, _)))) =>
           consumedAlgaeCount += 1
           algaeTotalLifespan += lifespan
         case _ =>
@@ -175,13 +175,13 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       y <- 0 until config.gridSize
     } {
       this.grid.cells(x)(y) match {
-        case ForaminiferaCell(energy, _, _, _) =>
+        case DirtCell(energy, _, _, _) =>
           foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
-        case BufferCell(ForaminiferaCell(energy, _, _, _)) =>
+        case BufferCell(DirtCell(energy, _, _, _)) =>
           foraminiferaTotalEnergy += energy.value
           foraminiferaCount += 1
-        case AlgaeCell(_, _) | BufferCell(AlgaeCell(_, _)) =>
+        case StudentCell(_, _, _) | BufferCell(StudentCell(_, _, _)) =>
           algaeCount += 1
         case _ =>
       }

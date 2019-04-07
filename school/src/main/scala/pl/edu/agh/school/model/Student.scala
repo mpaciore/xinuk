@@ -5,10 +5,10 @@ import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
-final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCell {
-  override type Self = AlgaeCell
+final case class StudentCell(smell: SmellArray, lifespan: Long, signalIndex: Int) extends SmellingCell {
+  override type Self = StudentCell
 
-  override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
+  override def withSmell(smell: SmellArray): StudentCell = copy(smell = smell)
 }
 
 trait AlgaeAccessible[+T <: GridPart] {
@@ -17,14 +17,14 @@ trait AlgaeAccessible[+T <: GridPart] {
 
 object AlgaeAccessible {
 
-  def unapply(arg: EmptyCell)(implicit config: SchoolConfig): AlgaeAccessible[AlgaeCell] =
-    new AlgaeAccessible[AlgaeCell] {
-      override def withAlgae(lifespan: Long): AlgaeCell = AlgaeCell(arg.smellWith(config.algaeInitialSignal.toSignalVector), lifespan)
+  def unapply(arg: EmptyCell)(implicit config: SchoolConfig): AlgaeAccessible[StudentCell] =
+    new AlgaeAccessible[StudentCell] {
+      override def withAlgae(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
     }
 
   def unapply(arg: BufferCell)(implicit config: SchoolConfig): AlgaeAccessible[BufferCell] =
     new AlgaeAccessible[BufferCell] {
-      override def withAlgae(lifespan: Long): BufferCell = BufferCell(AlgaeCell(arg.smellWith(config.algaeInitialSignal.toSignalVector), lifespan))
+      override def withAlgae(lifespan: Long): BufferCell = BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
     }
 
   def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[AlgaeAccessible[GridPart]] = arg match {

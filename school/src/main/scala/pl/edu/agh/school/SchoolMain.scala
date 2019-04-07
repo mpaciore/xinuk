@@ -6,12 +6,12 @@ import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.school.algorithm.SchoolMovesController
 import pl.edu.agh.school.config.SchoolConfig
 import pl.edu.agh.school.model.parallel.SchoolConflictResolver
-import pl.edu.agh.school.model.{AlgaeCell, ForaminiferaCell}
+import pl.edu.agh.school.model._
 import pl.edu.agh.xinuk.Simulation
 import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, SmellingCell}
 
 object SchoolMain extends LazyLogging {
-  private val configPrefix = "formin"
+  private val configPrefix = "school"
   private val metricHeaders = Vector( // TODO metric headers (it's just for information, but nonetheless...)
     "foraminiferaCount",
     "algaeCount",
@@ -25,8 +25,11 @@ object SchoolMain extends LazyLogging {
 
   private def cellToColor(cell: SmellingCell): Color = {
     cell match {
-      case AlgaeCell(_, _) => new Color(0, 128, 0)
-      case ForaminiferaCell(_, _, _, _) => new Color(139, 69, 19)
+      case CleanerCell(_, _, _, _) => new Color(66, 134, 244)
+      case DirtCell(_, _, _, _) => new Color(132, 86, 7)
+      case StudentCell(_, _, _) => new Color(16, 234, 23)
+      case TeacherCell(_, _, _, _) => new Color(132, 7, 7)
+      case WallCell(_) => new Color(135, 135, 135)
       case _ => Color.WHITE
     }
   }
