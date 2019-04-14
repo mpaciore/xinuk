@@ -2,6 +2,9 @@ package pl.edu.agh.school.simulation
 
 import pl.edu.agh.xinuk.simulation.Metrics
 
+/**
+  * Metrics are used to measure actual statistics for eg. current students count
+  */
 final case class SchoolMetrics(foraminiferaCount: Long,
                                algaeCount: Long,
                                foraminiferaDeaths: Long,

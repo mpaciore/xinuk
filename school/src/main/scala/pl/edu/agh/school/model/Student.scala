@@ -11,23 +11,23 @@ final case class StudentCell(smell: SmellArray, lifespan: Long, signalIndex: Int
   override def withSmell(smell: SmellArray): StudentCell = copy(smell = smell)
 }
 
-trait AlgaeAccessible[+T <: GridPart] {
-  def withAlgae(lifespan: Long): T
+trait StudentAccessible[+T <: GridPart] {
+  def withStudent(lifespan: Long): T
 }
 
-object AlgaeAccessible {
+object StudentAccessible {
 
-  def unapply(arg: EmptyCell)(implicit config: SchoolConfig): AlgaeAccessible[StudentCell] =
-    new AlgaeAccessible[StudentCell] {
-      override def withAlgae(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
+  def unapply(arg: EmptyCell)(implicit config: SchoolConfig): StudentAccessible[StudentCell] =
+    new StudentAccessible[StudentCell] {
+      override def withStudent(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
     }
 
-  def unapply(arg: BufferCell)(implicit config: SchoolConfig): AlgaeAccessible[BufferCell] =
-    new AlgaeAccessible[BufferCell] {
-      override def withAlgae(lifespan: Long): BufferCell = BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
+  def unapply(arg: BufferCell)(implicit config: SchoolConfig): StudentAccessible[BufferCell] =
+    new StudentAccessible[BufferCell] {
+      override def withStudent(lifespan: Long): BufferCell = BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
     }
 
-  def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[AlgaeAccessible[GridPart]] = arg match {
+  def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[StudentAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
     case cell: BufferCell => Some(unapply(cell))
     case _ => None

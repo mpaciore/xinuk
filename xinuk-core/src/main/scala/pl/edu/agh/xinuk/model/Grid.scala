@@ -53,7 +53,7 @@ object Grid {
 
 }
 
-final case class SignalVector(value: Array[Signal]) extends AnyVal {//with Ordered[SignalVector] {
+final case class SignalVector(value: Array[Signal]) extends AnyVal {
   def apply(index: Int): Signal = value(index)
 
   def +(other: SignalVector) = SignalVector(value.zipWithIndex.map{
@@ -68,7 +68,6 @@ final case class SignalVector(value: Array[Signal]) extends AnyVal {//with Order
 
   def /(scalar: Double) = SignalVector(value.map(_ / scalar))
 
-//  override def compare(that: SignalVector): Int = Ordering.Iterable[Signal].compare(value, that.value)
 }
 
 object SignalVector {

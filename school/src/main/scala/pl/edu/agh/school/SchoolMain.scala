@@ -25,11 +25,11 @@ object SchoolMain extends LazyLogging {
 
   private def cellToColor(cell: SmellingCell): Color = {
     cell match {
-      case CleanerCell(_, _, _, _) => new Color(66, 134, 244)
-      case DirtCell(_, _, _, _) => new Color(132, 86, 7)
-      case StudentCell(_, _, _) => new Color(16, 234, 23)
-      case TeacherCell(_, _, _, _) => new Color(132, 7, 7)
-      case WallCell(_) => new Color(135, 135, 135)
+      case CleanerCell(_, _, _, _) => new Color(66, 134, 244) // blue
+      case DirtCell(_, _, _, _) => new Color(132, 86, 7) // brown
+      case StudentCell(_, _, _) => new Color(16, 234, 23) // green
+      case TeacherCell(_, _, _, _) => new Color(255, 10, 10) // red
+      case WallCell(_) => new Color(135, 135, 135) // gray
       case _ => Color.WHITE
     }
   }
