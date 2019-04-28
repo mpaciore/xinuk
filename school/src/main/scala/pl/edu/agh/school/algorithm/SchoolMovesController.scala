@@ -98,6 +98,22 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
   }
 
+  def calculatePossibleDestinations(cell: StudentCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
+    val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
+    Grid.SubcellCoordinates
+      .map { case (i, j) => cell.smell(i)(j) }
+      .zipWithIndex
+      .map {
+        case (signalVector, index) => (signalVector(config.dirtSignalIndex), index) // make student go away from dirt
+      }
+      .sorted(implicitly[Ordering[(Signal, Int)]])
+      .iterator
+      .map { case (_, idx) =>
+        val (i, j) = neighbourCellCoordinates(idx)
+        (i, j, grid.cells(i)(j))
+      }
+  }
+
   def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
     possibleDestinations
       .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
@@ -105,6 +121,18 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
         case (i, j, currentCell @ TeacherAccessible(_), TeacherAccessible(_)) =>
           (i, j, currentCell)
         case (i, j, currentCell @ CleanerAccessible(_), CleanerAccessible(_)) =>
+          (i, j, currentCell)
+        case (i, j, currentCell @ StudentAccessible(_), StudentAccessible(_)) =>
+          (i, j, currentCell)
+      }
+  }
+
+  def selectStudentDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
+    possibleDestinations
+      .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
+      .filter(_ => new Random().nextBoolean())
+      .collectFirstOpt {
+        case (i, j, currentCell @ StudentAccessible(_), StudentAccessible(_)) =>
           (i, j, currentCell)
       }
   }
@@ -145,6 +173,7 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     }
 
     def makeMove(x: Int, y: Int): Unit = {
+      // order in this pattern match is important (cleaner and teacher must be last matched)
       this.grid.cells(x)(y) match {
         case Obstacle =>
           newGrid.cells(x)(y) = Obstacle
@@ -153,14 +182,12 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
             newGrid.cells(x)(y) = cell
           }
 
-        case cell: StudentCell =>
-          if(isEmptyIn(newGrid)(x,y)) {
-            newGrid.cells(x)(y) = cell
-          }
         case cell: DirtCell =>
           if(isEmptyIn(newGrid)(x,y)) {
             newGrid.cells(x)(y) = cell
           }
+        case cell: StudentCell =>
+          moveStudent(cell, x, y)
         case cell: CleanerCell =>
 //          if (iteration % config.algaeReproductionFrequency == 0) {
 //            reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
@@ -232,6 +259,32 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
           newGrid.cells(x)(y) = cell.copy(cell.energy, cell.smell, cell.lifespan, cell.signalIndex)
       }
     }
+
+    def moveStudent(cell: StudentCell, x: Int, y: Int): Unit = {
+      val destinations = calculatePossibleDestinations(cell, x, y, grid)
+      val destination = selectStudentDestinationCell(destinations, newGrid)
+      destination match {
+        case Opt((i, j, StudentAccessible(dest))) =>
+          val studentLastCell = newGrid.cells(x)(y)
+          if (new Random().nextInt(5) == 0) spawnDirtIfPossible(studentLastCell, x, y)
+          newGrid.cells(i)(j) = dest.withStudent(cell.lifespan)
+          newGrid.cells(i)(j) match {
+            case DirtCell(_, _, _, _) =>
+            case _ =>
+          }
+        case Opt((i, j, inaccessibleDestination)) =>
+          throw new RuntimeException(s"Student selected inaccessible destination ($i,$j): $inaccessibleDestination")
+        case Opt.Empty =>
+          newGrid.cells(x)(y) = cell.copy(cell.smell, cell.lifespan, cell.signalIndex)
+      }
+    }
+
+    def spawnDirtIfPossible(cell: GridPart, x: Int, y: Int): Unit =
+      cell match {
+        case DirtAccessible(c) =>
+          newGrid.cells(x)(y) = c.withDirt(Energy(0), 0)
+        case _ =>
+      }
 
     for {
       x <- 0 until config.gridSize

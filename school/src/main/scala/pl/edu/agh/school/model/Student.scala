@@ -27,6 +27,11 @@ object StudentAccessible {
       override def withStudent(lifespan: Long): BufferCell = BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
     }
 
+  def unapply(arg: DirtCell)(implicit config: SchoolConfig): StudentAccessible[StudentCell] =
+    new StudentAccessible[StudentCell] {
+      override def withStudent(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
+    }
+
   def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[StudentAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
     case cell: BufferCell => Some(unapply(cell))
