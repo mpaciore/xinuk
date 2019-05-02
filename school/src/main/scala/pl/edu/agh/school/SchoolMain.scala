@@ -37,7 +37,7 @@ object SchoolMain extends LazyLogging {
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation[SchoolConfig](configPrefix, metricHeaders, SchoolConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard)(new SchoolMovesController(_)(_),
+      DefaultSmellPropagation.calculateSmellAddendsCircular)(new SchoolMovesController(_)(_),
       { case cell: SmellingCell => cellToColor(cell) }
     ).start()
   }

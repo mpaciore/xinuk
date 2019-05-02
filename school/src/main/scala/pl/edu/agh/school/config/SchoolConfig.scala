@@ -20,26 +20,34 @@ ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
  */
 
 final case class SchoolConfig(
-                               foraminiferaStartEnergy: Energy,
-                               foraminiferaReproductionCost: Energy,
-                               foraminiferaReproductionThreshold: Energy,
-                               foraminiferaLifeActivityCost: Energy,
-                               algaeReproductionFrequency: Int,
-                               algaeEnergeticCapacity: Energy,
+                               //                               foraminiferaStartEnergy: Energy,
+                               //                               foraminiferaReproductionCost: Energy,
+                               //                               foraminiferaReproductionThreshold: Energy,
+                               //                               foraminiferaLifeActivityCost: Energy,
+                               //                               algaeReproductionFrequency: Int,
+                               //                               algaeEnergeticCapacity: Energy,
                                signalSpeedRatio: Int,
                                signalSuppressionFactor: Double,
                                signalAttenuationFactor: Double,
                                gridSize: Int,
                                spawnChance: Double,
-                               foraminiferaSpawnChance: Double,
+
+                               cleanerSpawnChance: Double,
                                cleanerInitialSignal: List[Signal],
                                cleanerInitialSignalIndex: Int,
+
+                               dirtInitialEnergy: Double,
                                dirtInitialSignal: List[Signal],
                                dirtSignalIndex: Int,
+
+                               studentSpawnChance: Double,
                                studentInitialSignal: List[Signal],
                                studentSignalIndex: Int,
+
+                               teacherSpawnChance: Double,
                                teacherInitialSignal: List[Signal],
                                teacherSignalIndex: Int,
+
                                guiType: GuiType,
                                guiCellSize: Int,
                                workersRoot: Int,
