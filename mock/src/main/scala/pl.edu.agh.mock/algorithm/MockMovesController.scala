@@ -24,7 +24,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
     val newGrid = Grid.empty(bufferZone)
-
+    Thread.sleep(100)
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
     }
@@ -32,7 +32,16 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
       val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
       val vacatedCell = EmptyCell(cell.smell)
-      val occupiedCell = MockCell.create(config.mockInitialSignal)
+
+      var occupiedCell = MockCell.create(config.mockInitialSignal)
+
+
+      grid.cells(x)(y) match {
+        case a: MockCell =>
+          occupiedCell = MockCell.create(config.mockInitialSignal, a.crowd)
+        case _ =>
+      }
+
 
       newGrid.cells(destination._1)(destination._2) match {
         case EmptyCell(_) =>
@@ -41,6 +50,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
         case BufferCell(EmptyCell(_)) =>
           newGrid.cells(x)(y) = vacatedCell
           newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
+        case cell: MockCell =>
+          newGrid.cells(x)(y) = MockCell(cell.smell, cell.crowd + occupiedCell.crowd)
         case _ =>
           newGrid.cells(x)(y) = occupiedCell
       }
@@ -50,7 +61,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
       x <- 0 until config.gridSize
       y <- 0 until config.gridSize
     } yield (x, y, grid.cells(x)(y))).partition({
-      case (_, _, MockCell(_)) => true
+      case (_, _, MockCell(_, _)) => true
       case (_, _, _) => false
     })
 
