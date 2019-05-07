@@ -31,43 +31,62 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     }
 
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
-      val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
-      val vacatedCell = EmptyCell(cell.smell)
-      val crowd = cell.asInstanceOf[MockCell].crowd
+
+      def makeMockMove(occupiedCell: MockCell): Unit = {
+        val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
+        val vacatedCell = EmptyCell(cell.smell)
+        newGrid.cells(destination._1)(destination._2) match {
+          case EmptyCell(_) =>
+            newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+              case occupied@MockCell(_, _) => occupied
+              case _ => vacatedCell
+            }
+            newGrid.cells(destination._1)(destination._2) = occupiedCell
+
+          case BufferCell(EmptyCell(_)) =>
+            newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+              case occupied@MockCell(_, _) => occupied
+              case _ => vacatedCell
+            }
+            newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
+
+          case BufferCell(MockCell(_, anotherCrowd)) =>
+            newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+              case occupied@MockCell(_, _) => occupied
+              case _ => vacatedCell
+            }
+            newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+              occupiedCell.crowd + anotherCrowd))
+
+          case MockCell(_, anotherCrowd) =>
+            newGrid.cells(x)(y) = vacatedCell
+            newGrid.cells(destination._1)(destination._2) = MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+              occupiedCell.crowd + anotherCrowd)
+
+          case Obstacle =>
+            newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+              case MockCell(_, anotherCrowd) => MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+                occupiedCell.crowd + anotherCrowd)
+              case _ => occupiedCell
+            }
+
+          case _ =>
+            throw new UnsupportedOperationException(s"Unresolved move, wtf bro?")
+        }
+      }
+
+      var crowd = cell.asInstanceOf[MockCell].crowd
+
+      if (crowd > 1) {
+        crowd -= 1
+        val child = MockCell.create(config.mockInitialSignal)
+        makeMockMove(child)
+      }
+
       val occupiedCell = MockCell.create(config.mockInitialSignal * crowd, crowd)
 
-      newGrid.cells(destination._1)(destination._2) match {
-        case EmptyCell(_) =>
-          newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
-            case occupied@MockCell(_, _) => occupied
-            case _ => vacatedCell
-          }
-          newGrid.cells(destination._1)(destination._2) = occupiedCell
+      makeMockMove(occupiedCell)
 
-        case BufferCell(EmptyCell(_)) =>
-          newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
-
-        case BufferCell(MockCell(_, anotherCrowd)) =>
-          newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-            occupiedCell.crowd + anotherCrowd))
-
-        case MockCell(_, anotherCrowd) =>
-          newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-            occupiedCell.crowd + anotherCrowd)
-
-        case Obstacle =>
-          newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
-            case MockCell(_, anotherCrowd) => MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd)
-            case _ => occupiedCell
-          }
-
-        case _ =>
-          throw new UnsupportedOperationException(s"Unresolved move, wtf bro?")
-      }
     }
 
     val (dynamicCells, staticCells) = (for {
