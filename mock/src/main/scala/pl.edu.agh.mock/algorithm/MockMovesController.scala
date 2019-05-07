@@ -4,7 +4,7 @@ import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
 import pl.edu.agh.xinuk.algorithm.MovesController
-import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
@@ -24,7 +24,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
     val newGrid = Grid.empty(bufferZone)
-    Thread.sleep(50)
+    Thread.sleep(100)
+
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
     }
@@ -32,20 +33,40 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
       val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
       val vacatedCell = EmptyCell(cell.smell)
-      val occupiedCell = MockCell.create(config.mockInitialSignal, cell.asInstanceOf[MockCell].crowd)
+      val crowd = cell.asInstanceOf[MockCell].crowd
+      val occupiedCell = MockCell.create(config.mockInitialSignal * crowd, crowd)
 
       newGrid.cells(destination._1)(destination._2) match {
         case EmptyCell(_) =>
-          newGrid.cells(x)(y) = vacatedCell
+          newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+            case occupied@MockCell(_, _) => occupied
+            case _ => vacatedCell
+          }
           newGrid.cells(destination._1)(destination._2) = occupiedCell
+
         case BufferCell(EmptyCell(_)) =>
           newGrid.cells(x)(y) = vacatedCell
           newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
-        case cell: MockCell =>
+
+        case BufferCell(MockCell(_, anotherCrowd)) =>
           newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = MockCell(cell.smell, cell.crowd + occupiedCell.crowd)
+          newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+            occupiedCell.crowd + anotherCrowd))
+
+        case MockCell(_, anotherCrowd) =>
+          newGrid.cells(x)(y) = vacatedCell
+          newGrid.cells(destination._1)(destination._2) = MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+            occupiedCell.crowd + anotherCrowd)
+
+        case Obstacle =>
+          newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
+            case MockCell(_, anotherCrowd) => MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
+              occupiedCell.crowd + anotherCrowd)
+            case _ => occupiedCell
+          }
+
         case _ =>
-          newGrid.cells(x)(y) = occupiedCell
+          throw new UnsupportedOperationException(s"Unresolved move, wtf bro?")
       }
     }
 
@@ -60,6 +81,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     staticCells.foreach({ case (x, y, cell) => copyCells(x, y, cell) })
     dynamicCells.foreach({ case (x, y, cell) => moveCells(x, y, cell) })
 
-    (newGrid, MockMetrics.empty())
+    val mockPopulation = dynamicCells.foldLeft(0)({ (acc, n) => acc + n._3.asInstanceOf[MockCell].crowd })
+    val metrics = MockMetrics(mockPopulation)
+    (newGrid, metrics)
   }
 }
