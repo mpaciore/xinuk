@@ -8,38 +8,27 @@ import pl.edu.agh.xinuk.simulation.Metrics
 final case class SchoolMetrics(studentsCount: Long,
                                teachersCount: Long,
                                cleanersCount: Long,
-                               studentsDeaths: Long,
-                               //                               foraminiferaTotalEnergy: Double,
-                               //                               foraminiferaReproductionsCount: Long,
-                               //                               consumedAlgaeCount: Long,
-                               //                               foraminiferaTotalLifespan: Long,
-                               //                               algaeTotalLifespan: Long
+                               dirtCount: Long
                               ) extends Metrics {
 
   override def log: String = {
-    s"$studentsCount;$teachersCount;$cleanersCount$studentsDeaths"
+    s"$studentsCount;$teachersCount;$cleanersCount;$dirtCount"
   }
 
   override def series: Vector[(String, Double)] = Vector(
     "Students" -> studentsCount,
     "Teachers" -> teachersCount,
-    "Cleaners" -> cleanersCount
+    "Cleaners" -> cleanersCount,
+    "Dirt"     -> dirtCount
   )
 
   override def +(other: Metrics): SchoolMetrics = {
     other match {
       case SchoolMetrics.EMPTY => this
-      case SchoolMetrics(otherStudentsCount, otherTeachersCount, otherCleanersCount, otherStudentDeaths,
-//      otherForaminiferaTotalEnergy,
-//      otherForaminiferaReproductionsCount, otherConsumedAlgaeCount, otherForaminiferaTotalLifespan,
-//      otherAlgaeTotalLifespan
+      case SchoolMetrics(otherStudentsCount, otherTeachersCount, otherCleanersCount, otherDirtCount
       ) =>
         SchoolMetrics(studentsCount + otherStudentsCount, teachersCount + otherTeachersCount,
-          cleanersCount + otherCleanersCount, studentsDeaths + otherStudentDeaths,
-//          foraminiferaTotalEnergy + otherForaminiferaTotalEnergy,
-//          foraminiferaReproductionsCount + otherForaminiferaReproductionsCount,
-//          consumedAlgaeCount + otherConsumedAlgaeCount, foraminiferaTotalLifespan + otherForaminiferaTotalLifespan,
-//          algaeTotalLifespan + otherAlgaeTotalLifespan
+          cleanersCount + otherCleanersCount, dirtCount + otherDirtCount
         )
       case null => this
       case _ => throw new UnsupportedOperationException(s"Cannot add: non-SchoolMetrics to SchoolMetrics")

@@ -19,25 +19,6 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
 
   private val random = new Random(System.nanoTime())
 
-  def initialGrid3: (Grid, Metrics) = {
-    grid = Grid.empty(bufferZone)
-
-    var gridSize = config.gridSize
-
-    // left - top
-    grid.cells(gridSize / 2)(gridSize / 4) = TeacherAccessible.unapply(EmptyCell.Instance).withTeacher(Energy(0), 0)
-    // left - bottom
-    grid.cells(gridSize / 4)(gridSize / 4) = CleanerAccessible.unapply(EmptyCell.Instance).withCleaner(Energy(0), 0)
-
-    // right - top
-    grid.cells(gridSize / 4)(gridSize * 3 / 4) = StudentAccessible.unapply(EmptyCell.Instance).withStudent(0)
-    // right - bottom
-    grid.cells(gridSize / 2)(gridSize * 3 / 4) = DirtAccessible.unapply(EmptyCell.Instance).withDirt(Energy(0), 0)
-
-    val metrics = SchoolMetrics(1, 1, 1, 0)
-    (grid, metrics)
-  }
-
   override def initialGrid: (Grid, SchoolMetrics) = {
     grid = Grid.empty(bufferZone)
     var cleanersCount = 0L
@@ -152,13 +133,9 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     val newGrid = Grid.empty(bufferZone)
 
     var studentsCount = 0L
-    var algaeCount = 0L
-    var foraminiferaDeaths = 0L
-    var foraminiferaReproductionsCount = 0L
-    var consumedAlgaeCount = 0L
-    var foraminiferaTotalLifespan = 0L
-    var algaeTotalLifespan = 0L
-    var foraminiferaTotalEnergy = 0.0
+    var teachersCount = 0L
+    var cleanersCount = 0L
+    var dirtCount = 0L
 
     def isEmptyIn(grid: Grid)(i: Int, j: Int): Boolean = {
       grid.cells(i)(j) match {
@@ -166,21 +143,6 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
         case _ => false
       }
     }
-
-    //    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
-    ////      val emptyCells =
-    ////        Grid.neighbourCellCoordinates(x, y).flatMap {
-    ////          case (i, j) =>
-    ////            grid.cells(i)(j).opt
-    ////              .filter(_ => creator.isDefinedAt(newGrid.cells(i)(j))) //use the same availability criteria on new grid
-    ////              .collect(creator)
-    ////              .map((i, j, _))
-    ////        }
-    ////      if (emptyCells.nonEmpty) {
-    ////        val (newAlgaeX, newAlgaeY, newCell) = emptyCells(random.nextInt(emptyCells.size))
-    ////        newGrid.cells(newAlgaeX)(newAlgaeY) = newCell
-    ////      }
-    ////    }
 
     def makeMove(x: Int, y: Int): Unit = {
       // order in this pattern match is important (cleaner and teacher must be last matched)
@@ -194,42 +156,16 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
 
         case cell: DirtCell =>
           if (isEmptyIn(newGrid)(x, y)) {
-            newGrid.cells(x)(y) = cell
+            spawnDirtIfPossible(cell, x, y)
           }
         case cell: StudentCell =>
           moveStudent(cell, x, y)
         case cell: CleanerCell =>
-          //          if (iteration % config.algaeReproductionFrequency == 0) {
-          //            reproduce(x, y) { case AlgaeAccessible(accessible) => accessible.withAlgae(0) }
-          //          }
           moveCleaner(cell, x, y)
-        //          if (isEmptyIn(newGrid)(x, y)) {
-        //            newGrid.cells(x)(y) = cell.copy(lifespan = cell.lifespan + 1)
-        //          }
         case cell: TeacherCell =>
-          //          if (cell.energy < config.foraminiferaLifeActivityCost) {
-          //            killForaminifera(cell, x, y)
-          //          } else if (cell.energy > config.foraminiferaReproductionThreshold) {
-          //            reproduceForaminifera(cell, x, y)
-          //          } else {
           moveTeacher(cell, x, y)
-        //          }
       }
     }
-
-    //    def killForaminifera(cell: CleanerCell, x: Int, y: Int): Unit = {
-    //      foraminiferaDeaths += 1
-    //      foraminiferaTotalLifespan += cell.lifespan
-    //      val vacated = EmptyCell(cell.smell)
-    //      newGrid.cells(x)(y) = vacated
-    //      grid.cells(x)(y) = vacated
-    //    }
-
-    //    def reproduceForaminifera(cell: CleanerCell, x: Int, y: Int): Unit = {
-    //      reproduce(x, y) { case DirtAccessible(accessible) => accessible.withDirt(config.foraminiferaStartEnergy, 0) }
-    //      newGrid.cells(x)(y) = cell.copy(energy = cell.energy - config.foraminiferaReproductionCost, lifespan = cell.lifespan + 1)
-    //      foraminiferaReproductionsCount += 1
-    //    }
 
     def moveCleaner(cell: CleanerCell, x: Int, y: Int): Unit = {
       val destinations = calculatePossibleDestinations(cell, x, y, grid)
@@ -301,14 +237,14 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       y <- 0 until config.gridSize
     } {
       this.grid.cells(x)(y) match {
-        case DirtCell(energy, _, _, _) =>
-          foraminiferaTotalEnergy += energy.value
-          studentsCount += 1
-        case BufferCell(DirtCell(energy, _, _, _)) =>
-          foraminiferaTotalEnergy += energy.value
-          studentsCount += 1
+        case DirtCell(_, _, _, _) | BufferCell(DirtCell(_, _, _, _)) =>
+          dirtCount += 1
         case StudentCell(_, _, _) | BufferCell(StudentCell(_, _, _)) =>
-          algaeCount += 1
+          studentsCount += 1
+        case CleanerCell(_, _, _,_) | BufferCell(CleanerCell(_, _, _,_)) =>
+          cleanersCount += 1
+        case TeacherCell(_, _, _,_) | BufferCell(TeacherCell(_, _, _,_)) =>
+          teachersCount += 1
         case _ =>
       }
     }
@@ -318,7 +254,7 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       y <- 0 until config.gridSize
     } makeMove(x, y)
 
-    val metrics = SchoolMetrics(studentsCount, algaeCount, 0, foraminiferaDeaths)
+    val metrics = SchoolMetrics(studentsCount, teachersCount, cleanersCount, dirtCount)
     (newGrid, metrics)
   }
 }
