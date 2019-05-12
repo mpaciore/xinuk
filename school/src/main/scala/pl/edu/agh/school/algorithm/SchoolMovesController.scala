@@ -32,21 +32,16 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       if (random.nextDouble() < config.spawnChance) {
         val chance = random.nextDouble()
         Math.abs(random.nextInt()) % 3 match {
-          case 0 =>
-            if (chance < config.cleanerSpawnChance) {
+          case 0 if chance < config.cleanerSpawnChance =>
               cleanersCount += 1
               grid.cells(x)(y) = CleanerAccessible.unapply(EmptyCell.Instance).withCleaner(Energy(0), 0)
-            }
-          case 1 =>
-            if (chance < config.teacherSpawnChance) {
+          case 1 if chance < config.teacherSpawnChance =>
               teachersCount += 1
               grid.cells(x)(y) = TeacherAccessible.unapply(EmptyCell.Instance).withTeacher(Energy(0), 0)
-            }
-          case 2 =>
-            if (chance < config.studentSpawnChance) {
+          case 2 if chance < config.studentSpawnChance =>
               studentsCount += 1
               grid.cells(x)(y) = StudentAccessible.unapply(EmptyCell.Instance).withStudent(0)
-            }
+          case _ =>
         }
       }
     }
@@ -58,14 +53,13 @@ final class SchoolMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
 
   def calculatePossibleDestinations(cell: CleanerCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-    val tuples = Grid.SubcellCoordinates
+    Grid.SubcellCoordinates
       .map { case (i, j) => cell.smell(i)(j) }
       .zipWithIndex
       .map {
         case (signalVector, index) => (signalVector(cell.signalIndex), index)
       }
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
-    tuples
       .iterator
       .map { case (_, idx) =>
         val (i, j) = neighbourCellCoordinates(idx)

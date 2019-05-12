@@ -25,8 +25,7 @@ final case class SchoolMetrics(studentsCount: Long,
   override def +(other: Metrics): SchoolMetrics = {
     other match {
       case SchoolMetrics.EMPTY => this
-      case SchoolMetrics(otherStudentsCount, otherTeachersCount, otherCleanersCount, otherDirtCount
-      ) =>
+      case SchoolMetrics(otherStudentsCount, otherTeachersCount, otherCleanersCount, otherDirtCount) =>
         SchoolMetrics(studentsCount + otherStudentsCount, teachersCount + otherTeachersCount,
           cleanersCount + otherCleanersCount, dirtCount + otherDirtCount
         )
