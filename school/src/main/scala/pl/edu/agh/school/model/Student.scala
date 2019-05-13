@@ -18,19 +18,13 @@ trait StudentAccessible[+T <: GridPart] {
 object StudentAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: SchoolConfig): StudentAccessible[StudentCell] =
-    new StudentAccessible[StudentCell] {
-      override def withStudent(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
-    }
+    (lifespan: Long) => StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
 
   def unapply(arg: BufferCell)(implicit config: SchoolConfig): StudentAccessible[BufferCell] =
-    new StudentAccessible[BufferCell] {
-      override def withStudent(lifespan: Long): BufferCell = BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
-    }
+    (lifespan: Long) => BufferCell(StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex))
 
   def unapply(arg: DirtCell)(implicit config: SchoolConfig): StudentAccessible[StudentCell] =
-    new StudentAccessible[StudentCell] {
-      override def withStudent(lifespan: Long): StudentCell = StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
-    }
+    (lifespan: Long) => StudentCell(arg.smellWith(config.studentInitialSignal.toSignalVector), lifespan, config.studentSignalIndex)
 
   def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[StudentAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))

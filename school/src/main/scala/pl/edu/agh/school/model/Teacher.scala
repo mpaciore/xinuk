@@ -18,19 +18,13 @@ trait TeacherAccessible[+T <: GridPart] {
 object TeacherAccessible {
 
   def unapply(arg: StudentCell)(implicit config: SchoolConfig): TeacherAccessible[TeacherCell] =
-    new TeacherAccessible[TeacherCell] {
-      override def withTeacher(energy: Energy, lifespan: Long): TeacherCell = TeacherCell(energy + config.algaeEnergeticCapacity, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex)
-    }
+    (energy: Energy, lifespan: Long) => TeacherCell(energy, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex)
 
   def unapply(arg: EmptyCell)(implicit config: SchoolConfig): TeacherAccessible[TeacherCell] =
-    new TeacherAccessible[TeacherCell] {
-      override def withTeacher(energy: Energy, lifespan: Long): TeacherCell = TeacherCell(energy, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex)
-    }
+    (energy: Energy, lifespan: Long) => TeacherCell(energy, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex)
 
   def unapply(arg: BufferCell)(implicit config: SchoolConfig): TeacherAccessible[BufferCell] =
-    new TeacherAccessible[BufferCell] {
-      override def withTeacher(energy: Energy, lifespan: Long): BufferCell = BufferCell(TeacherCell(energy, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex))
-    }
+    (energy: Energy, lifespan: Long) => BufferCell(TeacherCell(energy, arg.smellWith(config.teacherInitialSignal.toSignalVector), lifespan, config.teacherSignalIndex))
 
   def unapply(arg: GridPart)(implicit config: SchoolConfig): Option[TeacherAccessible[GridPart]] = arg match {
     case cell: StudentCell => Some(unapply(cell))
