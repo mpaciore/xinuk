@@ -16,7 +16,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid: (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone)
 
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, grid)
+    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid))
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -31,14 +31,14 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
       }
     }
 
-    val xDirection = calculateDirection(x, cell.destinationPoint._1)
-    val yDirection = calculateDirection(y, cell.destinationPoint._2)
+    val xDirection = calculateDirection(x, cell.destinationPoint.x)
+    val yDirection = calculateDirection(y, cell.destinationPoint.y)
     (x + xDirection, y + yDirection)
   }
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
     val newGrid = Grid.empty(bufferZone)
-    Thread.sleep(1000)
+    Thread.sleep(100)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -47,6 +47,10 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
 
       def makeMockMove(occupiedCell: MockCell): Unit = {
+        if (occupiedCell.destinationPoint == Point(x,y) || !isDestinationPointAccessible(grid,occupiedCell) ) {
+          occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
+        }
+
         val destination = calculateNextStep(occupiedCell, x, y)
         val vacatedCell = EmptyCell(cell.smell)
         newGrid.cells(destination._1)(destination._2) match {
@@ -62,6 +66,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
               case occupied@MockCell(_, _, _) => occupied
               case _ => vacatedCell
             }
+            occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
             newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
 
           case BufferCell(MockCell(_, anotherCrowd, _)) =>
@@ -70,17 +75,17 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
               case _ => vacatedCell
             }
             newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd))
+              occupiedCell.crowd + anotherCrowd, POIFactory.generatePOI(grid)))
 
           case MockCell(_, anotherCrowd, _) =>
             newGrid.cells(x)(y) = vacatedCell
             newGrid.cells(destination._1)(destination._2) = MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd)
+              occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint)
 
           case Obstacle =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
               case MockCell(_, anotherCrowd, _) => MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-                occupiedCell.crowd + anotherCrowd)
+                occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint)
               case _ => occupiedCell
             }
 
@@ -90,14 +95,14 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
       }
 
       var crowd = cell.asInstanceOf[MockCell].crowd
-
+    //TODO save destination point when creating crowd
       if (crowd > 1) {
         crowd -= 1
-        val child = MockCell.create(config.mockInitialSignal)
+        val child = MockCell.create(config.mockInitialSignal, destinationPoint = cell.asInstanceOf[MockCell].destinationPoint)
         makeMockMove(child)
       }
 
-      val occupiedCell = MockCell.create(config.mockInitialSignal * crowd, crowd)
+      val occupiedCell = MockCell.create(config.mockInitialSignal * crowd, crowd, cell.asInstanceOf[MockCell].destinationPoint)
 
       makeMockMove(occupiedCell)
 
@@ -118,4 +123,13 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     val metrics = MockMetrics(mockPopulation)
     (newGrid, metrics)
   }
+
+  def isDestinationPointAccessible(grid: Grid, cell: MockCell): Boolean = {
+    val point = cell.destinationPoint
+    grid.cells(point.x)(point.y) match {
+      case Obstacle => false
+      case _ => true
+    }
+  }
+
 }

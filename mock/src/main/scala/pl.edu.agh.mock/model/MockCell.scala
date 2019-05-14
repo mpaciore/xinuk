@@ -3,7 +3,7 @@ package pl.edu.agh.mock.model
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{Cell, Grid, Signal, SmellingCell}
 
-final case class MockCell(smell: SmellArray, crowd: Int, destinationPoint: (Int, Int)) extends SmellingCell {
+final case class MockCell(smell: SmellArray, crowd: Int, var destinationPoint: Point) extends SmellingCell {
 
   override type Self = MockCell
 
@@ -11,7 +11,7 @@ final case class MockCell(smell: SmellArray, crowd: Int, destinationPoint: (Int,
 }
 
 object MockCell {
-  def create(initialSignal: Signal, initialCrowd: Int = 1, grid: Grid): MockCell =
-    MockCell(Array.fill(Cell.Size, Cell.Size)(initialSignal), initialCrowd, POIFactory.generatePOI(grid)())
+  def create(initialSignal: Signal, initialCrowd: Int = 1, destinationPoint: Point): MockCell =
+    MockCell(Array.fill(Cell.Size, Cell.Size)(initialSignal), initialCrowd, destinationPoint)
 }
 
