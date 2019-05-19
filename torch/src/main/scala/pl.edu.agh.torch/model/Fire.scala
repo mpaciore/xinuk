@@ -3,7 +3,7 @@ package pl.edu.agh.torch.model
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
-
+import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
 final case class FireCell(smell: SmellArray) extends SmellingCell {
   override type Self = FireCell
@@ -18,22 +18,22 @@ object FireAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal.toSignalVector))
     }
 
   def unapply(arg: HumanCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal.toSignalVector))
     }
 
   def unapply(arg: EscapeCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal.toSignalVector))
     }
 
   def unapply(arg: BufferCell)(implicit config: TorchConfig): FireAccessible[BufferCell] =
     new FireAccessible[BufferCell] {
-      override def withFire(): BufferCell = BufferCell(FireCell(arg.smellWith(config.fireInitialSignal)))
+      override def withFire(): BufferCell = BufferCell(FireCell(arg.smellWith(config.fireInitialSignal.toSignalVector)))
     }
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[FireAccessible[GridPart]] = arg match {

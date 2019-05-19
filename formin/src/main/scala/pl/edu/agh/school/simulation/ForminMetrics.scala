@@ -1,4 +1,4 @@
-package pl.edu.agh.formin.simulation
+package pl.edu.agh.school.simulation
 
 import pl.edu.agh.xinuk.simulation.Metrics
 

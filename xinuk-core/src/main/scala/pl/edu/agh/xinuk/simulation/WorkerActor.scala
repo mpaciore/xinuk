@@ -18,7 +18,7 @@ class WorkerActor[ConfigType <: XinukConfig](
                                               regionRef: => ActorRef,
                                               movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                               conflictResolver: ConflictResolver[ConfigType],
-                                              smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
+                                              smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[SignalVector]],
                                               emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -169,7 +169,7 @@ object WorkerActor {
                                         regionRef: => ActorRef,
                                         movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                         conflictResolver: ConflictResolver[ConfigType],
-                                        smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
+                                        smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[SignalVector]],
                                         emptyCellFactory: => SmellingCell = EmptyCell.Instance
                                       )(implicit config: ConfigType): Props = {
     Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory))

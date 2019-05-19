@@ -1,7 +1,7 @@
 package pl.edu.agh.mock.model
 
 import pl.edu.agh.xinuk.model.Cell.SmellArray
-import pl.edu.agh.xinuk.model.{Cell, Signal, SmellingCell}
+import pl.edu.agh.xinuk.model.{Cell, Signal, SignalVector, SmellingCell}
 
 final case class MockCell(smell: SmellArray) extends SmellingCell {
   override type Self = MockCell
@@ -10,5 +10,5 @@ final case class MockCell(smell: SmellArray) extends SmellingCell {
 }
 
 object MockCell {
-  def create(initialSignal: Signal): MockCell = MockCell(Array.fill(Cell.Size, Cell.Size)(initialSignal))
+  def create(initialSignal: SignalVector): MockCell = MockCell(Array.fill(Cell.Size, Cell.Size)(initialSignal))
 }

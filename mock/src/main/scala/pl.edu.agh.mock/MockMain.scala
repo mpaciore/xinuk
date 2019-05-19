@@ -28,7 +28,10 @@ object MockMain extends LazyLogging {
   }
 
   private def cellToColorRegions(cell: SmellingCell): Color = {
-    val smellValue = cell.smell.map(_.map(_.value).max).max.toFloat
+    val smellValue = cell.smell
+      .map(signalVectors =>
+        signalVectors.map(signalVector =>
+          signalVector.value.map(signal => signal.value).max).max.toFloat).max
     val brightness = Math.pow(smellValue, 0.1).toFloat
     if (smellValue < 0.00001) {
       val hue = 1f
@@ -50,7 +53,10 @@ object MockMain extends LazyLogging {
   }
 
   private def cellToColor(cell: SmellingCell): Color = {
-    val smellValue = cell.smell.map(_.map(_.value).max).max.toFloat
+    val smellValue = cell.smell
+      .map(signalVectors =>
+        signalVectors.map(signalVector =>
+          signalVector.value.map(signal => signal.value).max).max.toFloat).max
     val brightness = Math.pow(smellValue, 0.1).toFloat
     val hue = 1f
     val saturation = 0.69f

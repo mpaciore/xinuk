@@ -1,7 +1,7 @@
-package pl.edu.agh.formin.config
+package pl.edu.agh.school.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
-import pl.edu.agh.xinuk.model.{Energy, Signal}
+import pl.edu.agh.xinuk.model.{Energy, Signal, SignalVector}
 
 /*
 FSE - foraminifera start energy; FSE ∈ [0,1] && FSE ∈ R.
@@ -19,21 +19,36 @@ FSSV - foraminifera start signal value; FSSV ∈ [0,1] && FSSV ∈ R.
 ASSV - algae start signal value; ASSV ∈ [0,1] && ASSV ∈ R.
  */
 
-final case class ForminConfig(
-                               foraminiferaStartEnergy: Energy,
-                               foraminiferaReproductionCost: Energy,
-                               foraminiferaReproductionThreshold: Energy,
-                               foraminiferaLifeActivityCost: Energy,
-                               algaeReproductionFrequency: Int,
-                               algaeEnergeticCapacity: Energy,
+final case class SchoolConfig(
+                               //                               foraminiferaStartEnergy: Energy,
+                               //                               foraminiferaReproductionCost: Energy,
+                               //                               foraminiferaReproductionThreshold: Energy,
+                               //                               foraminiferaLifeActivityCost: Energy,
+                               //                               algaeReproductionFrequency: Int,
+                               //                               algaeEnergeticCapacity: Energy,
                                signalSpeedRatio: Int,
                                signalSuppressionFactor: Double,
                                signalAttenuationFactor: Double,
+                               signalsNumber: Int,
                                gridSize: Int,
                                spawnChance: Double,
-                               foraminiferaSpawnChance: Double,
-                               foraminiferaInitialSignal: Signal,
-                               algaeInitialSignal: Signal,
+
+                               cleanerSpawnChance: Double,
+                               cleanerInitialSignal: List[Signal],
+                               cleanerInitialSignalIndex: Int,
+
+                               dirtInitialEnergy: Double,
+                               dirtInitialSignal: List[Signal],
+                               dirtSignalIndex: Int,
+
+                               studentSpawnChance: Double,
+                               studentInitialSignal: List[Signal],
+                               studentSignalIndex: Int,
+
+                               teacherSpawnChance: Double,
+                               teacherInitialSignal: List[Signal],
+                               teacherSignalIndex: Int,
+
                                guiType: GuiType,
                                guiCellSize: Int,
                                workersRoot: Int,

@@ -1,12 +1,12 @@
-package pl.edu.agh.formin
+package pl.edu.agh.school
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration, ScalaFutures}
 import org.scalatest.{FlatSpecLike, Matchers}
-import pl.edu.agh.formin.algorithm.ForminMovesController
-import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.formin.model.parallel.ForminConflictResolver
+import pl.edu.agh.school.algorithm.ForminMovesController
+import pl.edu.agh.school.config.ForminConfig
+import pl.edu.agh.school.model.parallel.ForminConflictResolver
 import pl.edu.agh.xinuk.config.GuiType
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.parallel.{Neighbour, NeighbourPosition}
@@ -26,8 +26,10 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     gridSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
-    foraminiferaInitialSignal = Signal(-1),
-    algaeInitialSignal = Signal(1),
+    foraminiferaInitialSignal = List(Signal(-1), Signal(0)),
+    foraminiferaPursuedSignalIndex = 0,
+    algaeInitialSignal = List(Signal(1), Signal(0)),
+    algaePursuedSignalIndex = 0,
     guiType = GuiType.None,
     guiCellSize = 4,
     workersRoot = 2,

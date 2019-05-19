@@ -67,6 +67,9 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         case (i, j) => cell.smell(i)(j)
       }
       .zipWithIndex
+      .map {
+        case (signalVector, index) => (signalVector(cell.pursuedSignalIndex), index)
+      }
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
       .iterator
       .map {
@@ -116,7 +119,7 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
         val (newFireX, newFireY, newCell) = availableCells(random.nextInt(availableCells.size))
         newGrid.cells(newFireX)(newFireY) = newCell
         grid.cells(newFireX)(newFireY) match {
-          case HumanCell(_, _, _) =>
+          case HumanCell(_, _, _, _) =>
             peopleDeaths += 1
           case _ =>
         }
@@ -196,7 +199,7 @@ final class TorchMovesController(bufferZone: TreeSet[(Int, Int)])(implicit confi
       y <- 0 until config.gridSize
     } {
       grid.cells(x)(y) match {
-        case HumanCell(_, crowd, _) =>
+        case HumanCell(_, crowd, _, _) =>
           humanCount += 1 + crowd.size
         case FireCell(_) =>
           fireCount += 1

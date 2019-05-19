@@ -37,7 +37,7 @@ inThisBuild(Seq(
 ))
 
 lazy val xinuk = project.in(file("."))
-  .aggregate(`xinuk-core`, formin, fortwist, torch)
+  .aggregate(`xinuk-core`, formin, fortwist, torch, school)
   .disablePlugins(AssemblyPlugin)
 
 lazy val `xinuk-core` = project
@@ -84,3 +84,4 @@ lazy val formin = modelProject("formin")("pl.edu.agh.formin.ForminMain")
 lazy val fortwist = modelProject("fortwist")("pl.edu.agh.fortwist.FortwistMain")
 lazy val torch = modelProject("torch")("pl.edu.agh.torch.TorchMain")
 lazy val mock = modelProject("mock")("pl.edu.agh.mock.MockMain")
+lazy val school = modelProject("school")("pl.edu.agh.school.SchoolMain")

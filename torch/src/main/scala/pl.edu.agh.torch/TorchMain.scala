@@ -21,7 +21,7 @@ object TorchMain extends LazyLogging {
 
   private def cellToColor(cell: SmellingCell): Color = {
     cell match {
-      case HumanCell(_, _, _) => Color.BLUE
+      case HumanCell(_, _, _, _) => Color.BLUE
       case FireCell(_) => Color.ORANGE
       case EscapeCell(_) => new Color(139, 69, 19)
       case _ => Color.WHITE

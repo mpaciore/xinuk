@@ -10,6 +10,7 @@ import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
+import pl.edu.agh.xinuk.model.SignalVector.SignalVectorOps
 
 final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: FortwistConfig)
   extends MovesController {
@@ -32,7 +33,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       if (random.nextDouble() < config.foraminiferaSpawnChance) {
         val foraminiferas = Vector(Foraminifera.create())
         val cell = FortwistCell(
-          smell = Cell.emptySignal + config.foraminiferaInitialSignal + (config.algaeSignalMultiplier * config.algaeStartEnergy.value),
+          smell = Cell.emptySignal + config.foraminiferaInitialSignal.toSignalVector + (config.algaeSignalMultiplier.toSignalVector * config.algaeStartEnergy.value),
           foraminiferas = foraminiferas,
           algae = config.algaeStartEnergy
         )
@@ -70,8 +71,8 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     def update(x: Int, y: Int)(op: FortwistCell => FortwistCell): Unit = {
       def updated(cell: FortwistCell): FortwistCell = {
         val afterOp = op(cell)
-        val smellAdjustment = (config.foraminiferaInitialSignal * afterOp.foraminiferas.size) +
-          (config.algaeSignalMultiplier * afterOp.algae.value)
+        val smellAdjustment = (config.foraminiferaInitialSignal.toSignalVector * afterOp.foraminiferas.size) +
+          (config.algaeSignalMultiplier.toSignalVector * afterOp.algae.value)
         afterOp.copy(smell = afterOp.smell + smellAdjustment)
       }
 
@@ -147,8 +148,11 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
       def calculatePossibleDestinations(x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
         val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
         Grid.SubcellCoordinates
-          .map { case (i, j) => grid.cells(x)(y).smell(i)(j) + moves.get((x, y)).map(formins => config.foraminiferaInitialSignal * formins.size).getOrElse(Signal.Zero) }
+          .map { case (i, j) => grid.cells(x)(y).smell(i)(j) + moves.get((x, y)).map(formins => config.foraminiferaInitialSignal.toSignalVector * formins.size).getOrElse(SignalVector.Zero) }
           .zipWithIndex
+          .map {
+            case (signalVector, index) => (signalVector(foraminifera.pursuedSignalIndex), index)
+          }
           .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
           .iterator
           .map { case (_, idx) =>

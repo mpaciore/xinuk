@@ -23,7 +23,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
+  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[SignalVector]],
   emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
   cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
@@ -47,6 +47,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
     import net.ceedubs.ficus.Ficus._
     Try(forminConfig.as[ConfigType]("config")) match {
       case Success(parsedConfig) =>
+        Simulation.config = parsedConfig
         parsedConfig
       case Failure(parsingError) =>
         logger.error("Config parsing error.", parsingError)
@@ -84,4 +85,8 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
     }
   }
 
+}
+
+object Simulation {
+  var config: XinukConfig = _
 }
