@@ -26,7 +26,8 @@ object SchoolMain extends LazyLogging {
       case StudentCell(_, _, _) => new Color(16, 234, 23) // green
       case TeacherCell(_, _, _, _) => new Color(255, 10, 10) // red
       case WallCell(_) => new Color(135, 135, 135) // gray
-      case _ => cellToColor2(cell)
+      case _ => Color.WHITE
+      //case _ => cellToColor2(cell)
     }
   }
 

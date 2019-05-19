@@ -27,8 +27,33 @@ object SchoolConflictResolver extends ConflictResolver[SchoolConfig] {
       case (StudentCell(currentSmell, lifespan, signalIndex), StudentCell(incomingSmell, incomingLifespan, _)) =>
         (StudentCell(currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), signalIndex), SchoolMetrics.empty())
 
-      case (CleanerCell(currentEnergy, currentSmell, lifespan, _), CleanerCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) => // TODO: here are place where two smells can intersect
+      case (CleanerCell(currentEnergy, currentSmell, lifespan, _), CleanerCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
         (CleanerCell(currentEnergy + incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (TeacherCell(currentEnergy, currentSmell, lifespan, _), DirtCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (TeacherCell(currentEnergy - incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (DirtCell(currentEnergy, currentSmell, lifespan, _), TeacherCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (TeacherCell(incomingEnergy - currentEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (StudentCell(currentSmell, lifespan, signalIndex), TeacherCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (TeacherCell(incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), signalIndex), SchoolMetrics.empty())
+
+      case (TeacherCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex), StudentCell(currentSmell, lifespan, signalIndex)) =>
+        (TeacherCell(incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), signalIndex), SchoolMetrics.empty())
+
+      case (TeacherCell(currentEnergy, currentSmell, lifespan, _), CleanerCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (TeacherCell(currentEnergy - incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (TeacherCell(currentEnergy, currentSmell, lifespan, _), TeacherCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (TeacherCell(currentEnergy + incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (CleanerCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex), TeacherCell(currentEnergy, currentSmell, lifespan, _)) =>
+        (TeacherCell(currentEnergy - incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
+      case (DirtCell(currentEnergy, currentSmell, lifespan, _), CleanerCell(incomingEnergy, incomingSmell, incomingLifespan, pursuedSignalIndex)) =>
+        (CleanerCell(currentEnergy + incomingEnergy, currentSmell + incomingSmell, math.max(lifespan, incomingLifespan), pursuedSignalIndex), SchoolMetrics.empty())
+
 
       case (Obstacle, _) => (Obstacle, SchoolMetrics.empty())
 

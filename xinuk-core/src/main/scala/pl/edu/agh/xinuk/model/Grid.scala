@@ -1,5 +1,6 @@
 package pl.edu.agh.xinuk.model
 
+import pl.edu.agh.xinuk.Simulation
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.Grid.CellArray
@@ -75,7 +76,7 @@ object SignalVector {
     def toSignalVector: SignalVector = SignalVector(signalList.toArray)
   }
 
-  final val Signals = 2
+  final val Signals = Simulation.config.signalsNumber
   final val Zero = SignalVector(Array.fill(Signals)(Signal.Zero))
 }
 

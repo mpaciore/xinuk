@@ -29,6 +29,7 @@ final case class SchoolConfig(
                                signalSpeedRatio: Int,
                                signalSuppressionFactor: Double,
                                signalAttenuationFactor: Double,
+                               signalsNumber: Int,
                                gridSize: Int,
                                spawnChance: Double,
 
