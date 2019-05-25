@@ -16,7 +16,6 @@ object POIFactory {
     do {
       xDestination = random.nextInt(grid.cells.length)
       yDestination = random.nextInt(grid.cells.length)
-      println(grid.cells.length)
     } while (grid.cells(xDestination)(yDestination) match {
       case EmptyCell(_) => false
       case BufferCell(EmptyCell(_)) => false

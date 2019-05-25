@@ -48,7 +48,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       val cells = Array.tabulate(config.gridSize, config.gridSize)((x, y) =>
         grid.propagatedSignal(smellPropagationFunction, x, y)
       )
-      grid = Grid(cells)
+      grid = Grid(cells, grid.workerId)
     }
   }
 
@@ -61,11 +61,11 @@ class WorkerActor[ConfigType <: XinukConfig](
       this.neighbours = neighbours.mkMap(_.position.neighbourId(id).get, identity)
       this.bufferZone = neighbours.foldLeft(TreeSet.empty[(Int, Int)])((builder, neighbour) => builder | neighbour.position.bufferZone)
       this.movesController = movesControllerFactory(bufferZone, config)
-      grid = Grid.empty(bufferZone)
+      grid = Grid.empty(bufferZone, workerId = this.id)
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       self ! StartIteration(1)
     case StartIteration(1) =>
-      val (newGrid, newMetrics) = movesController.initialGrid
+      val (newGrid, newMetrics) = movesController.initialGrid(workerID = this.id)
       this.grid = newGrid
       logMetrics(1, newMetrics)
       guiActors.foreach(_ ! GridInfo(1, grid, newMetrics))

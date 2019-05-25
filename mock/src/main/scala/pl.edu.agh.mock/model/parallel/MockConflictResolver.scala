@@ -16,12 +16,12 @@ object MockConflictResolver extends ConflictResolver[MockConfig] {
         (Obstacle, MockMetrics.empty())
       case (EmptyCell(currentSmell), EmptyCell(incomingSmell)) =>
         (EmptyCell(currentSmell + incomingSmell), MockMetrics.empty())
-      case (MockCell(currentSmell, currentCrowd, destinationPoint), EmptyCell(incomingSmell)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint), MockMetrics.empty())
-      case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint)) =>
-        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint), MockMetrics.empty())
-      case (MockCell(currentSmell, currentCrowd, destinationPoint), MockCell(incomingSmell, incomingCrowd, _)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd + incomingCrowd, destinationPoint), MockMetrics(currentCrowd + incomingCrowd))
+      case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), EmptyCell(incomingSmell)) =>
+        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
+      case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint,currentWorkerId)) =>
+        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
+      case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), MockCell(incomingSmell, incomingCrowd, _, _)) =>
+        (MockCell(currentSmell + incomingSmell, currentCrowd + incomingCrowd, destinationPoint,currentWorkerId), MockMetrics(currentCrowd + incomingCrowd))
       case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }
   }

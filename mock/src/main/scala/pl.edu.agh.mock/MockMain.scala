@@ -7,7 +7,7 @@ import pl.edu.agh.mock.algorithm.MockMovesController
 import pl.edu.agh.mock.model.MockCell
 import pl.edu.agh.mock.model.parallel.MockConflictResolver
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell, WorkerId}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
@@ -21,10 +21,10 @@ object MockMain extends LazyLogging {
       MockConflictResolver,
       DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_),
       {
-        case MockCell(_, 1, _) => Color.cyan
-        case MockCell(_, 2, _) => Color.YELLOW
-        case MockCell(_, 3, _) => Color.magenta
-        case MockCell(_, _, _) => Color.red
+        case MockCell(_, _, _,WorkerId(2)) => Color.cyan
+        case MockCell(_, _, _,WorkerId(1)) => Color.YELLOW
+        case MockCell(_, _, _,WorkerId(3)) => Color.magenta
+        case MockCell(_, _, _,WorkerId(4)) => Color.red
         case Obstacle => Color.BLUE
         case cell: SmellingCell => cellToColorRegions(cell)
       }).start()
