@@ -8,6 +8,7 @@ import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
+import scala.math._
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
@@ -22,7 +23,13 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     (grid, metrics)
   }
 
+
+
   def calculateNextStep(cell: MockCell, x: Int, y: Int): (Int, Int) = {
+    def isInDestinationWorker(cell: MockCell): Boolean = {
+      cell.destinationPoint.workerId.value.equals(cell.workerId.value)
+    }
+
     def calculateDirection(current: Int, destination: Int) : Int = {
       destination - current match {
         case z if z<0 => -1
@@ -31,14 +38,57 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
       }
     }
 
-    val xDirection = calculateDirection(x, cell.destinationPoint.x)
-    val yDirection = calculateDirection(y, cell.destinationPoint.y)
-    (x + xDirection, y + yDirection)
+    def makeMoveInsideWorker(cell: MockCell): (Int, Int) = {
+      val xDirection = calculateDirection(x, cell.destinationPoint.x)
+      val yDirection = calculateDirection(y, cell.destinationPoint.y)
+      (x + xDirection, y + yDirection)
+    }
+
+    def makeMoveToAnotherWorker(cell: MockCell): (Int, Int) = {
+      print("Worker dest: ")
+      print(cell.destinationPoint.workerId.value)
+      print(" worker curr: ")
+      println(cell.workerId.value)
+
+
+      val currentColumn = ((cell.workerId.value - 1) % config.workersRoot) + 1
+      val currentRow = ((cell.workerId.value - 1) / config.workersRoot) + 1
+
+      val destinationColumn = ((cell.destinationPoint.workerId.value - 1) % config.workersRoot) + 1
+      val destinationRow = ((cell.destinationPoint.workerId.value - 1) / config.workersRoot) + 1
+
+      val xDirection = calculateDirection(currentRow, destinationRow)
+      val yDirection = calculateDirection(currentColumn, destinationColumn)
+
+      print("Current: row ")
+      print(currentRow)
+      print("column ")
+      println(currentColumn)
+      print("Dest: row ")
+      print(destinationRow)
+      print("column ")
+      println(destinationColumn)
+
+      print("dir x: ")
+      print(xDirection)
+      print("dir y: ")
+      print(yDirection)
+
+      println()
+
+      (x + xDirection, y + yDirection)
+    }
+
+    if (isInDestinationWorker(cell)) {
+      makeMoveInsideWorker(cell)
+    } else {
+      makeMoveToAnotherWorker(cell)
+    }
   }
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    Thread.sleep(100)
+    Thread.sleep(300)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -47,7 +97,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
 
       def makeMockMove(occupiedCell: MockCell): Unit = {
-        if (occupiedCell.destinationPoint == Point(x,y) || !isDestinationPointAccessible(grid,occupiedCell) ) {
+        if (occupiedCell.destinationPoint == Point(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
           occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
         }
 
@@ -66,7 +116,6 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
               case occupied@MockCell(_, _, _,_) => occupied
               case _ => vacatedCell
             }
-            occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
             newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
 
           case BufferCell(MockCell(_, anotherCrowd, _,_)) =>
@@ -75,7 +124,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
               case _ => vacatedCell
             }
             newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd, POIFactory.generatePOI(grid),grid.workerId))
+              occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint ,grid.workerId))
 
           case MockCell(_, anotherCrowd, _,_) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
@@ -129,6 +178,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   def isDestinationPointAccessible(grid: Grid, cell: MockCell): Boolean = {
     val point = cell.destinationPoint
+    if (point.workerId.value != cell.workerId.value) return true;
     grid.cells(point.x)(point.y) match {
       case Obstacle => false
       case _ => true

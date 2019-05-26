@@ -22,10 +22,10 @@ object MockMain extends LazyLogging {
       DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_),
       {
         case MockCell(_, _, _,WorkerId(2)) => Color.cyan
-        case MockCell(_, _, _,WorkerId(1)) => Color.YELLOW
+        case MockCell(_, _, _,WorkerId(1)) => Color.yellow
         case MockCell(_, _, _,WorkerId(3)) => Color.magenta
         case MockCell(_, _, _,WorkerId(4)) => Color.red
-        case Obstacle => Color.BLUE
+        case Obstacle => Color.blue
         case cell: SmellingCell => cellToColorRegions(cell)
       }).start()
   }
