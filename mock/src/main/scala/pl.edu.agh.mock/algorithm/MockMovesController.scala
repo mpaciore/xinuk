@@ -11,6 +11,8 @@ import scala.util.Random
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
+  var crowdOnProcessor = 0
+
   private val random = new Random(System.nanoTime())
 
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
@@ -64,6 +66,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   }
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
+
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
     Thread.sleep(50)
 
@@ -118,6 +121,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
                 )
               )
 
+            crowdOnProcessor += 1
+
           case another@MockCell(_, anotherCrowd, _,_) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
               case occupied@MockCell(_, _, _,_) => occupied
@@ -139,9 +144,13 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
                 grid.workerId
               )
 
+            crowdOnProcessor += 1
+
           case Obstacle =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
               case another@MockCell(_, anotherCrowd, _, _) =>
+                crowdOnProcessor += 1
+
                 val crowd : List[MockCell] =
                   anotherCrowd ++
                     List(MockCell.create(
@@ -205,8 +214,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     staticCells.foreach({ case (x, y, cell) => copyCells(x, y, cell) })
     dynamicCells.foreach({ case (x, y, cell) => moveCells(x, y, cell) })
 
-    val mockPopulation = dynamicCells.foldLeft(0)({ (acc, n) => acc + n._3.asInstanceOf[MockCell].crowd.size })
-    val metrics = MockMetrics(mockPopulation)
+    val mockPopulation = dynamicCells.foldLeft(0)({ (acc, n) => acc + n._3.asInstanceOf[MockCell].crowd.size + 1 })
+    val metrics = MockMetrics(mockPopulation, crowdOnProcessor, 0)
     (newGrid, metrics)
   }
 

@@ -7,7 +7,7 @@ import pl.edu.agh.mock.algorithm.MockMovesController
 import pl.edu.agh.mock.model.MockCell
 import pl.edu.agh.mock.model.parallel.MockConflictResolver
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell, WorkerId}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Obstacle, SmellingCell}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"

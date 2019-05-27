@@ -8,20 +8,23 @@ import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 
 object MockConflictResolver extends ConflictResolver[MockConfig] {
 
+  var crowdOnSeams = 0
+
   import Cell._
 
   override def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: MockConfig): (GridPart, MockMetrics) = {
     (current, incoming) match {
       case (Obstacle, _) =>
-        (Obstacle, MockMetrics.empty())
+        (Obstacle, MockMetrics(0, 0, 0))
       case (EmptyCell(currentSmell), EmptyCell(incomingSmell)) =>
-        (EmptyCell(currentSmell + incomingSmell), MockMetrics.empty())
+        (EmptyCell(currentSmell + incomingSmell), MockMetrics(0, 0, 0))
       case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), EmptyCell(incomingSmell)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
+        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint,currentWorkerId), MockMetrics(0, 0, 0))
       case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint,currentWorkerId)) =>
-        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
+        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint,currentWorkerId), MockMetrics(0, 0, 0))
       case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), incoming@MockCell(incomingSmell, incomingCrowd, _, _)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd ++ List(incoming), destinationPoint,currentWorkerId), MockMetrics((currentCrowd ++ incomingCrowd).size))
+        crowdOnSeams += 1
+        (MockCell(currentSmell + incomingSmell, currentCrowd ++ List(incoming), destinationPoint,currentWorkerId), MockMetrics((currentCrowd ++ incomingCrowd).size + 2, 0, crowdOnSeams))
       case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }
   }
