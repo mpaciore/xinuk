@@ -20,8 +20,8 @@ object MockConflictResolver extends ConflictResolver[MockConfig] {
         (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
       case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint,currentWorkerId)) =>
         (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint,currentWorkerId), MockMetrics.empty())
-      case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), MockCell(incomingSmell, incomingCrowd, _, _)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd + incomingCrowd, destinationPoint,currentWorkerId), MockMetrics(currentCrowd + incomingCrowd))
+      case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), incoming@MockCell(incomingSmell, incomingCrowd, _, _)) =>
+        (MockCell(currentSmell + incomingSmell, currentCrowd ++ List(incoming), destinationPoint,currentWorkerId), MockMetrics((currentCrowd ++ incomingCrowd).size))
       case (x, y) => throw new UnsupportedOperationException(s"Unresolved conflict: $x with $y")
     }
   }

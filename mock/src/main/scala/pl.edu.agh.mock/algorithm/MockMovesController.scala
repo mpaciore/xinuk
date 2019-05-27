@@ -8,7 +8,6 @@ import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
-import scala.math._
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
@@ -17,7 +16,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid),workerId = grid.workerId)
+    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -45,12 +44,6 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     }
 
     def makeMoveToAnotherWorker(cell: MockCell): (Int, Int) = {
-      print("Worker dest: ")
-      print(cell.destinationPoint.workerId.value)
-      print(" worker curr: ")
-      println(cell.workerId.value)
-
-
       val currentColumn = ((cell.workerId.value - 1) % config.workersRoot) + 1
       val currentRow = ((cell.workerId.value - 1) / config.workersRoot) + 1
 
@@ -59,22 +52,6 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
       val xDirection = calculateDirection(currentRow, destinationRow)
       val yDirection = calculateDirection(currentColumn, destinationColumn)
-
-      print("Current: row ")
-      print(currentRow)
-      print("column ")
-      println(currentColumn)
-      print("Dest: row ")
-      print(destinationRow)
-      print("column ")
-      println(destinationColumn)
-
-      print("dir x: ")
-      print(xDirection)
-      print("dir y: ")
-      print(yDirection)
-
-      println()
 
       (x + xDirection, y + yDirection)
     }
@@ -88,7 +65,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    Thread.sleep(300)
+    Thread.sleep(50)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -118,26 +95,67 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
             }
             newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
 
-          case BufferCell(MockCell(_, anotherCrowd, _,_)) =>
+          case BufferCell(another@MockCell(_, anotherCrowd, _,_)) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
               case occupied@MockCell(_, _, _,_) => occupied
               case _ => vacatedCell
             }
-            newGrid.cells(destination._1)(destination._2) = BufferCell(MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint ,grid.workerId))
+            val crowd : List[MockCell] =
+              anotherCrowd ++
+              List(MockCell.create(
+                config.mockInitialSignal,
+                destinationPoint = another.destinationPoint,
+                workerId = another.workerId
+              )) ++
+              occupiedCell.crowd
 
-          case MockCell(_, anotherCrowd, _,_) =>
+            newGrid.cells(destination._1)(destination._2) =
+              BufferCell(
+                MockCell.create(config.mockInitialSignal * ((occupiedCell.crowd ++ anotherCrowd).size + 2),
+                  crowd,
+                  occupiedCell.destinationPoint,
+                  grid.workerId
+                )
+              )
+
+          case another@MockCell(_, anotherCrowd, _,_) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
               case occupied@MockCell(_, _, _,_) => occupied
               case _ => vacatedCell
             }
-            newGrid.cells(destination._1)(destination._2) = MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-              occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint,grid.workerId)
+            val crowd : List[MockCell] =
+              anotherCrowd ++
+                List(MockCell.create(
+                  config.mockInitialSignal,
+                  destinationPoint = another.destinationPoint,
+                  workerId = another.workerId
+                )) ++
+                occupiedCell.crowd
+            newGrid.cells(destination._1)(destination._2) =
+              MockCell.create(
+                config.mockInitialSignal * ((occupiedCell.crowd ++ anotherCrowd).size + 2),
+                crowd,
+                occupiedCell.destinationPoint,
+                grid.workerId
+              )
 
           case Obstacle =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
-              case MockCell(_, anotherCrowd, _, _) => MockCell.create(config.mockInitialSignal * (occupiedCell.crowd + anotherCrowd),
-                occupiedCell.crowd + anotherCrowd, occupiedCell.destinationPoint,grid.workerId)
+              case another@MockCell(_, anotherCrowd, _, _) =>
+                val crowd : List[MockCell] =
+                  anotherCrowd ++
+                    List(MockCell.create(
+                      config.mockInitialSignal,
+                      destinationPoint = another.destinationPoint,
+                      workerId = another.workerId
+                    )) ++
+                    occupiedCell.crowd
+                MockCell.create(
+                  config.mockInitialSignal * ((occupiedCell.crowd ++ anotherCrowd).size + 2),
+                  crowd,
+                  occupiedCell.destinationPoint,
+                  grid.workerId
+                )
               case _ => occupiedCell
             }
 
@@ -146,18 +164,34 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
         }
       }
 
-      var crowd = cell.asInstanceOf[MockCell].crowd
-    //TODO save destination point when creating crowd
-      if (crowd > 1) {
-        crowd -= 1
-        val child = MockCell.create(config.mockInitialSignal, destinationPoint = cell.asInstanceOf[MockCell].destinationPoint,workerId = grid.workerId)
+      val mock: MockCell = cell.asInstanceOf[MockCell]
+
+      if (mock.crowd.nonEmpty) {
+        val child =
+          MockCell.create(
+            initialSignal = config.mockInitialSignal * (mock.crowd.head.crowd.size + 1),
+            initialCrowd = mock.crowd.head.crowd,
+            destinationPoint = mock.crowd.head.destinationPoint,
+            workerId = grid.workerId)
         makeMockMove(child)
+        val occupiedCell =
+          MockCell.create(
+            initialSignal = config.mockInitialSignal * mock.crowd.size,
+            mock.crowd.drop(1),
+            mock.destinationPoint,
+            workerId = grid.workerId
+          )
+        makeMockMove(occupiedCell)
+      } else {
+        val occupiedCell =
+          MockCell.create(
+            config.mockInitialSignal * (mock.crowd.size + 1),
+            mock.crowd,
+            mock.destinationPoint,
+            workerId = grid.workerId
+          )
+        makeMockMove(occupiedCell)
       }
-
-      val occupiedCell = MockCell.create(config.mockInitialSignal * crowd, crowd, cell.asInstanceOf[MockCell].destinationPoint,workerId = grid.workerId)
-
-      makeMockMove(occupiedCell)
-
     }
 
     val (dynamicCells, staticCells) = (for {
@@ -171,7 +205,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     staticCells.foreach({ case (x, y, cell) => copyCells(x, y, cell) })
     dynamicCells.foreach({ case (x, y, cell) => moveCells(x, y, cell) })
 
-    val mockPopulation = dynamicCells.foldLeft(0)({ (acc, n) => acc + n._3.asInstanceOf[MockCell].crowd })
+    val mockPopulation = dynamicCells.foldLeft(0)({ (acc, n) => acc + n._3.asInstanceOf[MockCell].crowd.size })
     val metrics = MockMetrics(mockPopulation)
     (newGrid, metrics)
   }

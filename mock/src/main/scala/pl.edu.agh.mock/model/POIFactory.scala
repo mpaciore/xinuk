@@ -15,8 +15,8 @@ object POIFactory {
     var destinationWorkerId: Int = 1
 
     do {
-      xDestination = random.nextInt(config.gridSize - 1)
-      yDestination = random.nextInt(config.gridSize - 1)
+      xDestination = random.nextInt(config.gridSize - 2) + 1
+      yDestination = random.nextInt(config.gridSize - 2) + 1
       destinationWorkerId = random.nextInt(pow(config.workersRoot,2).intValue()) + 1
     } while (
       grid.cells(xDestination)(yDestination) match {
