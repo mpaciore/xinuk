@@ -3,7 +3,7 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.DistanceUtils
+import pl.edu.agh.mock.utlis.{DistanceUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -20,66 +20,13 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
-
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+    if (grid.workerId.value == 1)
+      grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
   }
 
-  def calculateNeighboursSmell(cell: MockCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Signal)] = {
-    val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-    Grid.SubcellCoordinates
-      .map {
-        case (i, j) => cell.smell(i)(j)
-      }
-      .zipWithIndex
-      .iterator
-      .map {
-        case (smell, idx) =>
-          val (i, j) = neighbourCellCoordinates(idx)
-          (i, j, smell)
-      }
-  }
-
-  def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Double)] = {
-    val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
-      .map {
-        case (i, j) => (i, j, DistanceUtils.calculateDistance(LocalPoint(x, y, cell.workerId), cell.destinationPoint))
-      }
-
-    val costList =
-      distanceCostsList
-        .map{
-          case (_, _, cost) => cost
-        }
-
-    val min = costList.min
-    val max = costList.max
-
-    distanceCostsList
-      .iterator
-      .map {
-        case (i, j, cost) =>
-          (i, j, (cost - min)/(max - min))
-      }
-  }
-
-  def calculateMovementCosts(
-                              smellsList: Iterator[(Int, Int, Signal)],
-                              distancesList: Iterator[(Int, Int, Double)]
-                            )(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
-    smellsList
-      .zip(distancesList)
-      .map {
-        case ((i, j, smell),(_, _, distance)) =>
-          (i, j, smell, distance)
-      }
-      .map {
-        case (i, j, smell, distance) =>
-          (i, j, config.distanceFactor * distance - config.repulsionFactor * smell.value)
-      }
-  }
 
   def calculateNextStep(cell: MockCell, x: Int, y: Int): (Int, Int) = {
     def isInDestinationWorker(cell: MockCell): Boolean = {
@@ -123,7 +70,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    Thread.sleep(50)
+    Thread.sleep(1000)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -135,8 +82,9 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
         if (occupiedCell.destinationPoint == LocalPoint(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
           occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
         }
-
-        val destination = calculateNextStep(occupiedCell, x, y)
+        val point = MovementDirectionUtils.calculateDirection(MovementDirectionUtils.calculateMovementCosts(SmellUtils.calculateNeighboursSmell(occupiedCell,x , y, grid),
+          DistanceUtils.calculateNeighboursDistances(occupiedCell,x , y, grid)))
+        val destination = Tuple2(point.x, point.y)
         val vacatedCell = EmptyCell(cell.smell)
         newGrid.cells(destination._1)(destination._2) match {
           case EmptyCell(_) =>

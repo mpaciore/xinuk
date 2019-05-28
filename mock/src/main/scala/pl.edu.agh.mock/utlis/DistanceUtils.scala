@@ -41,7 +41,7 @@ object DistanceUtils  {
           (i, j, (cost - min)/(max - min))
       }
       .filter(point =>{
-        grid.cells(point._1,point._2) match {
+        grid.cells(point._1)(point._2) match {
           case EmptyCell(_) => true
           case BufferCell(EmptyCell(_)) => true
           case _ => false
