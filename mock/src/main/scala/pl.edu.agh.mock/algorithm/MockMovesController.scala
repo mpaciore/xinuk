@@ -8,6 +8,8 @@ import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
+import scala.math.min
+import scala.math.max
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
@@ -24,7 +26,56 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     (grid, metrics)
   }
 
+  def calculateNeighboursSmell(cell: MockCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Signal)] = {
+    val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
+    Grid.SubcellCoordinates
+      .map {
+        case (i, j) => cell.smell(i)(j)
+      }
+      .zipWithIndex
+      .iterator
+      .map {
+        case (smell, idx) =>
+          val (i, j) = neighbourCellCoordinates(idx)
+          (i, j, smell)
+      }
+  }
 
+  def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Double)] = {
+    def min()
+    val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
+      .map {
+        case (i, j) => (i, j, piotrkoFunkcja(i, j, cell.destinationPoint))
+      }
+
+    val costList =
+      distanceCostsList
+        .map{
+          case (_, _, cost) => cost
+        }
+
+    val min = costList.min
+    val max = costList.max
+
+    distanceCostsList
+      .map {
+        (i, j, cost) =>
+          (i, j, (cost - min)/(max - min))
+      }
+  }
+
+  def calculateMovementCosts(smellsList: Iterator[(Int, Int, Signal)], distancesList: Iterator[(Int, Int, Double)])(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
+    smellsList
+      .zip(distancesList)
+      .map {
+        case ((i, j, smell),(_, _, distance)) =>
+          (i, j, smell, distance)
+      }
+      .map {
+        case (i, j, smell, distance) =>
+          (i, j, config.distanceFactor * distance - config.repulsionFactor * smell.value)
+      }
+  }
 
   def calculateNextStep(cell: MockCell, x: Int, y: Int): (Int, Int) = {
     def isInDestinationWorker(cell: MockCell): Boolean = {

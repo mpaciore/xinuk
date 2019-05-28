@@ -4,7 +4,7 @@ import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model.Grid.CellArray
 
-final case class Grid(cells: CellArray, var workerId: WorkerId )  {
+final case class Grid(cells: CellArray, var workerId: WorkerId = WorkerId(0) )  {
 
   import Grid._
 
