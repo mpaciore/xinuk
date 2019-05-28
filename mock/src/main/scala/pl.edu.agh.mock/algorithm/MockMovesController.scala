@@ -3,6 +3,7 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
+import pl.edu.agh.mock.utlis.DistanceUtils
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -42,10 +43,9 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   }
 
   def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Double)] = {
-    def min()
     val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
       .map {
-        case (i, j) => (i, j, piotrkoFunkcja(i, j, cell.destinationPoint))
+        case (i, j) => (i, j, DistanceUtils.calculateDistance(LocalPoint(x, y, cell.workerId), cell.destinationPoint))
       }
 
     val costList =
@@ -58,13 +58,17 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     val max = costList.max
 
     distanceCostsList
+      .iterator
       .map {
-        (i, j, cost) =>
+        case (i, j, cost) =>
           (i, j, (cost - min)/(max - min))
       }
   }
 
-  def calculateMovementCosts(smellsList: Iterator[(Int, Int, Signal)], distancesList: Iterator[(Int, Int, Double)])(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
+  def calculateMovementCosts(
+                              smellsList: Iterator[(Int, Int, Signal)],
+                              distancesList: Iterator[(Int, Int, Double)]
+                            )(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
     smellsList
       .zip(distancesList)
       .map {
