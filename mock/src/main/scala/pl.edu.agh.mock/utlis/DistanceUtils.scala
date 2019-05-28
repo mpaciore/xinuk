@@ -13,16 +13,20 @@ object DistanceUtils  {
   }
 
   def calculateGlobalPosition(point: LocalPoint)(implicit config: MockConfig): Point = {
-    val globalY = scala.math.floor((point.workerId.value - 1) / config.workersRoot)
-    val globalX = point.workerId.value - 1 - (config.workersRoot * globalY)
 
-    Point(globalX.asInstanceOf[Int] * config.gridSize, globalY.asInstanceOf[Int] * config.gridSize)
+    val globalX = (point.workerId.value - 1) / config.workersRoot
+    val globalY = (point.workerId.value - 1) % config.workersRoot
+
+    Point(globalX.asInstanceOf[Int] * config.gridSize + point.x, globalY.asInstanceOf[Int] * config.gridSize + point.y)
   }
 
   def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid)(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
     val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
       .map {
-        case (i, j) => (i, j, calculateDistance(LocalPoint(x, y, cell.workerId), cell.destinationPoint))
+        case (i, j) => (i, j, calculateDistance(LocalPoint(i, j, cell.workerId), cell.destinationPoint))
+      }
+      .map {
+        case (a,b,c) => (a,b,c)
       }
 
     val costList =

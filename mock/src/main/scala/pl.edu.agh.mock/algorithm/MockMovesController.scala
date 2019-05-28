@@ -20,8 +20,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
-    if (grid.workerId.value == 1)
-      grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+
+    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -70,7 +70,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    Thread.sleep(1000)
+    //Thread.sleep(50)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
