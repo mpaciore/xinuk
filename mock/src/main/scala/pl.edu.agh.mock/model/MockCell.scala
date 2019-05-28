@@ -17,7 +17,7 @@ object MockCell {
 }
 
 trait MockAccessible[+T <: GridPart] {
-  def withMock(crowd: List[MockCell], destinationPoint: Point, workerId: WorkerId): T
+  def withMock(crowd: List[MockCell], destinationPoint: LocalPoint, workerId: WorkerId): T
 }
 
 object MockAccessible {
@@ -25,7 +25,7 @@ object MockAccessible {
     new MockAccessible[MockCell] {
       override def withMock(
                              crowd: List[MockCell],
-                             destinationPoint: Point,
+                             destinationPoint: LocalPoint,
                              workerId: WorkerId
                            ): MockCell =
         MockCell(
@@ -40,7 +40,7 @@ object MockAccessible {
     new MockAccessible[BufferCell] {
       override def withMock(
                              crowd: List[MockCell],
-                             destinationPoint: Point,
+                             destinationPoint: LocalPoint,
                              workerId: WorkerId
                            ): BufferCell =
         BufferCell(MockCell(
