@@ -128,7 +128,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
 
       def makeMockMove(occupiedCell: MockCell): Unit = {
-        if (occupiedCell.destinationPoint == Point(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
+        if (occupiedCell.destinationPoint == LocalPoint(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
           occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
         }
 
