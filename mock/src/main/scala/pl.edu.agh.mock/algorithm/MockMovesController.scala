@@ -33,7 +33,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    //Thread.sleep(200)
+    //Thread.sleep(100)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -169,6 +169,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
             workerId = grid.workerId
           ).withSmell(newSmell)
         makeMockMove(singlePedestrianFromCrowd)
+
         val mockWithoutOneCrowdPerson =
           MockCell.create(
             initialSignal = config.mockInitialSignal * mock.crowd.size,
@@ -176,7 +177,20 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
             mock.destinationPoint,
             workerId = grid.workerId
           ).withSmell(newSmell)
-        makeMockMove(mockWithoutOneCrowdPerson)
+
+        newGrid.cells(x)(y) = newGrid.cells(x)(y)  match {
+          case newPedestrian@MockCell(_,_,_,_) =>
+            MockCell.create(
+              initialSignal = config.mockInitialSignal * mock.crowd.size,
+              mockWithoutOneCrowdPerson.crowd ++ List(newPedestrian),
+              mock.destinationPoint,
+              workerId = grid.workerId
+            ).withSmell(newSmell)
+           case _ =>
+              mockWithoutOneCrowdPerson
+        }
+
+
       } else {
         val occupiedCell =
           MockCell.create(
