@@ -30,45 +30,6 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   }
 
 
-  def calculateNextStep(cell: MockCell, x: Int, y: Int): (Int, Int) = {
-    def isInDestinationWorker(cell: MockCell): Boolean = {
-      cell.destinationPoint.workerId.value.equals(cell.workerId.value)
-    }
-
-    def calculateDirection(current: Int, destination: Int) : Int = {
-      destination - current match {
-        case z if z<0 => -1
-        case z if z==0 => 0
-        case _ => 1
-      }
-    }
-
-    def makeMoveInsideWorker(cell: MockCell): (Int, Int) = {
-      val xDirection = calculateDirection(x, cell.destinationPoint.x)
-      val yDirection = calculateDirection(y, cell.destinationPoint.y)
-      (x + xDirection, y + yDirection)
-    }
-
-    def makeMoveToAnotherWorker(cell: MockCell): (Int, Int) = {
-      val currentColumn = ((cell.workerId.value - 1) % config.workersRoot) + 1
-      val currentRow = ((cell.workerId.value - 1) / config.workersRoot) + 1
-
-      val destinationColumn = ((cell.destinationPoint.workerId.value - 1) % config.workersRoot) + 1
-      val destinationRow = ((cell.destinationPoint.workerId.value - 1) / config.workersRoot) + 1
-
-      val xDirection = calculateDirection(currentRow, destinationRow)
-      val yDirection = calculateDirection(currentColumn, destinationColumn)
-
-      (x + xDirection, y + yDirection)
-    }
-
-    if (isInDestinationWorker(cell)) {
-      makeMoveInsideWorker(cell)
-    } else {
-      makeMoveToAnotherWorker(cell)
-    }
-  }
-
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)

@@ -29,7 +29,7 @@ final case class Grid(cells: CellArray, var workerId: WorkerId = WorkerId(0) )  
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => SmellingCell = EmptyCell.Instance, workerId: WorkerId)(implicit config: XinukConfig): Grid = {
+  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => SmellingCell = EmptyCell.Instance, workerId: WorkerId = WorkerId(0))(implicit config: XinukConfig): Grid = {
     val n = config.gridSize
     val values = Array.tabulate[GridPart](n, n) {
       case (x, y) if bufferZone.contains((x, y)) => BufferCell(emptyCellFactory)
