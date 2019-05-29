@@ -9,8 +9,6 @@ import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
 import scala.util.Random
-import scala.math.min
-import scala.math.max
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
@@ -22,6 +20,10 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
     grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+//    if( grid.workerId.value == 1 ) {
+//      grid.cells(3)(3) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+//      grid.cells(12)(3) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+//    }
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
@@ -82,8 +84,13 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
         if (occupiedCell.destinationPoint == LocalPoint(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
           occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
         }
-        val point = MovementDirectionUtils.calculateDirection(MovementDirectionUtils.calculateMovementCosts(SmellUtils.calculateNeighboursSmell(occupiedCell,x , y, grid),
-          DistanceUtils.calculateNeighboursDistances(occupiedCell,x , y, grid)))
+        val point =
+          MovementDirectionUtils.calculateDirection(
+            MovementDirectionUtils.calculateMovementCosts(
+              SmellUtils.calculateNeighboursSmell(occupiedCell,x , y, grid, newGrid),
+              DistanceUtils.calculateNeighboursDistances(occupiedCell,x , y, grid, newGrid)
+            )
+          )
         val destination = Tuple2(point.x, point.y)
         val vacatedCell = EmptyCell(cell.smell)
         newGrid.cells(destination._1)(destination._2) match {

@@ -20,7 +20,7 @@ object DistanceUtils  {
     Point(globalX.asInstanceOf[Int] * config.gridSize + point.x, globalY.asInstanceOf[Int] * config.gridSize + point.y)
   }
 
-  def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid)(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
+  def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid, newGrid: Grid)(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
     val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
       .map {
         case (i, j) => (i, j, calculateDistance(LocalPoint(i, j, cell.workerId), cell.destinationPoint))
@@ -45,9 +45,11 @@ object DistanceUtils  {
           (i, j, (cost - min)/(max - min))
       }
       .filter(point =>{
-        grid.cells(point._1)(point._2) match {
+        newGrid.cells(point._1)(point._2) match {
           case EmptyCell(_) => true
           case BufferCell(EmptyCell(_)) => true
+          case BufferCell(MockCell(_,_,_,_)) => true
+          case MockCell(_,_,_,_) => true
           case _ => false
         }
     })
