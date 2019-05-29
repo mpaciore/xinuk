@@ -25,7 +25,7 @@ object MovementDirectionUtils {
                         ): Point = {
     val destinationPoint = movementCostList
       .toStream
-      .sortWith( _._3 < _._3)
+      .sortWith( _._3 > _._3)
       .head
 
     Point(destinationPoint._1,destinationPoint._2)
