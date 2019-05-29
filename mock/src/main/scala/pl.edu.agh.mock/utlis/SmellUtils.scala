@@ -4,6 +4,8 @@ import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.{LocalPoint, MockCell}
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid, Signal}
 
+// TODO: refactor name "SMELL"
+
 object SmellUtils{
   def calculateNeighboursSmell(cell: MockCell, x: Int, y: Int, grid: Grid, newGrid: Grid): Iterator[(Int, Int, Signal)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)

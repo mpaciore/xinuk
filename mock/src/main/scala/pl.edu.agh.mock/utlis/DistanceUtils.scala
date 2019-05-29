@@ -3,6 +3,7 @@ package pl.edu.agh.mock.utlis
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.{LocalPoint, MockCell, Point}
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid}
+import scala.math.abs
 
 object DistanceUtils  {
   def calculateDistance(firstPoint: LocalPoint, secondPoint: LocalPoint)(implicit config: MockConfig): Double = {
@@ -42,7 +43,7 @@ object DistanceUtils  {
       .iterator
       .map {
         case (i, j, cost) =>
-          (i, j, (cost - min)/(max - min))
+          (i, j, abs(1 - (cost - min)/(max - min)))
       }
       .filter(point =>{
         newGrid.cells(point._1)(point._2) match {

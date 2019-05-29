@@ -4,6 +4,8 @@ import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.xinuk.model.Cell.SmellArray
 import pl.edu.agh.xinuk.model._
 
+
+//TODO : Refactor "Mock" name
 final case class MockCell(smell: SmellArray, crowd: List[MockCell], var destinationPoint: LocalPoint, workerId: WorkerId) extends SmellingCell {
 
   override type Self = MockCell

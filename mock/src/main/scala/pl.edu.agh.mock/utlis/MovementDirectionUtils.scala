@@ -23,6 +23,7 @@ object MovementDirectionUtils {
   def calculateDirection(
                           movementCostList: Iterator[(Int, Int, Double)]
                         ): Point = {
+
     val destinationPoint = movementCostList
       .toStream
       .sortWith( _._3 > _._3)
