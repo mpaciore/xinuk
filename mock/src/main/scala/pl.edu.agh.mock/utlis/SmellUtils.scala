@@ -9,19 +9,15 @@ import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid, Signal}
 object SmellUtils{
   def calculateNeighboursSmell(cell: MockCell, x: Int, y: Int, grid: Grid, newGrid: Grid): Iterator[(Int, Int, Signal)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
-    Grid.SubcellCoordinates
+
+    neighbourCellCoordinates
       .map {
-        case (i, j) => cell.smell(i)(j)
+        case (i, j) =>
+          (i,j,Signal(grid.cells(i)(j).smell.map(_.map(_.value).sum).sum.toFloat))
       }
-      .zipWithIndex
       .iterator
-      .map {
-        case (smell, idx) =>
-          val (i, j) = neighbourCellCoordinates(idx)
-          (i, j, smell)
-      }
-      .filter(point =>{
-        newGrid.cells(point._1)(point._2) match {
+      .filter(smellingPoint =>{
+        newGrid.cells(smellingPoint._1)(smellingPoint._2) match {
           case EmptyCell(_) => true
           case BufferCell(EmptyCell(_)) => true
           case BufferCell(MockCell(_,_,_,_)) => true
