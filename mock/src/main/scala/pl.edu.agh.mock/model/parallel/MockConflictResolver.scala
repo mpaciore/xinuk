@@ -18,10 +18,10 @@ object MockConflictResolver extends ConflictResolver[MockConfig] {
         (Obstacle, MockMetrics(0, 0, 0))
       case (EmptyCell(currentSmell), EmptyCell(incomingSmell)) =>
         (EmptyCell(currentSmell + incomingSmell), MockMetrics(0, 0, 0))
-      case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), EmptyCell(incomingSmell)) =>
-        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint,currentWorkerId), MockMetrics(0, 0, 0))
-      case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint,currentWorkerId)) =>
-        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint,currentWorkerId), MockMetrics(0, 0, 0))
+      case (MockCell(currentSmell, currentCrowd, destinationPoint, currentWorkerId), EmptyCell(incomingSmell)) =>
+        (MockCell(currentSmell + incomingSmell, currentCrowd, destinationPoint, currentWorkerId), MockMetrics(0, 0, 0))
+      case (EmptyCell(currentSmell), MockCell(incomingSmell, incomingCrowd, destinationPoint, currentWorkerId)) =>
+        (MockCell(currentSmell + incomingSmell, incomingCrowd, destinationPoint, currentWorkerId), MockMetrics(0, 0, 0))
       case (MockCell(currentSmell, currentCrowd, destinationPoint,currentWorkerId), incoming@MockCell(incomingSmell, incomingCrowd, _, _)) =>
         crowdOnSeams += 1
         (MockCell(currentSmell + incomingSmell, currentCrowd ++ List(incoming), destinationPoint,currentWorkerId), MockMetrics((currentCrowd ++ incomingCrowd).size + 2, 0, crowdOnSeams))

@@ -26,25 +26,23 @@ object DistanceUtils  {
       .map {
         case (i, j) => (i, j, calculateDistance(LocalPoint(i, j, cell.workerId), cell.destinationPoint))
       }
-      .map {
-        case (a,b,c) => (a,b,c)
-      }
 
     val costList =
       distanceCostsList
-        .map{
+        .map {
           case (_, _, cost) => cost
         }
 
-    val min = costList.min
-    val max = costList.max
+    val (min, max) = costList.foldLeft((costList(0), costList(0))) {
+      case ((min, max), e) => (if (min < e) min else e, if (max > e) max else e)
+    }
 
     distanceCostsList
-      .iterator
       .map {
         case (i, j, cost) =>
-          (i, j, abs(1 - (cost - min)/(max - min)))
+          (i, j, (cost - min) / (max - min) )
       }
+      .iterator
       .filter(point =>{
         newGrid.cells(point._1)(point._2) match {
           case EmptyCell(_) => true

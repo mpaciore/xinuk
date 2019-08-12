@@ -10,42 +10,39 @@ object SmellUtils{
   def calculateNeighboursSmell(cell: MockCell, x: Int, y: Int, grid: Grid, newGrid: Grid): Iterator[(Int, Int, Signal)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
 
-    neighbourCellCoordinates
+    val smellsValuesList = neighbourCellCoordinates
       .map {
-        case (i, j) =>
-          (i,j,Signal(grid.cells(i)(j).smell.map(_.map(_.value).sum).sum.toFloat))
+        case (i, j) => (i, j, Signal(grid.cells(x)(y).smell(i - x + 1)(j - y + 1).value))
+      }
+
+    val smellsList =
+      smellsValuesList
+        .map {
+          case (_, _, smell) => smell.value
+        }
+
+//    val (min, max) = smellsList.foldLeft((smellsList(0), smellsList(0))) {
+//      case ((min, max), e) => (if (min < e) min else e, if (max > e) max else e)
+//    }
+
+//    wyłaczenie sprowadzania do od 0 do 1
+    val (min, max) = (0,1)
+
+    smellsValuesList
+      .map {
+        case (i, j, smell) =>
+          (i, j, Signal( (smell.value - min) / (max - min) ))
       }
       .iterator
-      .filter(smellingPoint =>{
-        newGrid.cells(smellingPoint._1)(smellingPoint._2) match {
+      .filter(point => {
+        newGrid.cells(point._1)(point._2) match {
           case EmptyCell(_) => true
           case BufferCell(EmptyCell(_)) => true
           case BufferCell(MockCell(_,_,_,_)) => true
           case MockCell(_,_,_,_) => true
           case _ => false
         }
-      })
-
-//    neighbourCellCoordinates
-//      .map {
-//        case (i, j) => grid.cells(i)(j).smell.map{ case x => x.map{ y => y.value} }.sum()
-//      }
-//      .zipWithIndex
-//      .iterator
-//      .map {
-//        case (smell, idx) =>
-//          val (i, j) = neighbourCellCoordinates(idx)
-//          (i, j, smell)
-//      }
-//      .filter(point =>{
-//        newGrid.cells(point._1)(point._2) match {
-//          case EmptyCell(_) => true
-//          case BufferCell(EmptyCell(_)) => true
-//          case BufferCell(MockCell(_,_,_,_)) => true
-//          case MockCell(_,_,_,_) => true
-//          case _ => false
-//        }
-//      })
+    })
   }
 
 

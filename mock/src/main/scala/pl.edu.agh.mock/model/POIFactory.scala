@@ -27,19 +27,6 @@ object POIFactory {
       }
     )
 
-//    if(i % 2 == 0) {
-//      xDestination = 12
-//      yDestination = 3
-//      destinationWorkerId = 1
-//
-//      i += 1
-//    } else {
-//      xDestination = 5
-//      yDestination = 3
-//      destinationWorkerId = 1
-//
-//      i += 1
-//    }
     LocalPoint(xDestination, yDestination, WorkerId(destinationWorkerId))
   }
 }

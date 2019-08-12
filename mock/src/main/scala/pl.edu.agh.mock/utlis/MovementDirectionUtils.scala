@@ -9,7 +9,7 @@ object MovementDirectionUtils {
                               smellsList: Iterator[(Int, Int, Signal)],
                               distancesList: Iterator[(Int, Int, Double)]
                             )(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
-    smellsList
+    val list = smellsList
       .zip(distancesList)
       .map {
         case ((i, j, smell),(_, _, distance)) =>
@@ -17,8 +17,10 @@ object MovementDirectionUtils {
       }
       .map {
         case (i, j, smell, distance) =>
-          (i, j, config.distanceFactor * distance - config.repulsionFactor * smell.value)
+          (i, j, config.distanceFactor * distance + config.repulsionFactor * smell.value)
       }
+
+    scala.util.Random.shuffle(list)
   }
   def calculateDirection(
                           movementCostList: Iterator[(Int, Int, Double)]
@@ -26,9 +28,8 @@ object MovementDirectionUtils {
 
     val destinationPoint = movementCostList
       .toStream
-      .sortWith( _._3 > _._3)
+      .sortWith( _._3 < _._3)
       .head
-
     Point(destinationPoint._1,destinationPoint._2)
   }
 }
