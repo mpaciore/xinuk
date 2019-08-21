@@ -21,12 +21,12 @@ object SmellUtils{
           case (_, _, smell) => smell.value
         }
 
-//    val (min, max) = smellsList.foldLeft((smellsList(0), smellsList(0))) {
-//      case ((min, max), e) => (if (min < e) min else e, if (max > e) max else e)
-//    }
+    val (min, max) = smellsList.foldLeft((smellsList(0), smellsList(0))) {
+      case ((min, max), e) => (if (min < e) min else e, if (max > e) max else e)
+    }
 
 //    wyłaczenie sprowadzania do od 0 do 1
-    val (min, max) = (0,1)
+//    val (min, max) = (0,1)
 
     smellsValuesList
       .map {
