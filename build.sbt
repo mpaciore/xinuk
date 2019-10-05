@@ -11,6 +11,7 @@ val Version = new {
   val Ficus = "1.4.3"
   val ScalaSwing = "2.0.2"
   val JFreeChart = "1.5.0"
+  val PlayJson = "2.7.3"
 }
 
 val akkaKryoVersion = SettingKey[String]("akkaKryoVersion")
@@ -61,6 +62,7 @@ lazy val `xinuk-core` = project
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
       "org.mockito" % "mockito-core" % Version.Mockito % Test,
+      "com.typesafe.play" %% "play-json" % Version.PlayJson
     ),
   ).disablePlugins(AssemblyPlugin)
 

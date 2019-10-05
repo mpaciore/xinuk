@@ -1,0 +1,7174 @@
+{
+  "size": 32,
+  "title": "Random map",
+  "tiles": [
+    {
+      "row": 0,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 0,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 0,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 2,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 3,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 4,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 4,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 4,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 5,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 5,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 6,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 6,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 7,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 8,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 9,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 9,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 10,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 10,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 10,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 11,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 11,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 12,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 13,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 14,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 14,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 14,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 14,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 15,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 15,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 15,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 16,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 17,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 17,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 17,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 18,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 18,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 18,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 19,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 19,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 19,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 20,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 20,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 21,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 21,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 21,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 22,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 23,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 23,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 23,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 23,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 24,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 24,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 24,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 25,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 25,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 26,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 26,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 26,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 27,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 27,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 27,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 28,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 28,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 29,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 29,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 29,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 30,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 30,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 30,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 0,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 1,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 2,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 3,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 4,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 5,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 6,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 8,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 9,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 10,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 24,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 26,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 27,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 28,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 31,
+      "column": 31,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    }
+  ]
+}
