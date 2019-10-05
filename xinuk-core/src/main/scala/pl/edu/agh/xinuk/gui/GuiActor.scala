@@ -56,7 +56,7 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
-  private val bgcolor = new Color(220, 220, 220)
+  private val bgcolor = new Color(0, 0, 0)
   private val cellView = new ParticleCanvas(config.gridSize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
     background = bgcolor

@@ -8,6 +8,7 @@ import scala.util.Random
 
 
 object POIFactory {
+  var i = 0
   def generatePOI(grid: Grid)(implicit config : MockConfig): LocalPoint = {
     val random = new Random(System.nanoTime())
     var xDestination: Int = 0
@@ -25,6 +26,7 @@ object POIFactory {
         case _ => true
       }
     )
+
     LocalPoint(xDestination, yDestination, WorkerId(destinationWorkerId))
   }
 }

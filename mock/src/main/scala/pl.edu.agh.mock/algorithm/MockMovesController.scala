@@ -4,6 +4,7 @@ import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
 import pl.edu.agh.mock.utlis.GridUtils
+import pl.edu.agh.mock.utlis.{DistanceUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -19,59 +20,23 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-    GridUtils.addDataFromFile("map.json", grid)
 
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal, destinationPoint = POIFactory.generatePOI(grid), workerId = grid.workerId)
+    //GridUtils.addDataFromFile("map.json", grid)
+
+    grid.cells(config.gridSize / 2)(config.gridSize / 2) =
+      MockCell.create(config.mockInitialSignal,
+        destinationPoint = POIFactory.generatePOI(grid),
+        workerId = grid.workerId)
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
   }
 
 
-
-  def calculateNextStep(cell: MockCell, x: Int, y: Int): (Int, Int) = {
-    def isInDestinationWorker(cell: MockCell): Boolean = {
-      cell.destinationPoint.workerId.value.equals(cell.workerId.value)
-    }
-
-    def calculateDirection(current: Int, destination: Int) : Int = {
-      destination - current match {
-        case z if z<0 => -1
-        case z if z==0 => 0
-        case _ => 1
-      }
-    }
-
-    def makeMoveInsideWorker(cell: MockCell): (Int, Int) = {
-      val xDirection = calculateDirection(x, cell.destinationPoint.x)
-      val yDirection = calculateDirection(y, cell.destinationPoint.y)
-      (x + xDirection, y + yDirection)
-    }
-
-    def makeMoveToAnotherWorker(cell: MockCell): (Int, Int) = {
-      val currentColumn = ((cell.workerId.value - 1) % config.workersRoot) + 1
-      val currentRow = ((cell.workerId.value - 1) / config.workersRoot) + 1
-
-      val destinationColumn = ((cell.destinationPoint.workerId.value - 1) % config.workersRoot) + 1
-      val destinationRow = ((cell.destinationPoint.workerId.value - 1) / config.workersRoot) + 1
-
-      val xDirection = calculateDirection(currentRow, destinationRow)
-      val yDirection = calculateDirection(currentColumn, destinationColumn)
-
-      (x + xDirection, y + yDirection)
-    }
-
-    if (isInDestinationWorker(cell)) {
-      makeMoveInsideWorker(cell)
-    } else {
-      makeMoveToAnotherWorker(cell)
-    }
-  }
-
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
-    val newGrid = Grid.empty(bufferZone,workerId = grid.workerId)
-    Thread.sleep(50)
+    val newGrid = Grid.empty(bufferZone, workerId = grid.workerId)
+    Thread.sleep(4)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -83,16 +48,28 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
         if (occupiedCell.destinationPoint == LocalPoint(x,y,occupiedCell.workerId) || !isDestinationPointAccessible(grid,occupiedCell) ) {
           occupiedCell.destinationPoint = POIFactory.generatePOI(grid)
         }
-
-        val destination = calculateNextStep(occupiedCell, x, y)
+        val point =
+          MovementDirectionUtils.calculateDirection(
+            MovementDirectionUtils.calculateMovementCosts(
+              SmellUtils.calculateNeighboursSmell(occupiedCell, x , y, grid, newGrid),
+              DistanceUtils.calculateNeighboursDistances(occupiedCell, x , y, grid, newGrid)
+            )
+          )
+        val destination = Tuple2(point.x, point.y)
         val vacatedCell = EmptyCell(cell.smell)
         newGrid.cells(destination._1)(destination._2) match {
           case EmptyCell(_) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
-              case occupied@MockCell(_, _, _,_) => occupied
+              case occupied@MockCell(_, _, _, _) => occupied
               case _ => vacatedCell
             }
-            newGrid.cells(destination._1)(destination._2) = occupiedCell
+            newGrid.cells(destination._1)(destination._2) =
+              MockCell(
+                occupiedCell.smell ++ grid.cells(destination._1)(destination._1).smell,
+                occupiedCell.crowd,
+                occupiedCell.destinationPoint,
+                occupiedCell.workerId
+              )
 
           case BufferCell(EmptyCell(_)) =>
             newGrid.cells(x)(y) = newGrid.cells(x)(y) match {
@@ -178,22 +155,45 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
       val mock: MockCell = cell.asInstanceOf[MockCell]
 
+      val newSmell = mock.smell.map{
+        case arr: Array[Signal] =>
+          arr.map{
+            case sig: Signal => Signal(sig.value + config.mockInitialSignal.value)
+          }
+      }
+
+      // TODO: splitting whole crowd
       if (mock.crowd.nonEmpty) {
-        val child =
+        val singlePedestrianFromCrowd =
           MockCell.create(
-            initialSignal = config.mockInitialSignal * (mock.crowd.head.crowd.size + 1),
+            initialSignal = config.mockInitialSignal,
             initialCrowd = mock.crowd.head.crowd,
             destinationPoint = mock.crowd.head.destinationPoint,
-            workerId = grid.workerId)
-        makeMockMove(child)
-        val occupiedCell =
+            workerId = grid.workerId
+          ).withSmell(newSmell)
+        makeMockMove(singlePedestrianFromCrowd)
+
+        val mockWithoutOneCrowdPerson =
           MockCell.create(
             initialSignal = config.mockInitialSignal * mock.crowd.size,
             mock.crowd.drop(1),
             mock.destinationPoint,
             workerId = grid.workerId
-          )
-        makeMockMove(occupiedCell)
+          ).withSmell(newSmell)
+
+        newGrid.cells(x)(y) = newGrid.cells(x)(y)  match {
+          case newPedestrian@MockCell(_,_,_,_) =>
+            MockCell.create(
+              initialSignal = config.mockInitialSignal * mock.crowd.size,
+              mockWithoutOneCrowdPerson.crowd ++ List(newPedestrian),
+              mock.destinationPoint,
+              workerId = grid.workerId
+            ).withSmell(newSmell)
+           case _ =>
+              mockWithoutOneCrowdPerson
+        }
+
+
       } else {
         val occupiedCell =
           MockCell.create(
@@ -201,7 +201,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
             mock.crowd,
             mock.destinationPoint,
             workerId = grid.workerId
-          )
+          ).withSmell(newSmell)
         makeMockMove(occupiedCell)
       }
     }
