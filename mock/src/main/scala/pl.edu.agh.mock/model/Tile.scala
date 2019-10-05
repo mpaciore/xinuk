@@ -1,5 +1,8 @@
 package pl.edu.agh.mock.model
 
-class Tile {
+
+case class Tile(row: Int, column: Int, tileType: TileType.EnumVal) {
 
 }
+
+
