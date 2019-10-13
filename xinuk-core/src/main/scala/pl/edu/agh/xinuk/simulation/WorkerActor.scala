@@ -78,20 +78,21 @@ class WorkerActor[ConfigType <: XinukConfig](
   }
 
   var currentIteration: Long = 1
+  val logInterval: Long = this.config.iterationsNumber / 10
 
   def started: Receive = {
     case StartIteration(i) =>
       finished.remove(i - 1)
-      if (i % 5000 == 0) logger.debug(s"$id started $i")
+      if (i % logInterval == 0) logger.debug(s"$id started $i")
       val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
       grid = newGrid
       val metrics = newMetrics + conflictResolutionMetrics
-      logMetrics(i, metrics)
+      if (i % logInterval == 0) logMetrics(i, metrics)
       guiActors.foreach(_ ! GridInfo(i, grid, metrics))
       propagateSignal()
       notifyNeighbours(i, grid)
       conflictResolutionMetrics = null
-      if (i % 5000 == 0) logger.info(s"$id finished $i")
+      if (i % logInterval == 0) logger.info(s"$id finished $i")
     case IterationPartFinished(workerId, _, iteration, neighbourBuffer) =>
       val currentlyFinished: Vector[IncomingNeighbourCells] = finished(iteration)
       val incomingNeighbourCells: IncomingNeighbourCells =
