@@ -36,7 +36,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone, workerId = grid.workerId)
-    Thread.sleep(4)
+//    Thread.sleep(4)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
@@ -224,11 +224,12 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
   def isDestinationPointAccessible(grid: Grid, cell: MockCell): Boolean = {
     val point = cell.destinationPoint
-    if (point.workerId.value != cell.workerId.value) return true;
+    if (point.workerId.value != cell.workerId.value) return true
     grid.cells(point.x)(point.y) match {
       case Obstacle => false
       case _ => true
     }
   }
+
 
 }
