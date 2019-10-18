@@ -79,6 +79,7 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   var currentIteration: Long = 1
   val logInterval: Long = this.config.iterationsNumber / 10
+  var metricsAdded: Boolean = false
 
   def started: Receive = {
     case StartIteration(i) =>
@@ -115,7 +116,10 @@ class WorkerActor[ConfigType <: XinukConfig](
             case ((x, y), BufferCell(cell)) =>
               val currentCell = grid.cells(x)(y)
               val (resolved, partialResolvingMetrics) = conflictResolver.resolveConflict(currentCell, cell)
-              conflictResolutionMetrics = partialResolvingMetrics + conflictResolutionMetrics
+              if (!metricsAdded) {
+                conflictResolutionMetrics = partialResolvingMetrics + conflictResolutionMetrics
+                metricsAdded = true
+              }
               grid.cells(x)(y) = resolved
           })
 
@@ -125,6 +129,7 @@ class WorkerActor[ConfigType <: XinukConfig](
           }
 
           currentIteration += 1
+          metricsAdded = false
           self ! StartIteration(currentIteration)
         }
       } else if (finished(currentIteration).size == neighbours.size + 1) {
