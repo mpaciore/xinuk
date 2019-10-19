@@ -16,6 +16,11 @@ trait XinukConfig {
   def iterationsNumber: Long
 }
 
+trait XinukConfigWithBendFactors extends XinukConfig {
+  def crossBendFactor: Double
+  def straightBendFactor: Double
+}
+
 sealed trait GuiType extends NamedEnum
 
 object GuiType extends AbstractNamedEnumCompanion[GuiType] {

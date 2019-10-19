@@ -9,7 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.xinuk.algorithm.MovesController
-import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
+import pl.edu.agh.xinuk.config.{GuiType, XinukConfig, XinukConfigWithBendFactors}
 import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model.parallel.{ConflictResolver, Neighbour, NeighbourPosition}
@@ -19,15 +19,15 @@ import pl.edu.agh.xinuk.simulation.WorkerActor
 import scala.collection.immutable.TreeSet
 import scala.util.{Failure, Success, Try}
 
-class Simulation[ConfigType <: XinukConfig : ValueReader](
-  configPrefix: String,
-  metricHeaders: Vector[String],
-  conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
-  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
-  movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
-  cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
-) extends LazyLogging {
+class SimulationWithCurvedSmellPropagation[ConfigType <: XinukConfig : ValueReader](
+                                                                                     configPrefix: String,
+                                                                                     metricHeaders: Vector[String],
+                                                                                     conflictResolver: ConflictResolver[ConfigType],
+                                                                                     smellPropagationFunction: XinukConfigWithBendFactors => (CellArray, Int, Int) => Vector[Option[Signal]],
+                                                                                     emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
+                                                                                     movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
+                                                                                     cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
+                                                                                   ) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -59,7 +59,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction(config.asInstanceOf[XinukConfigWithBendFactors]), emptyCellFactory),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId
