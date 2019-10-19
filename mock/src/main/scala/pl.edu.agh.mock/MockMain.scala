@@ -19,7 +19,7 @@ object MockMain extends LazyLogging {
       configPrefix,
       metricHeaders,
       MockConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard)(new MockMovesController(_)(_),
+      DefaultSmellPropagation.calculateSmellAddends)(new MockMovesController(_)(_),
       {
         case MockCell(_, x, _,_) =>
           x.size match {

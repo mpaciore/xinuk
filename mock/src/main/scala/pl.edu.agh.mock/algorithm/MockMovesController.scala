@@ -20,8 +20,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-
-    //GridUtils.addDataFromFile("map.json", grid)
+    GridUtils.addDataFromFile("map.json", grid)
 
     grid.cells(config.gridSize / 2)(config.gridSize / 2) =
       MockCell.create(config.mockInitialSignal,
@@ -36,7 +35,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
 
     val newGrid = Grid.empty(bufferZone, workerId = grid.workerId)
-//    Thread.sleep(4)
+    Thread.sleep(10)
 
     def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
       newGrid.cells(x)(y) = cell
