@@ -23,19 +23,19 @@ object MockMain extends LazyLogging {
       {
         case MockCell(_, x, _,_) =>
           x.size match {
-            case 0 => Color.cyan
+            case 0 => Color.white
             case 1 => Color.yellow
             case 2 => Color.pink
-            case _ => Color.red
+            case _ => Color.cyan
           }
-        case Obstacle => Color.blue
+        case Obstacle => Color.black
         case cell: SmellingCell => cellToColorRegions(cell)
       }).start()
   }
 
   private def cellToColorRegions(cell: SmellingCell): Color = {
     val smellValue = cell.smell.map(_.map(_.value).sum).sum.toFloat
-    val brightness = Math.pow(smellValue, 0.1).toFloat
+    val brightness = 1.toFloat - Math.pow(smellValue, 0.1).toFloat
     val saturation = 0f
   /*  if (smellValue < 0.00001) {
       val hue = 1f
