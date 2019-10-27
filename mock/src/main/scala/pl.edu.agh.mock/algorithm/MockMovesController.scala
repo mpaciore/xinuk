@@ -22,10 +22,12 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
     GridUtils.addDataFromFile("map.json", grid)
 
-    grid.cells(config.gridSize / 2)(config.gridSize / 2) =
-      MockCell.create(config.mockInitialSignal,
-        destinationPoint = POIFactory.generatePOI(grid),
-        workerId = grid.workerId)
+    if(grid.cells(config.gridSize / 2)(config.gridSize / 2).isInstanceOf[EmptyCell]) {
+      grid.cells(config.gridSize / 2)(config.gridSize / 2) =
+        MockCell.create(config.mockInitialSignal,
+          destinationPoint = POIFactory.generatePOI(grid),
+          workerId = grid.workerId)
+    }
 
     val metrics = MockMetrics.empty()
     (grid, metrics)
