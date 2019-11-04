@@ -14,6 +14,8 @@ object MockConflictResolver extends ConflictResolver[MockConfig] {
 
   override def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: MockConfig): (GridPart, MockMetrics) = {
     (current, incoming) match {
+      case (Obstacle, MockCell(_,_,_,_)) =>
+        throw new Exception("Mock encroaches on obstacle from buffer zone")
       case (Obstacle, _) =>
         (Obstacle, MockMetrics(0, 0, crowdOnSeams))
       case (EmptyCell(currentSmell), EmptyCell(incomingSmell)) =>

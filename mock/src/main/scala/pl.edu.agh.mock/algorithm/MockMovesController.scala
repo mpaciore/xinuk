@@ -3,8 +3,7 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.GridUtils
-import pl.edu.agh.mock.utlis.{DistanceUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -21,6 +20,10 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
     GridUtils.addDataFromFile("map.json", grid)
+
+    AlgorithmUtils.mapDistances(grid)
+
+    Thread.sleep(100000)
 
     if(grid.cells(config.gridSize / 2)(config.gridSize / 2).isInstanceOf[EmptyCell]) {
       grid.cells(config.gridSize / 2)(config.gridSize / 2) =

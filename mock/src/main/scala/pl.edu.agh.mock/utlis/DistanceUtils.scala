@@ -2,10 +2,7 @@ package pl.edu.agh.mock.utlis
 
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.{LocalPoint, MockCell, Point}
-import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid, Obstacle}
-
-import scala.math.{abs, pow}
-import scala.util.Random
+import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid}
 
 object DistanceUtils  {
   def calculateDistance(firstPoint: LocalPoint, secondPoint: LocalPoint)(implicit config: MockConfig): Double = {
@@ -16,7 +13,6 @@ object DistanceUtils  {
   }
 
   def calculateGlobalPosition(point: LocalPoint)(implicit config: MockConfig): Point = {
-
     val globalX = (point.workerId.value - 1) / config.workersRoot
     val globalY = (point.workerId.value - 1) % config.workersRoot
 
@@ -24,29 +20,6 @@ object DistanceUtils  {
   }
 
   def calculateNeighboursDistances(cell: MockCell, x: Int, y: Int, grid: Grid, newGrid: Grid)(implicit config: MockConfig): Iterator[(Int, Int, Double)] = {
-    if(cell.workerId == cell.destinationPoint.workerId) {
-      grid.cells(cell.destinationPoint.x)(cell.destinationPoint.y) match {
-        case Obstacle => {
-          val random = new Random(System.nanoTime())
-          var xDestination: Int = 0
-          var yDestination: Int = 0
-
-          do {
-            xDestination = random.nextInt(config.gridSize - 2) + 1
-            yDestination = random.nextInt(config.gridSize - 2) + 1
-          } while (
-            grid.cells(xDestination)(yDestination) match {
-              case EmptyCell(_) => false
-              case _ => true
-            }
-          )
-
-          cell.destinationPoint = LocalPoint(xDestination, yDestination, cell.workerId)
-        }
-        case _ => Unit
-      }
-    }
-
     val distanceCostsList = Grid.neighbourCellCoordinates(x, y)
       .map {
         case (i, j) => (i, j, calculateDistance(LocalPoint(i, j, cell.workerId), cell.destinationPoint))

@@ -18,7 +18,6 @@ object DefaultSmellPropagation {
       case (i, j) =>
         destinationCellSignal(i, j).map(signal => {
           var signalSum = signal(i)(j)
-          //          System.out.println(x + (j - i) / 2, y + (i + j - 2) / 2, x, y, i, j)
           if(!outOfBounds(x + (j - i) / 2, y + (i + j - 2) / 2, cells) && cells(x + (j - i) / 2)(y + (i + j - 2) / 2) == Obstacle)
             signalSum += signal(i / 2 + j / 2)(j /2 - i / 2 + 1) + signal(j)(2 - i)
           if(!outOfBounds(x + (i + j - 2) / 2, y + (i - j) / 2, cells) && cells(x + (i + j - 2) / 2)(y + (i - j) / 2) == Obstacle)
