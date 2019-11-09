@@ -3,7 +3,7 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.{AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AlgorithmUtils, Direction, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -21,7 +21,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
     GridUtils.addDataFromFile("map.json", grid)
 
-    AlgorithmUtils.mapDistances(grid)
+    AlgorithmUtils.mapLocalDistancesForEveryDirection(grid)
+    AlgorithmUtils.mapTransitionsThroughThisWorker(grid)
 
     Thread.sleep(100000)
 
