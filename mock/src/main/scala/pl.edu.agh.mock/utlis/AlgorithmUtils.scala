@@ -28,6 +28,8 @@ object AlgorithmUtils {
 
   var directionalSmell: Map[Direction.Value, DirectionalSmellArray] = Map[Direction.Value, DirectionalSmellArray]()
 
+  var transitionsThroughThisWorker: Map[(Direction.Value, Direction.Value), Boolean] = Map[(Direction.Value, Direction.Value), Boolean]()
+
   def mapTransitionsThroughThisWorker(grid: Grid)(implicit config: MockConfig): Unit = {
     for (sourceDirection <- Direction.values) {
       val coordinatesToCheck = coordinatesToCheckFor(sourceDirection)
@@ -44,12 +46,12 @@ object AlgorithmUtils {
               sumOfPositive += 1
             }
           }
-          if (sumOfPositive == coordinatesToCheck.size) {
-            print("a")
-          }
+          transitionsThroughThisWorker += ((sourceDirection, destinationDirection) -> (sumOfPositive == coordinatesToCheck.length))
         }
       }
     }
+
+    FileSerializationUtils.serializeInFile[Map[(Direction.Value, Direction.Value), Boolean]](transitionsThroughThisWorker, "transitionsThrough" + grid.workerId.value)
   }
 
   def coordinatesToCheckFor(direction: Direction.Value)(implicit config: MockConfig): Array[(Int, Int)] = {
@@ -70,6 +72,30 @@ object AlgorithmUtils {
     Direction.values.foreach(direction => {
       mapDistances(grid, direction)
     })
+
+//    Saving directional signal in file for debugging purposes
+
+//    val filename = "signalForWorker" + grid.workerId.value + ".txt"
+//    val file = new File(filename)
+//    val fw = new FileWriter(file)
+//
+//    for (direction <- Direction.values) {
+//      fw.write("\n")
+//      fw.write(direction.toString + "\n")
+//      fw.write("\n")
+//      for (arrayOfArraysOfSmell <- directionalSmell(direction)) {
+//        for (arrayOfSmell <- arrayOfArraysOfSmell) {
+//          for (smell <- arrayOfSmell) {
+//            smell.map(signal => signal.value).foreach(smellValue => fw.write(smellValue + ", "))
+//            fw.write("\n")
+//          }
+//          fw.write("\n")
+//        }
+//        fw.write("\n")
+//      }
+//    }
+//
+//    fw.close()
   }
 
   def mapDistances(grid: Grid, direction: Direction.Value)(implicit config: MockConfig): Unit = {
@@ -88,8 +114,6 @@ object AlgorithmUtils {
       newGrid.cells(coordinate._1)(coordinate._2) = MockCell.create(Signal(1), List(), LocalPoint(1, 1, grid.workerId), grid.workerId)
     }
 
-    newGrid.cells(2)(2) = Obstacle
-
     (0 until config.gridSize*2).foreach { _ =>
       val cells = Array.tabulate(config.gridSize, config.gridSize)((x, y) =>
         newGrid.propagatedSignal(InitSmellPropagation.calculateSmellAddends, x, y)
@@ -104,14 +128,14 @@ object AlgorithmUtils {
     )
 
 //  Printing directional signal for debugging purposes
-//
+
 //    println()
 //    println(direction.toString())
 //    println()
 //    for (arrayOfArraysOfSmell <- directionalSmell(direction)) {
 //      for (arrayOfSmell <- arrayOfArraysOfSmell) {
 //        for (smell <- arrayOfSmell) {
-//          smell.map(signal => signal.value).map(smellValue => print(smellValue + ", "))
+//          smell.map(signal => signal.value).foreach(smellValue => print(f"$smellValue%5.1f "))
 //          println()
 //        }
 //        println()

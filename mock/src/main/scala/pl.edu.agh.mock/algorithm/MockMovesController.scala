@@ -3,7 +3,7 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.{AlgorithmUtils, Direction, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
@@ -160,10 +160,10 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
       val mock: MockCell = cell.asInstanceOf[MockCell]
 
-      val newSmell = mock.smell.map{
-        case arr: Array[Signal] =>
-          arr.map{
-            case sig: Signal => Signal(sig.value + config.mockInitialSignal.value)
+      val newSmell = mock.smell.map {
+        arr: Array[Signal] =>
+          arr.map {
+            sig: Signal => Signal(sig.value + config.mockInitialSignal.value)
           }
       }
 
