@@ -3,26 +3,32 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.{AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AStartAlgorithmUtils, AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
 
 import scala.collection.immutable.TreeSet
-import scala.util.Random
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
   var crowdOnProcessor = 0
 
-  private val random = new Random(System.nanoTime())
-
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-    GridUtils.addDataFromFile("map.json", grid)
+//    GridUtils.addDataFromFile("map.json", grid)
 
     AlgorithmUtils.mapLocalDistancesForEveryDirection(grid)
     AlgorithmUtils.mapTransitionsThroughThisWorker(grid)
+
+    grid.cells(5)(5) = Obstacle
+    grid.cells(4)(5) = Obstacle
+    grid.cells(5)(4) = Obstacle
+    grid.cells(5)(3) = Obstacle
+    grid.cells(5)(2) = Obstacle
+
+    AStartAlgorithmUtils.aStar((1,1), (13,12), grid)
+        .foreach(println)
 
     Thread.sleep(100000)
 
