@@ -23,15 +23,74 @@ object GridUtils extends LazyLogging{
       }
     }
 
-    //updateBufferZone(grid, gridArray, xOffset, yOffset)
+    updateBufferZone(grid, gridArray, xOffset, yOffset)
   }
 
   private def updateBufferZone(grid: Grid, gridArray: Array[Array[GridPart]], xOffset: Int, yOffset: Int)
                               (implicit config: XinukConfig) = {
+    for (i <- 0 until config.gridSize) {
+      grid.cells(i)(1) match {
+        case Obstacle =>
+          grid.cells(i)(0) = Obstacle
+          gridArray(xOffset + i)(yOffset) = Obstacle
+        case _ =>
+      }
+      grid.cells(i)(config.gridSize - 2) match {
+        case Obstacle =>
+          grid.cells(i)(config.gridSize - 1) = Obstacle
+          gridArray(xOffset + i)(yOffset + config.gridSize - 1) = Obstacle
+        case _ =>
+      }
+
+      grid.cells(1)(i) match {
+        case Obstacle =>
+          grid.cells(0)(i) = Obstacle
+          gridArray(xOffset)(yOffset + i)
+        case _ =>
+      }
+
+      grid.cells(config.gridSize - 2)(i) match {
+        case Obstacle =>
+          grid.cells(config.gridSize - 1)(i)
+          gridArray(xOffset + config.gridSize - 1)(yOffset + i)
+        case _ =>
+      }
+    }
+
+
+
     if (yOffset > 0) {
       for (i <- 0 until config.gridSize) {
-        gridArray(xOffset + i)(yOffset - 2) match {
-          case Obstacle => grid.cells(xOffset - 1)(yOffset - 1) = Obstacle
+        gridArray(xOffset + i)(yOffset - 1) match {
+          case Obstacle => grid.cells(i)(0) = Obstacle
+          case _ =>
+        }
+      }
+    }
+
+    if (xOffset > 0) {
+      for (i <- 0 until config.gridSize) {
+        gridArray(xOffset - 1)(yOffset + i) match {
+          case Obstacle => grid.cells(0)(i) = Obstacle
+          case _ =>
+        }
+      }
+    }
+
+    if (grid.workerId.value % config.workersRoot != 0) {
+      for (i <- 0 until config.gridSize) {
+        gridArray(xOffset + i)(yOffset + config.gridSize) match {
+          case Obstacle => grid.cells(i)(config.gridSize - 1) = Obstacle
+          case _ =>
+        }
+      }
+    }
+
+    if (grid.workerId.value <= (Math.pow(config.workersRoot, 2) - config.workersRoot)) {
+      for (i <- 0 until config.gridSize) {
+        gridArray(xOffset + config.gridSize)(yOffset + i) match {
+          case Obstacle => grid.cells(config.gridSize - 1)(i) = Obstacle
+          case _ =>
         }
       }
     }

@@ -1441,7 +1441,7 @@
       "row": 6,
       "column": 13,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
