@@ -13,7 +13,7 @@
       "row": 0,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -27,14 +27,14 @@
       "row": 0,
       "column": 3,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 0,
       "column": 4,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -118,7 +118,7 @@
       "row": 0,
       "column": 16,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -146,7 +146,7 @@
       "row": 0,
       "column": 20,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -216,7 +216,7 @@
       "row": 0,
       "column": 30,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -265,25 +265,25 @@
       "row": 1,
       "column": 5,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 6,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 1,
-      "column": 7,
+      "column": 6,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 1,
+      "column": 7,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
       "column": 8,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -293,109 +293,109 @@
       "row": 1,
       "column": 9,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 1,
       "column": 10,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 11,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 12,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 13,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 14,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 15,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 16,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 17,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 18,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 19,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 20,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 21,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 22,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 1,
-      "column": 23,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 1,
+      "column": 11,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 12,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 14,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 15,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 16,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 17,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 1,
+      "column": 18,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 19,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 21,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 22,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 1,
       "column": 24,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -412,7 +412,7 @@
       "row": 1,
       "column": 26,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -503,7 +503,7 @@
       "row": 2,
       "column": 7,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -524,7 +524,7 @@
       "row": 2,
       "column": 10,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -720,7 +720,7 @@
       "row": 3,
       "column": 6,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -776,7 +776,7 @@
       "row": 3,
       "column": 14,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -811,7 +811,7 @@
       "row": 3,
       "column": 19,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -867,7 +867,7 @@
       "row": 3,
       "column": 27,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -895,7 +895,7 @@
       "row": 3,
       "column": 31,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -958,7 +958,7 @@
       "row": 4,
       "column": 8,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -972,7 +972,7 @@
       "row": 4,
       "column": 10,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -993,7 +993,7 @@
       "row": 4,
       "column": 13,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -1112,7 +1112,7 @@
       "row": 4,
       "column": 30,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -1147,7 +1147,7 @@
       "row": 5,
       "column": 3,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -1280,7 +1280,7 @@
       "row": 5,
       "column": 22,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -1427,25 +1427,25 @@
       "row": 6,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 6,
       "column": 12,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 6,
-      "column": 13,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 6,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
       "column": 14,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -1511,25 +1511,25 @@
       "row": 6,
       "column": 23,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 6,
-      "column": 24,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 6,
-      "column": 25,
+      "column": 24,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 6,
+      "column": 25,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 6,
       "column": 26,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -1651,25 +1651,25 @@
       "row": 7,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 7,
       "column": 12,
-      "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 7,
-      "column": 13,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 7,
+      "column": 13,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
       "column": 14,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -1721,25 +1721,25 @@
       "row": 7,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
-      }
-    },
-    {
-      "row": 7,
-      "column": 22,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 7,
-      "column": 23,
+      "column": 22,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 7,
+      "column": 23,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 7,
       "column": 24,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -1945,7 +1945,7 @@
       "row": 8,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -1994,7 +1994,7 @@
       "row": 8,
       "column": 28,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2029,7 +2029,7 @@
       "row": 9,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2071,7 +2071,7 @@
       "row": 9,
       "column": 7,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -2169,7 +2169,7 @@
       "row": 9,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2253,7 +2253,7 @@
       "row": 10,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -2351,7 +2351,7 @@
       "row": 10,
       "column": 15,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -2372,7 +2372,7 @@
       "row": 10,
       "column": 18,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2386,7 +2386,7 @@
       "row": 10,
       "column": 20,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2477,7 +2477,7 @@
       "row": 11,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2575,7 +2575,7 @@
       "row": 11,
       "column": 15,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2617,7 +2617,7 @@
       "row": 11,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2638,7 +2638,7 @@
       "row": 11,
       "column": 24,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2820,25 +2820,25 @@
       "row": 12,
       "column": 18,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
-      }
-    },
-    {
-      "row": 12,
-      "column": 19,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 12,
-      "column": 20,
+      "column": 19,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 12,
+      "column": 20,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 12,
       "column": 21,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -2974,7 +2974,7 @@
       "row": 13,
       "column": 8,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -2995,7 +2995,7 @@
       "row": 13,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3058,7 +3058,7 @@
       "row": 13,
       "column": 20,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3149,7 +3149,7 @@
       "row": 14,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3205,7 +3205,7 @@
       "row": 14,
       "column": 9,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3219,7 +3219,7 @@
       "row": 14,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3233,7 +3233,7 @@
       "row": 14,
       "column": 13,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3345,7 +3345,7 @@
       "row": 14,
       "column": 29,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3415,7 +3415,7 @@
       "row": 15,
       "column": 7,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3429,7 +3429,7 @@
       "row": 15,
       "column": 9,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3499,7 +3499,7 @@
       "row": 15,
       "column": 19,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3513,14 +3513,14 @@
       "row": 15,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 15,
       "column": 22,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3611,7 +3611,7 @@
       "row": 16,
       "column": 3,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3667,7 +3667,7 @@
       "row": 16,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -3828,14 +3828,14 @@
       "row": 17,
       "column": 2,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 17,
       "column": 3,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -3856,7 +3856,7 @@
       "row": 17,
       "column": 6,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -4150,7 +4150,7 @@
       "row": 18,
       "column": 16,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -4185,7 +4185,7 @@
       "row": 18,
       "column": 21,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -4241,7 +4241,7 @@
       "row": 18,
       "column": 29,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -4444,42 +4444,42 @@
       "row": 19,
       "column": 26,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
-      }
-    },
-    {
-      "row": 19,
-      "column": 27,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 19,
-      "column": 28,
+      "column": 27,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 19,
-      "column": 29,
+      "column": 28,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 19,
+      "column": 29,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+      }
+    },
+    {
+      "row": 19,
       "column": 30,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 19,
       "column": 31,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -4584,7 +4584,7 @@
       "row": 20,
       "column": 14,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -4612,14 +4612,14 @@
       "row": 20,
       "column": 18,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 20,
       "column": 19,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -4836,7 +4836,7 @@
       "row": 21,
       "column": 18,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -4920,7 +4920,7 @@
       "row": 21,
       "column": 30,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -4941,7 +4941,7 @@
       "row": 22,
       "column": 1,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5130,25 +5130,25 @@
       "row": 22,
       "column": 28,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
-      }
-    },
-    {
-      "row": 22,
-      "column": 29,
-      "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 22,
-      "column": 30,
+      "column": 29,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 22,
+      "column": 30,
+      "tileType": {
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+      }
+    },
+    {
+      "row": 22,
       "column": 31,
       "tileType": {
         "_type": "pl.edu.agh.mock.model.TileType.Empty"
@@ -5207,7 +5207,7 @@
       "row": 23,
       "column": 7,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -5277,14 +5277,14 @@
       "row": 23,
       "column": 17,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 23,
       "column": 18,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -5480,7 +5480,7 @@
       "row": 24,
       "column": 14,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5501,7 +5501,7 @@
       "row": 24,
       "column": 17,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -5515,7 +5515,7 @@
       "row": 24,
       "column": 19,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -5564,7 +5564,7 @@
       "row": 24,
       "column": 26,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5599,7 +5599,7 @@
       "row": 24,
       "column": 31,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -5634,7 +5634,7 @@
       "row": 25,
       "column": 4,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5662,7 +5662,7 @@
       "row": 25,
       "column": 8,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5781,7 +5781,7 @@
       "row": 25,
       "column": 25,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5921,14 +5921,14 @@
       "row": 26,
       "column": 13,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 26,
       "column": 14,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -5984,14 +5984,14 @@
       "row": 26,
       "column": 22,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
       "row": 26,
       "column": 23,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6131,7 +6131,7 @@
       "row": 27,
       "column": 11,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -6152,7 +6152,7 @@
       "row": 27,
       "column": 14,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6166,7 +6166,7 @@
       "row": 27,
       "column": 16,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6334,7 +6334,7 @@
       "row": 28,
       "column": 8,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6607,7 +6607,7 @@
       "row": 29,
       "column": 15,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
@@ -6670,7 +6670,7 @@
       "row": 29,
       "column": 24,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6705,7 +6705,7 @@
       "row": 29,
       "column": 29,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6894,14 +6894,14 @@
       "row": 30,
       "column": 24,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {
       "row": 30,
       "column": 25,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -6915,7 +6915,7 @@
       "row": 30,
       "column": 27,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
+        "_type": "pl.edu.agh.mock.model.TileType.Empty"
       }
     },
     {
@@ -7111,7 +7111,7 @@
       "row": 31,
       "column": 23,
       "tileType": {
-        "_type": "pl.edu.agh.mock.model.TileType.Empty"
+        "_type": "pl.edu.agh.mock.model.TileType.Obstacle"
       }
     },
     {

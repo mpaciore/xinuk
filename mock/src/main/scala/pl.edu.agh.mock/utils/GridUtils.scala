@@ -1,4 +1,4 @@
-package pl.edu.agh.mock.utlis
+package pl.edu.agh.mock.utils
 
 import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.mock.model.{SimulationMap, Tile}
@@ -7,12 +7,11 @@ import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, Grid, GridPart, Obstacle, 
 
 object GridUtils extends LazyLogging{
 
-  def addDataFromFile(filename: String, grid: Grid)(implicit config: XinukConfig): Unit = {
+  def loadDataFromFile(filename: String, grid: Grid)(implicit config: XinukConfig): Unit = {
     val simulationMap: SimulationMap = JsonMapParser.parseMapFromJson(filename)
     val gridArray = simulationMap.getTilesAsArray
     val xOffset = calculateXOffset(grid.workerId, config.workersRoot, config.gridSize)
     val yOffset = calculateYOffset(grid.workerId, config.workersRoot, config.gridSize)
-
     for (i <- 0 until config.gridSize; j <- 0 until config.gridSize) {
       grid.cells(i)(j) match {
         case EmptyCell.Instance => grid.cells(i)(j) = gridArray(i + xOffset)(j + yOffset)
@@ -24,19 +23,36 @@ object GridUtils extends LazyLogging{
       }
     }
 
-    updateBufferZone(grid, gridArray, xOffset, yOffset)
+    //updateBufferZone(grid, gridArray, xOffset, yOffset)
   }
 
-  private def updateBufferZone(grid: Grid, gridArray: Array[Array[GridPart]], xOffset: Int, yOffset: Int) = {
-
+  private def updateBufferZone(grid: Grid, gridArray: Array[Array[GridPart]], xOffset: Int, yOffset: Int)
+                              (implicit config: XinukConfig) = {
+    if (yOffset > 0) {
+      for (i <- 0 until config.gridSize) {
+        gridArray(xOffset + i)(yOffset - 2) match {
+          case Obstacle => grid.cells(xOffset - 1)(yOffset - 1) = Obstacle
+        }
+      }
+    }
   }
 
 
   private def calculateXOffset(workerId: WorkerId, workersRoot: Int, gridSize: Int): Int = {
-    (workersRoot - 1 - workerId.value % workersRoot) * gridSize
+    if (workerId.value <= workersRoot){
+      0
+    } else {
+      var value = workerId.value
+      var counter = 0
+      while (value > workersRoot) {
+        value -= workersRoot
+        counter += 1
+      }
+      counter * gridSize
+    }
   }
 
   private def calculateYOffset(workerId: WorkerId, workersRoot: Int, gridSize: Int): Int = {
-    Math.floor((workerId.value - 1) / workersRoot).toInt * gridSize
+    Math.floor((workerId.value - 1) % workersRoot).toInt * gridSize
   }
 }

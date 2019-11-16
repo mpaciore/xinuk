@@ -1,4 +1,4 @@
-package pl.edu.agh.mock.utlis
+package pl.edu.agh.mock.utils
 
 import pl.edu.agh.mock.model.{SimulationMap, Tile, TileType}
 
