@@ -3,9 +3,11 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.{AStartAlgorithmUtils, AlgorithmUtils, Direction, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utils.{DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AStartAlgorithmUtils, AlgorithmUtils, Direction}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
+
 import scala.collection.immutable.TreeSet
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {

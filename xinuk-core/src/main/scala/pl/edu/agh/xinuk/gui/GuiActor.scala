@@ -93,8 +93,8 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
   }
 
   private def alignFrame(): (Point, Dimension) = {
-    val xOffset = 100
-    val yOffset = 100
+    val xOffset = 50
+    val yOffset = 50
     val width = config.gridSize * config.guiCellSize + 25
     val height = config.gridSize * config.guiCellSize + 75
     val xPos = (workerId.value - 1) % config.workersRoot
