@@ -64,16 +64,16 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
   private val chartPage = new Page("Plot", chartPanel)
   private val (alignedLocation, alignedSize) = alignFrame()
 
-  def top = new MainFrame {
+  def top: MainFrame = new MainFrame {
     title = "Xinuk"
     background = bgcolor
     location = alignedLocation
     preferredSize = alignedSize
 
-    val mainPanel = new BorderPanel {
+    val mainPanel: BorderPanel = new BorderPanel {
 
-      val cellPanel = new BorderPanel {
-        val view = new BorderPanel {
+      val cellPanel: BorderPanel = new BorderPanel {
+        val view: BorderPanel = new BorderPanel {
           background = bgcolor
           layout(cellView) = Center
         }
@@ -81,7 +81,7 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
         layout(view) = Center
       }
 
-      val contentPane = new TabbedPane {
+      val contentPane: TabbedPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
       }

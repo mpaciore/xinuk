@@ -23,7 +23,7 @@ object Direction extends Enumeration {
   }
 }
 
-object AlgorithmUtils {
+class AlgorithmUtils {
   type DirectionalSmellArray = Array[Array[SmellArray]]
 
   var directionalSmell: Map[Direction.Value, DirectionalSmellArray] = Map[Direction.Value, DirectionalSmellArray]()

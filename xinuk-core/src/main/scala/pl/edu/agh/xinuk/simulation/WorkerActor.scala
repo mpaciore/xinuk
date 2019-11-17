@@ -19,7 +19,8 @@ class WorkerActor[ConfigType <: XinukConfig](
                                               movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
                                               conflictResolver: ConflictResolver[ConfigType],
                                               smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
-                                              emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType) extends Actor with Stash {
+                                              emptyCellFactory: => SmellingCell = EmptyCell.Instance
+                                            )(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
@@ -52,6 +53,8 @@ class WorkerActor[ConfigType <: XinukConfig](
     }
   }
 
+  var receivedMessages = 0
+
   def stopped: Receive = {
     case SubscribeGridInfo(_) =>
       guiActors += sender()
@@ -65,16 +68,27 @@ class WorkerActor[ConfigType <: XinukConfig](
       logger.info(s"${id.value} neighbours: ${neighbours.map(_.position).toList}")
       self ! StartIteration(1)
     case StartIteration(1) =>
-      val (newGrid, newMetrics) = movesController.initialGrid(workerID = this.id)
+      val (newGrid, newMetrics, transitionsThroughWorker) = movesController.initialGrid(workerID = this.id)
+      (1 to math.pow(config.workersRoot, 2).toInt)
+        .map(WorkerId).foreach(workerId => {
+          regionRef ! TransitionsThroughWorker(id, workerId, transitionsThroughWorker.asInstanceOf[Map[(Any, Any), Boolean]])
+        })
       this.grid = newGrid
       logMetrics(1, newMetrics)
       guiActors.foreach(_ ! GridInfo(1, grid, newMetrics))
       propagateSignal()
       notifyNeighbours(1, grid)
       unstashAll()
-      context.become(started)
     case _: IterationPartFinished =>
       stash()
+    case TransitionsThroughWorker(from, to, transitions) => {
+      println(from, to)
+      movesController.receiveMessage((from.value, transitions))
+      receivedMessages += 1
+      if (receivedMessages == math.pow(config.workersRoot, 2).toInt) {
+        context.become(started)
+      }
+    }
   }
 
   var currentIteration: Long = 1
@@ -181,6 +195,8 @@ object WorkerActor {
 
   final case class IterationPartMetrics private(workerId: WorkerId, iteration: Long, metrics: Metrics)
 
+  final case class TransitionsThroughWorker private(from: WorkerId, to: WorkerId,  transitions: Map[(Any, Any), Boolean])
+
   def props[ConfigType <: XinukConfig](
                                         regionRef: => ActorRef,
                                         movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
@@ -197,6 +213,7 @@ object WorkerActor {
     case NeighboursInitialized(id, _) => idToShard(id)
     case IterationPartFinished(_, id, _, _) => idToShard(id)
     case SubscribeGridInfo(id) => idToShard(id)
+    case TransitionsThroughWorker(_, id, _) => idToShard(id)
   }
 
   def extractEntityId: ExtractEntityId = {
@@ -206,5 +223,7 @@ object WorkerActor {
       (to.value.toString, msg)
     case msg@SubscribeGridInfo(id) =>
       (id.value.toString, msg)
+    case msg@TransitionsThroughWorker(_, to, _) =>
+      (to.value.toString, msg)
   }
 }

@@ -3,34 +3,45 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.mock.utlis.{AStartAlgorithmUtils, AlgorithmUtils, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
+import pl.edu.agh.mock.utlis.{AStartAlgorithmUtils, AlgorithmUtils, Direction, DistanceUtils, GridUtils, MovementDirectionUtils, SmellUtils}
 import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model.{Obstacle, _}
-
 import scala.collection.immutable.TreeSet
 
 final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
 
   var crowdOnProcessor = 0
+  var transitionsThroughWorkers: Map[Int, Map[(Direction.Value, Direction.Value), Boolean]] = Map[Int, Map[(Direction.Value, Direction.Value), Boolean]]()
+  val algorithmUtils = new AlgorithmUtils()
+  var receivedMessages = 0
 
-  override def initialGrid(workerId: WorkerId): (Grid, MockMetrics) = {
+  override def receiveMessage(message: Any): Unit = {
+    val tuple = message.asInstanceOf[(Int, Map[(Direction.Value, Direction.Value), Boolean])]
+    transitionsThroughWorkers += (tuple._1 -> tuple._2)
+    receivedMessages += 1
+    if (receivedMessages == math.pow(config.workersRoot, 2).toInt) {
+      println(transitionsThroughWorkers)
+    }
+  }
+
+  override def initialGrid(workerId: WorkerId): (Grid, MockMetrics, Map[(Direction.Value, Direction.Value), Boolean]) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-//    GridUtils.addDataFromFile("map.json", grid)
+    GridUtils.addDataFromFile("map.json", grid)
 
-    AlgorithmUtils.mapLocalDistancesForEveryDirection(grid)
-    AlgorithmUtils.mapTransitionsThroughThisWorker(grid)
+    algorithmUtils.mapLocalDistancesForEveryDirection(grid)
+    algorithmUtils.mapTransitionsThroughThisWorker(grid)
 
-    grid.cells(5)(5) = Obstacle
-    grid.cells(4)(5) = Obstacle
-    grid.cells(5)(4) = Obstacle
-    grid.cells(5)(3) = Obstacle
-    grid.cells(5)(2) = Obstacle
+//    grid.cells(5)(5) = Obstacle
+//    grid.cells(4)(5) = Obstacle
+//    grid.cells(5)(4) = Obstacle
+//    grid.cells(5)(3) = Obstacle
+//    grid.cells(5)(2) = Obstacle
+//
+//    AStartAlgorithmUtils.aStar((1,1), (13,12), grid)
+//        .foreach(println)
 
-    AStartAlgorithmUtils.aStar((1,1), (13,12), grid)
-        .foreach(println)
-
-    Thread.sleep(100000)
+    Thread.sleep(1000)
 
     if(grid.cells(config.gridSize / 2)(config.gridSize / 2).isInstanceOf[EmptyCell]) {
       grid.cells(config.gridSize / 2)(config.gridSize / 2) =
@@ -40,7 +51,7 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
     }
 
     val metrics = MockMetrics.empty()
-    (grid, metrics)
+    (grid, metrics, algorithmUtils.transitionsThroughThisWorker)
   }
 
 
