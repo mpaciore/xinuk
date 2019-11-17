@@ -27,7 +27,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
   override def initialGrid(workerId: WorkerId): (Grid, MockMetrics, Map[(Direction.Value, Direction.Value), Boolean]) = {
     val grid = Grid.empty(bufferZone,workerId = workerId)
 
-    GridUtils.addDataFromFile("map.json", grid)
+    GridUtils.loadDataFromFile("map.json", grid)
+    //grid.cells(1)(0) = Obstacle
 
     algorithmUtils.mapLocalDistancesForEveryDirection(grid)
     algorithmUtils.mapTransitionsThroughThisWorker(grid)

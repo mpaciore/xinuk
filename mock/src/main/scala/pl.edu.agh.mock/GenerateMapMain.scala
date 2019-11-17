@@ -3,7 +3,7 @@ package pl.edu.agh.mock
 import java.io.PrintWriter
 
 import pl.edu.agh.mock.model.{SimulationMap, Tile, TileType}
-import pl.edu.agh.mock.utlis.{JsonMapParser, SimpleJsonMapGenerator}
+import pl.edu.agh.mock.utils.{JsonMapParser, SimpleJsonMapGenerator}
 import pl.edu.agh.xinuk.model.{EmptyCell, Obstacle}
 import play.api.libs.json.{Json, OWrites, Reads}
 
