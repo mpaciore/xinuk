@@ -51,7 +51,7 @@ class AlgorithmUtils {
       }
     }
 
-    FileSerializationUtils.serializeInFile[Map[(Direction.Value, Direction.Value), Boolean]](transitionsThroughThisWorker, "transitionsThrough" + grid.workerId.value)
+//    FileSerializationUtils.serializeInFile[Map[(Direction.Value, Direction.Value), Boolean]](transitionsThroughThisWorker, "transitionsThrough" + grid.workerId.value)
   }
 
   def coordinatesToCheckFor(direction: Direction.Value)(implicit config: MockConfig): Array[(Int, Int)] = {
