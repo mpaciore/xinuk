@@ -23,7 +23,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (CellArray, Int, Int) => Vector[Option[Signal]],
+  smellPropagationFunction: XinukConfig => (CellArray, Int, Int) => Vector[Option[Signal]],
   emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
   movesControllerFactory: (TreeSet[(Int, Int)], ConfigType) => MovesController,
   cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
@@ -40,12 +40,12 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private def logHeader: String = s"worker:${metricHeaders.mkString(";")}"
 
   implicit val config: ConfigType = {
-    val forminConfig = rawConfig.getConfig(configPrefix)
-    logger.info(WorkerActor.MetricsMarker, forminConfig.root().render(ConfigRenderOptions.concise()))
+    val conf = rawConfig.getConfig(configPrefix)
+    logger.info(WorkerActor.MetricsMarker, conf.root().render(ConfigRenderOptions.concise()))
     logger.info(WorkerActor.MetricsMarker, logHeader)
 
     import net.ceedubs.ficus.Ficus._
-    Try(forminConfig.as[ConfigType]("config")) match {
+    Try(conf.as[ConfigType]("config")) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>
@@ -59,7 +59,13 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory),
+      entityProps = WorkerActor.props[ConfigType](
+        workerRegionRef,
+        movesControllerFactory,
+        conflictResolver,
+        smellPropagationFunction(config.asInstanceOf[XinukConfig]),
+        emptyCellFactory
+      ),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId

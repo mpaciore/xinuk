@@ -14,6 +14,9 @@ trait XinukConfig {
   def isSupervisor: Boolean
   def signalSpeedRatio: Int
   def iterationsNumber: Long
+
+  def crossBendFactor: Double
+  def straightBendFactor: Double
 }
 
 sealed trait GuiType extends NamedEnum

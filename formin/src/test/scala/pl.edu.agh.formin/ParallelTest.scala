@@ -36,7 +36,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     workersRoot = 3,
     iterationsNumber = 3,
     isSupervisor = true,
-    shardingMod = 1
+    shardingMod = 1,
+    crossBendFactor = 0,
+    straightBendFactor = 0
   )
 
   trait Fixture {
@@ -47,7 +49,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -73,7 +75,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -95,7 +97,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
@@ -117,7 +119,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Top),
@@ -139,7 +141,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -161,7 +163,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -193,7 +195,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -225,7 +227,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Bottom),
@@ -257,7 +259,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     worker ! WorkerActor.NeighboursInitialized(WorkerId(5),
       Vector(Neighbour(NeighbourPosition.Left),
@@ -289,11 +291,11 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workerRegion = TestProbe("workerRegion")
     val worker1 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
     val worker2 = TestActorRef(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
 
     worker1 ! WorkerActor.NeighboursInitialized(WorkerId(5),

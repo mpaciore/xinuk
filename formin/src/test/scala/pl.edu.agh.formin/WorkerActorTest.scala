@@ -33,7 +33,9 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     workersRoot = 2,
     iterationsNumber = 3,
     isSupervisor = true,
-    shardingMod = 1
+    shardingMod = 1,
+    crossBendFactor = 0,
+    straightBendFactor = 0
   )
 
   trait Fixture {
@@ -44,7 +46,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
@@ -60,7 +62,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector(Neighbour(NeighbourPosition.Bottom)))
@@ -87,7 +89,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     val workerRegion = TestProbe("workerRegion")
     val worker = system.actorOf(WorkerActor.props[ForminConfig](workerRegion.ref, (bufferZone, config) =>
       new ForminMovesController(bufferZone)(config), ForminConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
+      DefaultSmellPropagation.calculateSmellAddendsStandard(config)
     ))
 
     worker ! WorkerActor.NeighboursInitialized(WorkerId(2), Vector())

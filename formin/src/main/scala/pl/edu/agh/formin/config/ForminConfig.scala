@@ -39,5 +39,7 @@ final case class ForminConfig(
                                workersRoot: Int,
                                iterationsNumber: Long,
                                isSupervisor: Boolean,
-                               shardingMod: Int
+                               shardingMod: Int,
+                               crossBendFactor: Double,
+                               straightBendFactor: Double
                              ) extends XinukConfig
