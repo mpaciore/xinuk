@@ -28,7 +28,9 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     workersRoot = 1,
     iterationsNumber = 1000,
     isSupervisor = true,
-    1
+    1,
+    crossBendFactor = 0,
+    straightBendFactor = 0
   )
 
   private var grid: Grid = _
@@ -59,8 +61,8 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "propagate signal correctly for one foraminifera cell" in {
     grid.cells(2)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
-    grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
+    grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 3, 2)
+    grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 3, 1)
 
     grid.cells(2)(2).smell(0)(0).value shouldBe -1
     grid.cells(2)(2).smell(0)(1).value shouldBe -1
@@ -73,8 +75,8 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "propagate signal correctly for one algae cell" in {
     grid.cells(2)(2) = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
-    grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
-    grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
+    grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 3, 2)
+    grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 3, 1)
 
     grid.cells(2)(2).smell(0)(0).value shouldBe 1
     grid.cells(2)(2).smell(0)(1).value shouldBe 1
@@ -88,8 +90,8 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   it should "propagate signal correctly between algae and foraminifera cells" in {
     grid.cells(2)(2) = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    val gridCellWithAlgaeAfterSignalPropagation = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 2, 2)
-    val gridCellWithForaminiferaAfterSignalPropagation = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
+    val gridCellWithAlgaeAfterSignalPropagation = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 2, 2)
+    val gridCellWithForaminiferaAfterSignalPropagation = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 3, 2)
     grid.cells(2)(2) = gridCellWithAlgaeAfterSignalPropagation
     grid.cells(3)(2) = gridCellWithForaminiferaAfterSignalPropagation
 
@@ -110,7 +112,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "not propagate signal on obstacle cell" in {
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    grid.cells(4)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 4, 2)
+    grid.cells(4)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard(config), 4, 2)
     grid.cells(3)(2).smell(1)(1).value shouldBe -1
     grid.cells(4)(2).smell(0)(1).value shouldBe 0
   }

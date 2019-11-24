@@ -31,7 +31,9 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     workersRoot = 1,
     iterationsNumber = 1000,
     isSupervisor = true,
-    shardingMod = 1
+    shardingMod = 1,
+    crossBendFactor = 0,
+    straightBendFactor = 0
   )
 
   private var grid: Grid = _

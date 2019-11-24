@@ -1,9 +1,9 @@
-package pl.edu.agh.mock.config
+package pl.edu.agh.wind.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.Signal
 
-final case class MockConfig(
+final case class WindConfig(
                              gridSize: Int,
                              guiCellSize: Int,
                              signalSuppressionFactor: Double,
@@ -16,8 +16,8 @@ final case class MockConfig(
                              signalSpeedRatio: Int,
                              iterationsNumber: Long,
 
-                             mockInitialSignal: Signal,
-
                              crossBendFactor: Double,
-                             straightBendFactor: Double
+                             straightBendFactor: Double,
+
+                             windSourceInitialSignal: Signal
                            ) extends XinukConfig

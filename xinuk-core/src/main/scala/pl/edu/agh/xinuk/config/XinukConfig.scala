@@ -14,9 +14,7 @@ trait XinukConfig {
   def isSupervisor: Boolean
   def signalSpeedRatio: Int
   def iterationsNumber: Long
-}
 
-trait XinukConfigWithBendFactors extends XinukConfig {
   def crossBendFactor: Double
   def straightBendFactor: Double
 }

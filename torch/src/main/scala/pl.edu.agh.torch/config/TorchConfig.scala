@@ -4,7 +4,6 @@ import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.Signal
 
 final case class TorchConfig(
-
                                humanMaxSpeed: Int,
                                fireSpeadingFrequency: Int,
                                signalSpeedRatio: Int,
@@ -23,5 +22,7 @@ final case class TorchConfig(
                                workersRoot: Int,
                                iterationsNumber: Long,
                                isSupervisor: Boolean,
-                               shardingMod: Int
+                               shardingMod: Int,
+                               crossBendFactor: Double,
+                               straightBendFactor: Double
                              ) extends XinukConfig
