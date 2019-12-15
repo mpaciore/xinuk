@@ -1,13 +1,13 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.xinuk.model.Cell.SmellArray
+import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model._
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellArray, lifespan: Long) extends SmellingCell {
+final case class ForaminiferaCell(energy: Energy, smell: SmellMap, lifespan: Long) extends SmellingCell {
   override type Self = ForaminiferaCell
 
-  override def withSmell(smell: SmellArray): ForaminiferaCell = copy(smell = smell)
+  override def withSmell(smell: SmellMap): ForaminiferaCell = copy(smell = smell)
 }
 
 trait ForaminiferaAccessible[+T <: GridPart] {

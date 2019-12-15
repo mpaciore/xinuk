@@ -97,6 +97,17 @@ object NeighbourPosition extends SealedEnumCompanion[NeighbourPosition] {
   case object BottomLeft extends NeighbourPositionComposite(Bottom, Left)
 
   override val values: List[NeighbourPosition] = caseObjects
+
+  def opposite(ngh: NeighbourPosition): NeighbourPosition = ngh match {
+    case Top => Bottom
+    case Bottom => Top
+    case Right => Left
+    case Left => Right
+    case TopRight => BottomLeft
+    case TopLeft => BottomRight
+    case BottomRight => TopLeft
+    case BottomLeft => TopRight
+  }
 }
 
 final case class Neighbour(position: NeighbourPosition) extends AnyVal

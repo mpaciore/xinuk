@@ -10,7 +10,6 @@ import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
-import pl.edu.agh.xinuk.model.Grid.CellArray
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.simulation.Metrics
 import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -21,13 +20,15 @@ import scala.swing.TabbedPane.Page
 import scala.swing._
 import scala.util.{Random, Try}
 
-class GuiActor private(
-                        worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color]
-                      )(implicit config: XinukConfig) extends Actor with ActorLogging {
+class GuiActor private(worker: ActorRef,
+                       workerId: WorkerId,
+                       gridSize: Int,
+                       cellToColor: PartialFunction[GridPart, Color])
+                      (implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(cellToColor, workerId)
+  private lazy val gui: GuiGrid = new GuiGrid(gridSize, cellToColor, workerId)
 
   override def preStart: Unit = {
     worker ! SubscribeGridInfo(workerId)
@@ -43,21 +44,22 @@ class GuiActor private(
 
 object GuiActor {
 
-  final case class GridInfo private(iteration: Long, grid: Grid, metrics: Metrics)
+  final case class GridInfo private(iteration: Long, grid: EnhancedGrid, metrics: Metrics)
 
-  def props(worker: ActorRef, workerId: WorkerId, cellToColor: PartialFunction[GridPart, Color])
+  def props(worker: ActorRef, workerId: WorkerId, gridSize: Int, cellToColor: PartialFunction[GridPart, Color])
            (implicit config: XinukConfig): Props = {
-    Props(new GuiActor(worker, workerId, cellToColor))
+    Props(new GuiActor(worker, workerId, gridSize, cellToColor))
   }
 
 }
 
-private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)(implicit config: XinukConfig) extends SimpleSwingApplication {
+private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)
+                          (implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val cellView = new ParticleCanvas(config.gridSize, config.guiCellSize)
+  private val cellView = new ParticleCanvas(gridSize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
     background = bgcolor
   }
@@ -95,15 +97,15 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
   private def alignFrame(): (Point, Dimension) = {
     val xOffset = 100
     val yOffset = 100
-    val width = config.gridSize * config.guiCellSize + 25
-    val height = config.gridSize * config.guiCellSize + 75
+    val width = gridSize * config.guiCellSize + 25
+    val height = gridSize * config.guiCellSize + 75
     val xPos = (workerId.value - 1) % config.workersRoot
     val yPos = (workerId.value - 1) / config.workersRoot
     (new Point(xOffset + xPos * width, yOffset + yPos * height), new Dimension(width, height))
   }
 
-  def setNewValues(iteration: Long, grid: Grid): Unit = {
-    cellView.set(grid.cells.transpose)
+  def setNewValues(iteration: Long, grid: EnhancedGrid): Unit = {
+    cellView.set(grid)
   }
 
   private class ParticleCanvas(dimension: Int, guiCellSize: Int) extends Label {
@@ -121,7 +123,7 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
       classOf[EmptyCell] -> emptyColor
     )
 
-    def set(cells: CellArray): Unit = {
+    def set(grid: EnhancedGrid): Unit = {
       def generateColor(cell: GridPart): Color = {
         val random = new Random(cell.getClass.hashCode())
         val hue = random.nextFloat()
@@ -130,13 +132,14 @@ private[gui] class GuiGrid(cellToColor: PartialFunction[GridPart, Color], worker
         Color.getHSBColor(hue, saturation, luminance)
       }
 
-      val rgbArray: Array[Array[Color]] = cells.map(_.map(cell =>
+      val rgbArray: Array[Array[Color]] = grid.yRange.toArray.map(y => grid.xRange.toArray.map(x => {
+        val cell: GridPart = grid.getLocalCellAt(x, y).cell
         cellToColor.applyOrElse(cell, (_: GridPart) => classToColor.getOrElseUpdate(cell.getClass, generateColor(cell)))
-      ))
+      }))
 
       for {
-        x <- cells.indices
-        y <- cells.indices
+        y <- 0 until gridSize
+        x <- 0 until gridSize
       } {
         val startX = x * guiCellSize
         val startY = y * guiCellSize

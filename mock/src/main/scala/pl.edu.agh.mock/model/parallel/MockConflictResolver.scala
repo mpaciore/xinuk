@@ -10,7 +10,7 @@ object MockConflictResolver extends ConflictResolver[MockConfig] {
 
   import Cell._
 
-  override def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: MockConfig): (GridPart, MockMetrics) = {
+  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: MockConfig): (GridPart, MockMetrics) = {
     (current, incoming) match {
       case (Obstacle, _) =>
         (Obstacle, MockMetrics.empty())

@@ -18,8 +18,8 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid: (Grid, ForminMetrics) = {
-    grid = Grid.empty(bufferZone)
+  override def initialGrid: (Grid, NonPlanarConnections) = {
+    grid = Grid.empty()
     var foraminiferaCount = 0L
     var algaeCount = 0L
     for {
@@ -40,7 +40,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
     }
     val metrics = ForminMetrics(foraminiferaCount, algaeCount, 0, config.foraminiferaStartEnergy.value * foraminiferaCount, 0, 0, 0, 0)
-    (grid, metrics)
+    (grid, NonPlanarConnections.empty)
   }
 
 

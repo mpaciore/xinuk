@@ -4,53 +4,43 @@ import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model._
 import pl.edu.agh.mock.simulation.MockMetrics
 import pl.edu.agh.xinuk.algorithm.MovesController
-import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.model.{LocalEnhancedCell, _}
 
-import scala.collection.immutable.TreeSet
 import scala.util.Random
 
-final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config: MockConfig) extends MovesController {
+final class MockMovesController(implicit config: MockConfig) extends MovesController {
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid: (Grid, MockMetrics) = {
-    val grid = Grid.empty(bufferZone)
+  override def makeMoves(iteration: Long, grid: EnhancedGrid): (EnhancedGrid, MockMetrics) = {
+    val newGrid = grid.emptyCopy()
 
-    grid.cells(config.gridSize / 4)(config.gridSize / 4) = MockCell.create(config.mockInitialSignal)
-
-    val metrics = MockMetrics.empty()
-    (grid, metrics)
-  }
-
-  override def makeMoves(iteration: Long, grid: Grid): (Grid, MockMetrics) = {
-    val newGrid = Grid.empty(bufferZone)
-
-    def copyCells(x: Int, y: Int, cell: GridPart): Unit = {
-      newGrid.cells(x)(y) = cell
+    def copyCells(x: Int, y: Int, cell: EnhancedCell): Unit = {
+      newGrid.setCellAt(x, y, cell.cell)
     }
 
-    def moveCells(x: Int, y: Int, cell: GridPart): Unit = {
-      val destination = (x + random.nextInt(3) - 1, y + random.nextInt(3) - 1)
-      val vacatedCell = EmptyCell(cell.smell)
+    def moveCells(x: Int, y: Int, cell: EnhancedCell): Unit = {
+      val destination = cell.neighbours.values.toVector(random.nextInt(cell.neighbours.size))
+      val vacatedCell = EmptyCell(cell.cell.smell)
       val occupiedCell = MockCell.create(config.mockInitialSignal)
 
-      newGrid.cells(destination._1)(destination._2) match {
+      val destinationCell = newGrid.getCellAt(destination._1, destination._2)
+      destinationCell.cell match {
         case EmptyCell(_) =>
-          newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = occupiedCell
-        case BufferCell(EmptyCell(_)) =>
-          newGrid.cells(x)(y) = vacatedCell
-          newGrid.cells(destination._1)(destination._2) = BufferCell(occupiedCell)
+          newGrid.setCellAt(x, y, vacatedCell)
+          newGrid.setCellAt(destination._1, destination._2, occupiedCell)
         case _ =>
-          newGrid.cells(x)(y) = occupiedCell
+          newGrid.setCellAt(x, y, occupiedCell)
       }
     }
 
-    val (dynamicCells, staticCells) = (for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-    } yield (x, y, grid.cells(x)(y))).partition({
-      case (_, _, MockCell(_)) => true
+    val cells: Seq[(Int, Int, EnhancedCell)] = for {
+      x <- grid.xRange
+      y <- grid.yRange
+    } yield (x, y, grid.getCellAt(x, y))
+
+    val (dynamicCells, staticCells) = cells.partition({
+      case (_, _, LocalEnhancedCell(MockCell(_), _)) => true
       case (_, _, _) => false
     })
 
@@ -59,4 +49,8 @@ final class MockMovesController(bufferZone: TreeSet[(Int, Int)])(implicit config
 
     (newGrid, MockMetrics.empty())
   }
+}
+
+object MockMovesController {
+  def apply(implicit config: MockConfig): MockMovesController = new MockMovesController
 }
