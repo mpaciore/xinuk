@@ -34,7 +34,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   private var grid: Grid = _
 
   before {
-    grid = Grid.empty(Set.empty)
+    grid = Grid.empty()
   }
 
   "A Grid" should "have obstacles around" in {

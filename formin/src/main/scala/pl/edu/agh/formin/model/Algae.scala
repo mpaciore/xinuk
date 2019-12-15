@@ -1,13 +1,13 @@
 package pl.edu.agh.formin.model
 
 import pl.edu.agh.formin.config.ForminConfig
-import pl.edu.agh.xinuk.model.Cell.SmellArray
+import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 
-final case class AlgaeCell(smell: SmellArray, lifespan: Long) extends SmellingCell {
+final case class AlgaeCell(smell: SmellMap, lifespan: Long) extends SmellingCell {
   override type Self = AlgaeCell
 
-  override def withSmell(smell: SmellArray): AlgaeCell = copy(smell = smell)
+  override def withSmell(smell: SmellMap): AlgaeCell = copy(smell = smell)
 }
 
 trait AlgaeAccessible[+T <: GridPart] {

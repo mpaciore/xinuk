@@ -1,47 +1,38 @@
 package pl.edu.agh.xinuk.model
 
 import pl.edu.agh.xinuk.config.XinukConfig
-import pl.edu.agh.xinuk.model.Cell.SmellArray
+import pl.edu.agh.xinuk.model.Cell.SmellMap
+import pl.edu.agh.xinuk.model.Direction.Direction
 import pl.edu.agh.xinuk.model.Grid.CellArray
 
 final case class Grid(cells: CellArray) extends AnyVal {
 
   import Grid._
 
-  def propagatedSignal(calculateSmellAddends: (CellArray, Int, Int) => Vector[Option[Signal]], x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
-    val current = cells(x)(y)
-    current match {
-      case Obstacle => current
-      case smelling: SmellMedium =>
-        val currentSmell = current.smell
-        val addends = calculateSmellAddends(cells, x, y)
-        val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
-          val (i, j) = SubcellCoordinates(index)
-          cell(i)(j) = (currentSmell(i)(j) * config.signalAttenuationFactor) + (signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor)
-          (cell, index + 1)
-        }
-        newSmell(1)(1) = Signal.Zero
-        smelling.withSmell(newSmell)
-    }
-  }
+  // TODO ???
+//  def propagatedSignal(calculateSmellAddends: (CellArray, Int, Int) => Vector[Option[Signal]], x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
+//    val current = cells(x)(y)
+//    current match {
+//      case Obstacle => current
+//      case smelling: SmellMedium =>
+//        val currentSmell = current.smell
+//        val addends = calculateSmellAddends(cells, x, y)
+//        val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
+//          val (i, j) = Cell.subCellCoordinates(index)
+//          cell(i)(j) = (currentSmell(i)(j) * config.signalAttenuationFactor) + (signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor)
+//          (cell, index + 1)
+//        }
+//        newSmell(1)(1) = Signal.Zero
+//        smelling.withSmell(newSmell)
+//    }
+//  }
 }
 
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  def empty(bufferZone: Set[(Int, Int)], emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
-    val n = config.gridSize
-    val values = Array.tabulate[GridPart](n, n) {
-      case (x, y) if bufferZone.contains((x, y)) => BufferCell(emptyCellFactory)
-      case (x, y) if x == 0 || x == n - 1 || y == 0 || y == n - 1 => Obstacle
-      case _ => emptyCellFactory
-    }
-    Grid(values)
-  }
-
-  val SubcellCoordinates: Vector[(Int, Int)] = {
-    val pos = Vector(0, 1, 2)
-    pos.flatMap(i => pos.collect { case j if !(i == 1 && j == 1) => (i, j) })
+  def empty(emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
+    Grid(Array.tabulate[GridPart](config.gridSize, config.gridSize)((_, _) => emptyCellFactory))
   }
 
   def neighbourCellCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
@@ -86,7 +77,7 @@ object Energy {
 }
 
 trait GridPart {
-  def smell: SmellArray
+  def smell: SmellMap
 }
 
 trait SmellMedium extends GridPart {
@@ -94,17 +85,13 @@ trait SmellMedium extends GridPart {
 
   import Cell._
 
-  final def smellWith(added: Signal): SmellArray = smell + added
+  final def smellWith(added: Signal): SmellMap = smell + added
 
-  final def smellWithout(deducted: Signal): SmellArray = {
-    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) - deducted)
-  }
+  final def smellWithout(deducted: Signal): SmellMap = smell - deducted
 
-  final def smellWithoutArray(deducted: SmellArray): SmellArray = {
-    Array.tabulate(Cell.Size, Cell.Size)((i, j) => smell(i)(j) - deducted(i)(j))
-  }
+  final def smellWithout(deducted: SmellMap): SmellMap = smell - deducted
 
-  def withSmell(smell: SmellArray): Self
+  def withSmell(smell: SmellMap): Self
 }
 
 trait SmellingCell extends SmellMedium {
@@ -113,40 +100,44 @@ trait SmellingCell extends SmellMedium {
 
 object Cell {
 
-  type SmellArray = Array[Array[Signal]]
+  type SmellMap = Map[Direction, Signal]
 
-  implicit class SmellArrayOps(private val arr: SmellArray) extends AnyVal {
-    def +(other: SmellArray): SmellArray = {
-      Array.tabulate(Cell.Size, Cell.Size)((x, y) => arr(x)(y) + other(x)(y))
-    }
+  implicit class SmellMapOps(private val smell: SmellMap) extends AnyVal {
+    def +(other: SmellMap): SmellMap = Direction.values.map(d => (d, smell(d) + other(d))).toMap
 
-    def +(added: Signal): SmellArray = {
-      Array.tabulate(Cell.Size, Cell.Size)((i, j) => arr(i)(j) + added)
-    }
+    def +(added: Signal): SmellMap = Direction.values.map(d => (d, smell(d) + added)).toMap
+
+    def -(other: SmellMap): SmellMap = Direction.values.map(d => (d, smell(d) - other(d))).toMap
+
+    def -(deducted: Signal): SmellMap = Direction.values.map(d => (d, smell(d) - deducted)).toMap
+
+    def *(factor: Double): SmellMap = Direction.values.map(d => (d, smell(d) * factor)).toMap
+
+    def /(divisor: Double): SmellMap = Direction.values.map(d => (d, smell(d) / divisor)).toMap
   }
 
-  final val Size: Int = 3
+  def uniformSignal(initialSignal: => Signal): SmellMap = Direction.values.map(d => (d, initialSignal)).toMap
 
-  def emptySignal: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
+  def emptySignal: SmellMap = uniformSignal(Signal.Zero)
 }
 
 case object Obstacle extends GridPart {
-  override val smell: SmellArray = Array.fill(Cell.Size, Cell.Size)(Signal.Zero)
+  override val smell: SmellMap = Cell.emptySignal
 }
 
 final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPart {
 
   override type Self = BufferCell
 
-  override def smell: SmellArray = cell.smell
+  override def smell: SmellMap = cell.smell
 
-  override def withSmell(smell: SmellArray): BufferCell = copy(cell.withSmell(smell))
+  override def withSmell(smell: SmellMap): BufferCell = copy(cell.withSmell(smell))
 }
 
-final case class EmptyCell(smell: SmellArray) extends SmellingCell {
+final case class EmptyCell(smell: SmellMap) extends SmellingCell {
   override type Self = EmptyCell
 
-  override def withSmell(smell: SmellArray): EmptyCell = copy(smell)
+  override def withSmell(smell: SmellMap): EmptyCell = copy(smell)
 }
 
 object EmptyCell {

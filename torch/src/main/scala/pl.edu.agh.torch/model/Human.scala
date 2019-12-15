@@ -1,14 +1,14 @@
 package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
-import pl.edu.agh.xinuk.model.Cell.SmellArray
+import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model.{BufferCell, EmptyCell, GridPart, SmellingCell}
 
-final case class HumanCell(smell: SmellArray, crowd : List[HumanCell], speed : Int) (implicit config: TorchConfig) extends SmellingCell {
+final case class HumanCell(smell: SmellMap, crowd : List[HumanCell], speed : Int)(implicit config: TorchConfig) extends SmellingCell {
 
   override type Self = HumanCell
 
-  override def withSmell(smell: SmellArray): HumanCell = copy(smell = smell)
+  override def withSmell(smell: SmellMap): HumanCell = copy(smell = smell)
 }
 
 trait HumanAccessible[+T <: GridPart] {
