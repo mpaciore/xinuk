@@ -41,6 +41,8 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   var conflictResolutionMetrics: Metrics = _
 
+  var currentIteration: Long = 1
+
   override def receive: Receive = stopped
 
   private def propagateSignal(): Unit = {
@@ -66,27 +68,28 @@ class WorkerActor[ConfigType <: XinukConfig](
       stash()
   }
 
-  var currentIteration: Long = 1
-
   def started: Receive = {
+
     case SubscribeGridInfo(_) =>
       guiActors += sender()
-    case StartIteration(i) =>
-      finished.remove(i - 1)
-      logger.debug(s"$id started $i")
-      val (newGrid, newMetrics) = movesController.makeMoves(i, grid)
+
+    case StartIteration(iteration) =>
+      finished.remove(iteration - 1)
+      logger.debug(s"$id started $iteration")
+      val (newGrid, newMetrics) = movesController.makeMoves(iteration, grid)
       grid = newGrid
       val metrics = newMetrics + conflictResolutionMetrics
-      logMetrics(i, metrics)
-      guiActors.foreach(_ ! GridInfo(i, grid, metrics))
+      logMetrics(iteration, metrics)
+      guiActors.foreach(_ ! GridInfo(iteration, grid, metrics))
       propagateSignal()
-      notifyNeighbours(i, grid)
+      notifyNeighbours(iteration, grid)
       conflictResolutionMetrics = null
-      if (i % 100 == 0) logger.info(s"$id finished $i")
+      if (iteration % 100 == 0) logger.info(s"$id finished $iteration")
+
     case IterationPartFinished(_, _, iteration, incomingCells) =>
       finished(iteration) += incomingCells
-      if (currentIteration < config.iterationsNumber) {
-        if (finished(currentIteration).size == incomingNeighbours.size + 1) {
+      if (finished(currentIteration).size == incomingNeighbours.size + 1) {
+        if (currentIteration < config.iterationsNumber) {
           finished(currentIteration).foreach(_.foreach {
             case ((x, y), cell) =>
               val currentCell = grid.getLocalCellAt(x, y)
@@ -96,11 +99,12 @@ class WorkerActor[ConfigType <: XinukConfig](
           })
           currentIteration += 1
           self ! StartIteration(currentIteration)
+        } else {
+          logger.info(s"$id terminating")
+          import scala.concurrent.duration._
+          Thread.sleep(10.seconds.toMillis)
+          context.system.terminate()
         }
-      } else if (finished(currentIteration).size == incomingNeighbours.size + 1) {
-        import scala.concurrent.duration._
-        Thread.sleep(10.seconds.toMillis)
-        context.system.terminate()
       }
   }
 

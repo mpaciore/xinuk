@@ -35,6 +35,11 @@ class GuiActor private(worker: ActorRef,
     log.info("GUI started")
   }
 
+  override def postStop(): Unit = {
+    log.info("GUI stopped")
+    gui.quit()
+  }
+
   def started: Receive = {
     case GridInfo(iteration, grid, metrics) =>
       gui.setNewValues(iteration, grid)
@@ -66,7 +71,7 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
   private val chartPage = new Page("Plot", chartPanel)
   private val (alignedLocation, alignedSize) = alignFrame()
 
-  def top = new MainFrame {
+  def top: MainFrame = new MainFrame {
     title = "Xinuk"
     background = bgcolor
     location = alignedLocation
