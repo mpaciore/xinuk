@@ -48,9 +48,12 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def propagateSignal(): Unit = {
     (0 until config.signalSpeedRatio).foreach { _ => grid = grid.propagatedSignal(smellPropagationFunction) }
   }
+
   def stopped: Receive = {
+
     case SubscribeGridInfo(_) =>
       guiActors += sender()
+
     case NeighboursInitialized(id, grid, outgoingNeighbours, incomingNeighbours) =>
       this.id = id
       this.grid = grid
@@ -64,6 +67,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       self ! StartIteration(1)
       unstashAll()
       context.become(started)
+
     case _: IterationPartFinished =>
       stash()
   }
