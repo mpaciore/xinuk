@@ -13,15 +13,16 @@ final case class EscapeCell(smell: SmellMap) extends SmellingCell {
 trait EscapeAccessible[+T <: GridPart] {
   def withEscape(): T
 }
-object EscapeAccessible {
 
-  def unapply(arg: EmptyCell)(implicit config: TorchConfig): EscapeAccessible[EscapeCell] =
-    new EscapeAccessible[EscapeCell] {
-      override def withEscape(): EscapeCell = EscapeCell(arg.smellWith(config.escapeInitialSignal))
-    }
+object EscapeAccessible {
 
   def unapply(arg: GridPart)(implicit config: TorchConfig): Option[EscapeAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
     case _ => None
   }
+
+  def unapply(arg: EmptyCell)(implicit config: TorchConfig): EscapeAccessible[EscapeCell] =
+    new EscapeAccessible[EscapeCell] {
+      override def withEscape(): EscapeCell = EscapeCell(arg.smellWith(config.escapeInitialSignal))
+    }
 }

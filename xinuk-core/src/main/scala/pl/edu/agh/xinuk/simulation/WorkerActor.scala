@@ -17,8 +17,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   regionRef: => ActorRef,
   movesControllerFactory: ConfigType => MovesController,
   conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: ConfigType
+  smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap)(implicit config: ConfigType
 ) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -150,10 +149,9 @@ object WorkerActor {
                                         regionRef: => ActorRef,
                                         movesControllerFactory: ConfigType => MovesController,
                                         conflictResolver: ConflictResolver[ConfigType],
-                                        smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-                                        emptyCellFactory: => SmellingCell = EmptyCell.Instance
+                                        smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap
                                       )(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory))
+    Props(new WorkerActor(regionRef, movesControllerFactory, conflictResolver, smellPropagationFunction))
   }
 
   private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
