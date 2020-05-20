@@ -2,10 +2,10 @@ package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.{EmptyCell, GridPart, SmellingCell}
+import pl.edu.agh.xinuk.model.{EmptyCell, GridPart}
 
 
-final case class FireCell(smell: SmellMap) extends SmellingCell {
+final case class FireCell(smell: SmellMap) extends GridPart {
   override type Self = FireCell
 
   override def withSmell(smell: SmellMap): FireCell = copy(smell = smell)

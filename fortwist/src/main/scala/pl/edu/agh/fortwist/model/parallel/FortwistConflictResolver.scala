@@ -10,7 +10,7 @@ object FortwistConflictResolver extends ConflictResolver[FortwistConfig] {
 
   import Cell._
 
-  override def resolveConflict(current: GridPart, incoming: SmellingCell)(implicit config: FortwistConfig): (GridPart, FortwistMetrics) = {
+  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: FortwistConfig): (GridPart, FortwistMetrics) = {
     (current, incoming) match {
       case (Obstacle, _) => (Obstacle, FortwistMetrics.empty())
       case (FortwistCell(currentSmell, currentForaminiferas, currentAlgae), FortwistCell(incomingSmell, incomingForaminiferas, incomingAlgae)) =>

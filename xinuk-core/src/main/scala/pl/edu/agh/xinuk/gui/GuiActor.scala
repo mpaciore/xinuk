@@ -22,13 +22,14 @@ import scala.util.{Random, Try}
 
 class GuiActor private(worker: ActorRef,
                        workerId: WorkerId,
-                       gridSize: Int,
+                       gridXSize: Int,
+                       gridYSize: Int,
                        cellToColor: PartialFunction[GridPart, Color])
                       (implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(gridSize, cellToColor, workerId)
+  private lazy val gui: GuiGrid = new GuiGrid(gridXSize, gridYSize, cellToColor, workerId)
 
   override def preStart: Unit = {
     worker ! SubscribeGridInfo(workerId)
@@ -51,20 +52,20 @@ object GuiActor {
 
   final case class GridInfo private(iteration: Long, grid: EnhancedGrid, metrics: Metrics)
 
-  def props(worker: ActorRef, workerId: WorkerId, gridSize: Int, cellToColor: PartialFunction[GridPart, Color])
+  def props(worker: ActorRef, workerId: WorkerId, gridXSize: Int, gridYSize: Int, cellToColor: PartialFunction[GridPart, Color])
            (implicit config: XinukConfig): Props = {
-    Props(new GuiActor(worker, workerId, gridSize, cellToColor))
+    Props(new GuiActor(worker, workerId, gridXSize, gridYSize, cellToColor))
   }
 
 }
 
-private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)
+private[gui] class GuiGrid(xSize: Int, ySize: Int, cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)
                           (implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val bgcolor = new Color(220, 220, 220)
-  private val cellView = new ParticleCanvas(gridSize, config.guiCellSize)
+  private val cellView = new ParticleCanvas(xSize, ySize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
     background = bgcolor
   }
@@ -77,10 +78,10 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
     location = alignedLocation
     preferredSize = alignedSize
 
-    val mainPanel = new BorderPanel {
+    val mainPanel: BorderPanel = new BorderPanel {
 
-      val cellPanel = new BorderPanel {
-        val view = new BorderPanel {
+      val cellPanel: BorderPanel = new BorderPanel {
+        val view: BorderPanel = new BorderPanel {
           background = bgcolor
           layout(cellView) = Center
         }
@@ -88,7 +89,7 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
         layout(view) = Center
       }
 
-      val contentPane = new TabbedPane {
+      val contentPane: TabbedPane = new TabbedPane {
         pages += new Page("Cells", cellPanel)
         pages += chartPage
       }
@@ -102,10 +103,10 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
   private def alignFrame(): (Point, Dimension) = {
     val xOffset = 100
     val yOffset = 100
-    val width = gridSize * config.guiCellSize + 25
-    val height = gridSize * config.guiCellSize + 75
-    val xPos = (workerId.value - 1) % config.workersRoot
-    val yPos = (workerId.value - 1) / config.workersRoot
+    val width = xSize * config.guiCellSize + 25
+    val height = ySize * config.guiCellSize + 75
+    val xPos = (workerId.value - 1) / config.workersRoot
+    val yPos = (workerId.value - 1) % config.workersRoot
     (new Point(xOffset + xPos * width, yOffset + yPos * height), new Dimension(width, height))
   }
 
@@ -113,12 +114,12 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
     cellView.set(grid)
   }
 
-  private class ParticleCanvas(dimension: Int, guiCellSize: Int) extends Label {
+  private class ParticleCanvas(xSize: Int, ySize: Int, guiCellSize: Int) extends Label {
 
     private val obstacleColor = new swing.Color(0, 0, 0)
     private val bufferColor = new swing.Color(163, 163, 194)
     private val emptyColor = new swing.Color(255, 255, 255)
-    private val img = new BufferedImage(dimension * guiCellSize, dimension * guiCellSize, BufferedImage.TYPE_INT_ARGB)
+    private val img = new BufferedImage(xSize * guiCellSize, ySize * guiCellSize, BufferedImage.TYPE_INT_ARGB)
 
     icon = new ImageIcon(img)
 
@@ -137,14 +138,14 @@ private[gui] class GuiGrid(gridSize: Int, cellToColor: PartialFunction[GridPart,
         Color.getHSBColor(hue, saturation, luminance)
       }
 
-      val rgbArray: Array[Array[Color]] = grid.yRange.toArray.map(y => grid.xRange.toArray.map(x => {
+      val rgbArray: Array[Array[Color]] = grid.xRange.toArray.map(x => grid.yRange.toArray.map(y => {
         val cell: GridPart = grid.getLocalCellAt(x, y).cell
         cellToColor.applyOrElse(cell, (_: GridPart) => classToColor.getOrElseUpdate(cell.getClass, generateColor(cell)))
       }))
 
       for {
-        y <- 0 until gridSize
-        x <- 0 until gridSize
+        x <- 0 until xSize
+        y <- 0 until ySize
       } {
         val startX = x * guiCellSize
         val startY = y * guiCellSize

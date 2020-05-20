@@ -7,8 +7,6 @@ import pl.edu.agh.xinuk.model.Grid.CellArray
 
 final case class Grid(cells: CellArray) extends AnyVal {
 
-  import Grid._
-
   // TODO ???
 //  def propagatedSignal(calculateSmellAddends: (CellArray, Int, Int) => Vector[Option[Signal]], x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
 //    val current = cells(x)(y)
@@ -31,7 +29,7 @@ final case class Grid(cells: CellArray) extends AnyVal {
 object Grid {
   type CellArray = Array[Array[GridPart]]
 
-  def empty(emptyCellFactory: => SmellingCell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
+  def empty(emptyCellFactory: => GridPart = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
     Grid(Array.tabulate[GridPart](config.gridSize, config.gridSize)((_, _) => emptyCellFactory))
   }
 
@@ -77,13 +75,11 @@ object Energy {
 }
 
 trait GridPart {
-  def smell: SmellMap
-}
-
-trait SmellMedium extends GridPart {
-  type Self <: SmellMedium
+  type Self <: GridPart
 
   import Cell._
+
+  def smell: SmellMap
 
   final def smellWith(added: Signal): SmellMap = smell + added
 
@@ -92,10 +88,6 @@ trait SmellMedium extends GridPart {
   final def smellWithout(deducted: SmellMap): SmellMap = smell - deducted
 
   def withSmell(smell: SmellMap): Self
-}
-
-trait SmellingCell extends SmellMedium {
-  override type Self <: SmellingCell
 }
 
 object Cell {
@@ -122,10 +114,12 @@ object Cell {
 }
 
 case object Obstacle extends GridPart {
+  override type Self = Obstacle.type
   override val smell: SmellMap = Cell.emptySignal
+  override def withSmell(smell: SmellMap): Obstacle.type = Obstacle
 }
 
-final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPart {
+final case class BufferCell(cell: GridPart) extends GridPart {
 
   override type Self = BufferCell
 
@@ -134,7 +128,7 @@ final case class BufferCell(cell: SmellingCell) extends SmellMedium with GridPar
   override def withSmell(smell: SmellMap): BufferCell = copy(cell.withSmell(smell))
 }
 
-final case class EmptyCell(smell: SmellMap) extends SmellingCell {
+final case class EmptyCell(smell: SmellMap) extends GridPart {
   override type Self = EmptyCell
 
   override def withSmell(smell: SmellMap): EmptyCell = copy(smell)

@@ -7,7 +7,7 @@ import pl.edu.agh.torch.algorithm.{TorchGridCreator, TorchMovesController}
 import pl.edu.agh.torch.model.parallel.TorchConflictResolver
 import pl.edu.agh.torch.model.{EscapeCell, FireCell, HumanCell}
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, SmellingCell}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, GridPart}
 
 object TorchMain extends LazyLogging {
   private val configPrefix = "torch"
@@ -19,7 +19,7 @@ object TorchMain extends LazyLogging {
     "peopleEscapes"
   )
 
-  private def cellToColor(cell: SmellingCell): Color = {
+  private def cellToColor(cell: GridPart): Color = {
     cell match {
       case HumanCell(_, _, _) => Color.BLUE
       case FireCell(_) => Color.ORANGE
@@ -38,7 +38,7 @@ object TorchMain extends LazyLogging {
     )(
       TorchGridCreator.apply(_),
       TorchMovesController.apply(_),
-      { case cell: SmellingCell => cellToColor(cell) }
+      { case cell: GridPart => cellToColor(cell) }
     ).start()
   }
 
