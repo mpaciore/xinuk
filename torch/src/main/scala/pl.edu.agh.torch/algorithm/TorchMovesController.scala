@@ -114,12 +114,14 @@ final class TorchMovesController(implicit config: TorchConfig) extends MovesCont
     }
 
     def calculatePossibleDestinations(x: Int, y: Int): Iterator[(Int, Int)] = {
-      grid.getCellAt(x, y).cell.smell
+      val enhancedCell = grid.getCellAt(x, y)
+      random.shuffle(enhancedCell.cell.smell
         .toList
         .map(_.swap)
+        .filter { case (_, direction) => enhancedCell.neighbours.contains(direction) })
         .sortBy(_._1)(Ordering[Signal].reverse)
         .iterator
-        .map { case (_, direction) => grid.getCellAt(x, y).neighbours(direction) }
+        .map { case (_, direction) => enhancedCell.neighbours(direction) }
     }
 
     def selectDestinationCell(possibleDestinations: Iterator[(Int, Int)]): commons.Opt[(Int, Int, GridPart)] = {

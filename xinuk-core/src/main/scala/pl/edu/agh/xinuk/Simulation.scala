@@ -23,8 +23,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
   conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-  emptyCellFactory: => SmellingCell = EmptyCell.Instance)(
+  smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap)(
   gridCreatorFactory: ConfigType => GridCreator,
   movesControllerFactory: ConfigType => MovesController,
   cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
@@ -57,7 +56,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction, emptyCellFactory),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId
@@ -85,7 +84,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
       workersInfo.foreach { case (workerId, grid, outgoingNeighbours, incomingNeighbours) =>
         if (config.guiType != GuiType.None) {
-          system.actorOf(GuiActor.props(workerRegionRef, workerId, grid.size, cellToColor))
+          system.actorOf(GuiActor.props(workerRegionRef, workerId, grid.xSize, grid.ySize, cellToColor))
         }
         workerRegionRef ! WorkerActor.NeighboursInitialized(workerId, grid, outgoingNeighbours, incomingNeighbours)
       }

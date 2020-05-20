@@ -2,9 +2,9 @@ package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.{EmptyCell, GridPart, SmellingCell}
+import pl.edu.agh.xinuk.model.{EmptyCell, GridPart}
 
-final case class HumanCell(smell: SmellMap, crowd: List[HumanCell], speed: Int)(implicit config: TorchConfig) extends SmellingCell {
+final case class HumanCell(smell: SmellMap, crowd: List[HumanCell], speed: Int)(implicit config: TorchConfig) extends GridPart {
 
   override type Self = HumanCell
 
