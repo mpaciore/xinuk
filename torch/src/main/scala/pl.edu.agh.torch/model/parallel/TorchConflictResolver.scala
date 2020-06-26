@@ -10,11 +10,11 @@ object TorchConflictResolver extends ConflictResolver[TorchConfig] {
 
   import Cell._
 
-  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: TorchConfig): (GridPart, TorchMetrics) = {
+  override def resolveConflict(current: Cell, incoming: Cell)(implicit config: TorchConfig): (Cell, TorchMetrics) = {
     (current, incoming) match {
       case (EmptyCell(currentSmell), incomingCell) =>
         (incomingCell.withSmell(incomingCell.smell + currentSmell), TorchMetrics.empty())
-      case (currentCell: GridPart, EmptyCell(incomingSmell)) =>
+      case (currentCell: Cell, EmptyCell(incomingSmell)) =>
         (currentCell.withSmell(currentCell.smell + incomingSmell), TorchMetrics.empty())
       case (EscapeCell(currentSmell), HumanCell(_, _, _)) =>
         (EscapeCell(currentSmell), TorchMetrics(0, 0, 0, 0, 1))

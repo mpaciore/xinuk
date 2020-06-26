@@ -3,11 +3,11 @@ package pl.edu.agh.torch
 import java.awt.Color
 
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.torch.algorithm.{TorchGridCreator, TorchMovesController}
-import pl.edu.agh.torch.model.parallel.TorchConflictResolver
+import pl.edu.agh.torch.algorithm.{TorchGridCreator, TorchPlanCreator, TorchPlanResolver}
 import pl.edu.agh.torch.model.{EscapeCell, FireCell, HumanCell}
+import pl.edu.agh.torch.simulation.TorchMetrics
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, GridPart}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Cell}
 
 object TorchMain extends LazyLogging {
   private val configPrefix = "torch"
@@ -19,7 +19,7 @@ object TorchMain extends LazyLogging {
     "peopleEscapes"
   )
 
-  private def cellToColor(cell: GridPart): Color = {
+  private def cellToColor(cell: Cell): Color = {
     cell match {
       case HumanCell(_, _, _) => Color.BLUE
       case FireCell(_) => Color.ORANGE
@@ -33,12 +33,12 @@ object TorchMain extends LazyLogging {
     new Simulation(
       configPrefix,
       metricHeaders,
-      TorchConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
-    )(
-      TorchGridCreator.apply(_),
-      TorchMovesController.apply(_),
-      { case cell: GridPart => cellToColor(cell) }
+      TorchGridCreator,
+      TorchPlanCreator,
+      TorchPlanResolver,
+      TorchMetrics.empty,
+      DefaultSmellPropagation.calculateSmellAddendsStandard,
+      { case cell: Cell => cellToColor(cell) }
     ).start()
   }
 

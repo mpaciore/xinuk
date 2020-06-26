@@ -2,18 +2,19 @@ package pl.edu.agh.xinuk.model
 
 import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model.Direction.Direction
+import pl.edu.agh.xinuk.model.EnhancedCell.NeighbourMap
 
 object DefaultSmellPropagation {
 
   @inline def destinationCellSignal(grid: EnhancedGrid,
-                                    neighbours: Map[Direction, (Int, Int)],
+                                    neighbours: NeighbourMap,
                                     direction: Direction): Option[SmellMap] = {
     neighbours.get(direction)
       .flatMap({ case (x, y) => grid.getLocalCellOptionAt(x, y) })
       .map(_.cell.smell)
   }
 
-  def calculateSmellAddendsStandard(grid: EnhancedGrid, neighbours: Map[Direction, (Int, Int)]): SmellMap =
+  def calculateSmellAddendsStandard(grid: EnhancedGrid, neighbours: NeighbourMap): SmellMap =
     Direction.values.map({
       case cardinal@(Direction.Top | Direction.Right | Direction.Bottom | Direction.Left) =>
         (
@@ -31,7 +32,7 @@ object DefaultSmellPropagation {
         )
     }).toMap
 
-  def calculateSmellAddendsCircular(grid: EnhancedGrid, neighbours: Map[Direction, (Int, Int)]): SmellMap = {
+  def calculateSmellAddendsCircular(grid: EnhancedGrid, neighbours: NeighbourMap): SmellMap = {
     def sideToSide: Double = 1.0 / 3
 
     def sideToCorner: Double = 1.0 / Math.sqrt(10)

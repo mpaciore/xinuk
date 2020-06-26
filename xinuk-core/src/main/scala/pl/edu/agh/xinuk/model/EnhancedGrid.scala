@@ -3,11 +3,11 @@ package pl.edu.agh.xinuk.model
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.Cell.{SmellMap, SmellMapOps}
 import pl.edu.agh.xinuk.model.Direction.Direction
+import pl.edu.agh.xinuk.model.EnhancedCell.NeighbourMap
 
 class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
                    private val remoteCells: collection.mutable.Map[(Int, Int), RemoteEnhancedCell],
-                   private val offset: (Int, Int))
-                  (implicit config: XinukConfig) {
+                   private val offset: (Int, Int)) {
   def xSize: Int = cells.length
 
   def ySize: Int = cells(0).length
@@ -20,20 +20,38 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
 
   def indicesColumnWise: Seq[(Int, Int)] = for {y <- yRange; x <- xRange} yield (x, y)
 
+  def cellsWithNeighbours: Seq[((Int, Int), Cell, NeighbourMap)] = for {x <- xRange; y <- yRange} yield {
+    val cell = getCellAt(x, y)
+    ((x, y), cell.cell, cell.neighbours)
+  }
+
+  def isLocal(coords: (Int, Int)): Boolean = isLocal(coords._1, coords._2)
+
+  def isLocal(x: Int, y: Int): Boolean = {
+    val (localX, localY) = toLocalCoords(x, y)
+    0 <= localX && localX < xSize && 0 <= localY && localY < ySize
+  }
+
+  def getCellAt(coords: (Int, Int)): EnhancedCell = getCellAt(coords._1, coords._2)
+
   def getCellAt(x: Int, y: Int): EnhancedCell = {
-    if (areCoordsInGrid(x, y)) {
+    if (isLocal(x, y)) {
       getLocalCellAt(x, y)
     } else {
       remoteCells((x, y))
     }
   }
 
+  def getLocalCellAt(coords: (Int, Int)): LocalEnhancedCell = getLocalCellAt(coords._1, coords._2)
+
   def getLocalCellAt(x: Int, y: Int): LocalEnhancedCell = {
     val (localX, localY) = toLocalCoords(x, y)
     cells(localX)(localY)
   }
 
-  def setCellAt(x: Int, y: Int, newCell: GridPart): Unit = {
+  def setCellAt(coords: (Int, Int), newCell: Cell): Unit = setCellAt(coords._1, coords._2, newCell)
+
+  def setCellAt(x: Int, y: Int, newCell: Cell): Unit = {
     getCellAt(x, y) match {
       case localCell: LocalEnhancedCell =>
         val (localX, localY) = toLocalCoords(x, y)
@@ -44,7 +62,7 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
   }
 
   def getLocalCellOptionAt(x: Int, y: Int): Option[LocalEnhancedCell] = Option((x, y))
-    .filter({ case (x, y) => areCoordsInGrid(x, y) })
+    .filter({ case (x, y) => isLocal(x, y) })
     .map({ case (x, y) => toLocalCoords(x, y) })
     .map({ case (localX, localY) => cells(localX)(localY) })
 
@@ -93,11 +111,12 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
 
         val neighbourWorkers: Set[WorkerId] = subRemoteCells.map(_._2.workerId).toSet.filterNot(_ == workerId)
 
-        (workerId, enhancedSubGrid, neighbourWorkers)
+        (workerId, enhancedSubGrid, neighbourWorkers + workerId)
     })
   }
 
-  def propagatedSignal(smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap): EnhancedGrid = {
+  def propagatedSignal(smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap)
+                      (implicit config: XinukConfig): EnhancedGrid = {
     EnhancedGrid(
       tabulateLocalCells(propagatedLocal(smellPropagationFunction, _)),
       mapRemoteCells(propagatedRemote(smellPropagationFunction, _)),
@@ -111,19 +130,22 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
   private def mapRemoteCells(fun: RemoteEnhancedCell => RemoteEnhancedCell): collection.mutable.Map[(Int, Int), RemoteEnhancedCell] =
     remoteCells.map({ case ((x, y), currentRemoteCell) => ((x, y), fun(currentRemoteCell))})
 
-  private def propagatedLocal(smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-                               oldCell: LocalEnhancedCell): LocalEnhancedCell =
+  private def propagatedLocal(smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap,
+                               oldCell: LocalEnhancedCell)
+                             (implicit config: XinukConfig): LocalEnhancedCell =
     oldCell.withCell(propagatedGridPart(smellPropagationFunction, oldCell))
 
-  private def propagatedRemote(smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-                              oldCell: RemoteEnhancedCell): RemoteEnhancedCell =
+  private def propagatedRemote(smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap,
+                              oldCell: RemoteEnhancedCell)
+                              (implicit config: XinukConfig): RemoteEnhancedCell =
     oldCell.withCell(propagatedGridPart(smellPropagationFunction, oldCell))
 
-  private def propagatedGridPart(smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap,
-                                 enhancedCell: EnhancedCell): GridPart =
+  private def propagatedGridPart(smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap,
+                                 enhancedCell: EnhancedCell)
+                                (implicit config: XinukConfig): Cell =
     enhancedCell.cell match {
       case obstacle@Obstacle => obstacle
-      case smelling: GridPart =>
+      case smelling: Cell =>
         val currentSmell: SmellMap = smelling.smell
         val addends: SmellMap = smellPropagationFunction(this, enhancedCell.neighbours)
         val newSmell: SmellMap = currentSmell * config.signalAttenuationFactor + addends * config.signalSuppressionFactor
@@ -134,19 +156,16 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
     remoteCells.foreach({ case ((x, y), cell) => remoteCells((x, y)) = cell.empty() })
   }
 
-  def outgoingCells(targetWorker: WorkerId): Set[((Int, Int), GridPart)] = remoteCells.values
+  def outgoingCells(targetWorker: WorkerId): Set[((Int, Int), Cell)] = remoteCells.values
     .filter(_.workerId == targetWorker)
     .map(remoteCell => (remoteCell.targetCoordinates, remoteCell.cell))
     .toSet
 
-  private def areCoordsInGrid(x: Int, y: Int): Boolean = {
-    val (localX, localY) = toLocalCoords(x, y)
-    0 <= localX && localX < xSize && 0 <= localY && localY < ySize
-  }
+  def getWorkerFor(coords: (Int, Int)): WorkerId = remoteCells(coords).workerId
 
   private def toLocalCoords(x: Int, y: Int): (Int, Int) = (x - offset._1, y - offset._2)
 
-  def emptyCopy(emptyCellFactory: => GridPart = EmptyCell.Instance): EnhancedGrid = {
+  def emptyCopy(emptyCellFactory: => Cell = EmptyCell.Instance): EnhancedGrid = {
     val emptyGrid: Array[Array[LocalEnhancedCell]] = cells.map(_.map(_.withCell(emptyCellFactory)))
     EnhancedGrid(emptyGrid, remoteCells, offset)
   }
@@ -154,8 +173,8 @@ class EnhancedGrid(private val cells: Array[Array[LocalEnhancedCell]],
 
 object EnhancedGrid {
 
-  def empty(emptyCellFactory: => GridPart = EmptyCell.Instance)(implicit config: XinukConfig): EnhancedGrid = {
-    EnhancedGrid(Grid(Array.tabulate[GridPart](config.gridSize, config.gridSize)((_, _) => emptyCellFactory)), NonPlanarConnections.empty)
+  def empty(emptyCellFactory: => Cell = EmptyCell.Instance)(implicit config: XinukConfig): EnhancedGrid = {
+    EnhancedGrid(Grid(Array.tabulate[Cell](config.gridSize, config.gridSize)((_, _) => emptyCellFactory)), NonPlanarConnections.empty)
   }
 
   def apply(grid: Grid, nonPlanarConnections: NonPlanarConnections)(implicit config: XinukConfig): EnhancedGrid = {
@@ -163,15 +182,15 @@ object EnhancedGrid {
 
     val enhancedGrid = Array.tabulate[LocalEnhancedCell](config.gridSize, config.gridSize) {
       (cellX, cellY) => {
-        val planarNeighbours: Map[Direction, (Int, Int)] = Direction
+        val planarNeighbours: NeighbourMap = Direction
           .values
           .map(d => (d, d.of(cellX, cellY)))
           .filter({ case (_, (x, y)) => areCoordinatesValid(x, y) })
           .toMap
-        val nonPlanarNeighbours: Map[Direction, (Int, Int)] = nonPlanarConnectionMap
+        val nonPlanarNeighbours: NeighbourMap = nonPlanarConnectionMap
           .getOrElse((cellX, cellY), Set.empty)
           .toMap
-        val neighbours: Map[Direction, (Int, Int)] = planarNeighbours ++ nonPlanarNeighbours
+        val neighbours: NeighbourMap = planarNeighbours ++ nonPlanarNeighbours
         LocalEnhancedCell(grid.cells(cellX)(cellY), neighbours)
       }
     }
@@ -181,7 +200,7 @@ object EnhancedGrid {
   def apply(grid: Array[Array[LocalEnhancedCell]],
             remoteCells: collection.mutable.Map[(Int, Int), RemoteEnhancedCell],
             offset: (Int, Int)
-           )(implicit config: XinukConfig): EnhancedGrid =
+           ): EnhancedGrid =
     new EnhancedGrid(grid, remoteCells, offset)
 
   private def areCoordinatesValid(x: Int, y: Int)(implicit config: XinukConfig): Boolean = {

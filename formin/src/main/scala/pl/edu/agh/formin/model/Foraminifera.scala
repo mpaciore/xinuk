@@ -4,13 +4,13 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model._
 
-final case class ForaminiferaCell(energy: Energy, smell: SmellMap, lifespan: Long) extends GridPart {
+final case class ForaminiferaCell(energy: Energy, smell: SmellMap, lifespan: Long) extends Cell {
   override type Self = ForaminiferaCell
 
   override def withSmell(smell: SmellMap): ForaminiferaCell = copy(smell = smell)
 }
 
-trait ForaminiferaAccessible[+T <: GridPart] {
+trait ForaminiferaAccessible[+T <: Cell] {
   def withForaminifera(energy: Energy, lifespan: Long): T
 }
 
@@ -31,7 +31,7 @@ object ForaminiferaAccessible {
       override def withForaminifera(energy: Energy, lifespan: Long): BufferCell = BufferCell(ForaminiferaCell(energy, arg.smellWith(config.foraminiferaInitialSignal), lifespan))
     }
 
-  def unapply(arg: GridPart)(implicit config: ForminConfig): Option[ForaminiferaAccessible[GridPart]] = arg match {
+  def unapply(arg: Cell)(implicit config: ForminConfig): Option[ForaminiferaAccessible[Cell]] = arg match {
     case cell: AlgaeCell => Some(unapply(cell))
     case cell: EmptyCell => Some(unapply(cell))
     case cell: BufferCell => Some(unapply(cell))

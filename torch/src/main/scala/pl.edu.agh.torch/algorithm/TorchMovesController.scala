@@ -12,11 +12,12 @@ import pl.edu.agh.xinuk.model._
 
 import scala.util.Random
 
-final class TorchMovesController(implicit config: TorchConfig) extends MovesController {
+// TODO: scrap for parts for TorchPlanCreator and TorchPlanResolver
+final class TorchMovesController extends MovesController[TorchConfig] {
 
   private val random = new Random(System.nanoTime())
 
-  override def makeMoves(iteration: Long, grid: EnhancedGrid): (EnhancedGrid, TorchMetrics) = {
+  override def makeMoves(iteration: Long, grid: EnhancedGrid)(implicit config: TorchConfig): (EnhancedGrid, TorchMetrics) = {
     val newGrid = grid.emptyCopy()
 
     var humanCount = 0L
@@ -65,7 +66,7 @@ final class TorchMovesController(implicit config: TorchConfig) extends MovesCont
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
       val availableCells =
         grid.getCellAt(x, y).neighbours.toList.flatMap {
           case (_, (i, j)) =>
@@ -124,7 +125,7 @@ final class TorchMovesController(implicit config: TorchConfig) extends MovesCont
         .map { case (_, direction) => enhancedCell.neighbours(direction) }
     }
 
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int)]): commons.Opt[(Int, Int, GridPart)] = {
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int)]): commons.Opt[(Int, Int, Cell)] = {
       possibleDestinations
         .map {
           case (i, j) => (i, j, grid.getCellAt(i, j).cell, newGrid.getCellAt(i, j).cell)
@@ -164,5 +165,5 @@ final class TorchMovesController(implicit config: TorchConfig) extends MovesCont
 }
 
 object TorchMovesController {
-  def apply(implicit config: TorchConfig): TorchMovesController = new TorchMovesController
+  def apply(): TorchMovesController = new TorchMovesController
 }

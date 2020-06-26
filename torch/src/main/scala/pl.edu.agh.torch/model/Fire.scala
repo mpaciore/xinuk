@@ -2,22 +2,22 @@ package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.{EmptyCell, GridPart}
+import pl.edu.agh.xinuk.model.{EmptyCell, Cell}
 
 
-final case class FireCell(smell: SmellMap) extends GridPart {
+final case class FireCell(smell: SmellMap) extends Cell {
   override type Self = FireCell
 
   override def withSmell(smell: SmellMap): FireCell = copy(smell = smell)
 }
 
-trait FireAccessible[+T <: GridPart] {
+trait FireAccessible[+T <: Cell] {
   def withFire(): T
 }
 
 object FireAccessible {
 
-  def unapply(arg: GridPart)(implicit config: TorchConfig): Option[FireAccessible[GridPart]] = arg match {
+  def unapply(arg: Cell)(implicit config: TorchConfig): Option[FireAccessible[Cell]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
     case cell: EscapeCell => Some(unapply(cell))
     case cell: HumanCell => Some(unapply(cell))

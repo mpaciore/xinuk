@@ -44,7 +44,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
   }
 
 
-  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
+  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Cell)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
     Grid.SubcellCoordinates
       .map { case (i, j) => cell.smell(i)(j) }
@@ -57,7 +57,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
   }
 
-  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
+  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, Cell)], newGrid: Grid): commons.Opt[(Int, Int, Cell)] = {
     possibleDestinations
       .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
       .collectFirstOpt {
@@ -86,7 +86,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
       val emptyCells =
         Grid.neighbourCellCoordinates(x, y).flatMap {
           case (i, j) =>
