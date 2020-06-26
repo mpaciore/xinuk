@@ -10,7 +10,7 @@ object Foraminifera {
   def create()(implicit config: FortwistConfig): Foraminifera = Foraminifera(config.foraminiferaStartEnergy, 0)
 }
 
-final case class FortwistCell(smell: SmellMap, foraminiferas: Vector[Foraminifera], algae: Energy) extends GridPart {
+final case class FortwistCell(smell: SmellMap, foraminiferas: Vector[Foraminifera], algae: Energy) extends Cell {
   override type Self = FortwistCell
 
   override def withSmell(smell: SmellMap): FortwistCell = copy(smell = smell)

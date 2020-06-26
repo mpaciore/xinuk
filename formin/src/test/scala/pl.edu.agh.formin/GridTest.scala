@@ -131,9 +131,9 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "make correct cell transformations from empty cell" in {
     val emptyCell: EmptyCell = EmptyCell.Instance
-    val emptyCellWithForaminiferaInstantiated: GridPart =
+    val emptyCellWithForaminiferaInstantiated: Cell =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
+    val emptyCellWithAlgaeInstantiated: Cell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val emptyCellWithSmell: EmptyCell =
       emptyCell.withSmell(emptyCellWithForaminiferaInstantiated.smell)
     val emptyCellWithForaminifera: ForaminiferaCell =
@@ -153,7 +153,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
   it should "make correct cell transformations from foraminifera cell" in {
     val foraminiferaCell: ForaminiferaCell =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
+    val emptyCellWithAlgaeInstantiated: Cell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val foraminiferaCellWithSmell: ForaminiferaCell =
       foraminiferaCell.withSmell(emptyCellWithAlgaeInstantiated.smell)
 
@@ -164,7 +164,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "make correct cell transformations from algae cell" in {
     val algaeCell: AlgaeCell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
-    val emptyCellWithForaminiferaInstantiated: GridPart =
+    val emptyCellWithForaminiferaInstantiated: Cell =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val emptyCell: EmptyCell = EmptyCell.Instance
     val algaeCellWithSmell: AlgaeCell =

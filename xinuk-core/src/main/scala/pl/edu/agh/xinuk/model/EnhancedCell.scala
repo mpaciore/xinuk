@@ -1,39 +1,44 @@
 package pl.edu.agh.xinuk.model
 
 import pl.edu.agh.xinuk.model.Direction.Direction
+import pl.edu.agh.xinuk.model.EnhancedCell.NeighbourMap
 
 sealed trait EnhancedCell {
   type Self <: EnhancedCell
 
-  def cell: GridPart = EmptyCell.Instance
+  def cell: Cell = EmptyCell.Instance
 
-  def withCell(newCell: GridPart): Self
+  def withCell(newCell: Cell): Self
 
-  def neighbours: Map[Direction, (Int, Int)] = Map.empty
+  def neighbours: NeighbourMap = Map.empty
 }
 
-final case class LocalEnhancedCell(override val cell: GridPart,
-                              override val neighbours: Map[Direction, (Int, Int)]
+object EnhancedCell {
+  type NeighbourMap = Map[Direction, (Int, Int)]
+}
+
+final case class LocalEnhancedCell(override val cell: Cell,
+                                   override val neighbours: NeighbourMap
                              ) extends EnhancedCell {
   override type Self = LocalEnhancedCell
 
-  override def withCell(newCell: GridPart): LocalEnhancedCell = {
+  override def withCell(newCell: Cell): LocalEnhancedCell = {
     LocalEnhancedCell(newCell, neighbours)
   }
 }
 
 object LocalEnhancedCell {
-  def apply(cell: GridPart, neighbours: Map[Direction, (Int, Int)]): LocalEnhancedCell = new LocalEnhancedCell(cell, neighbours)
+  def apply(cell: Cell, neighbours: NeighbourMap): LocalEnhancedCell = new LocalEnhancedCell(cell, neighbours)
 }
 
-final case class RemoteEnhancedCell(override val cell: GridPart,
-                                    override val neighbours: Map[Direction, (Int, Int)],
+final case class RemoteEnhancedCell(override val cell: Cell,
+                                    override val neighbours: NeighbourMap,
                                     workerId: WorkerId,
                                     targetCoordinates: (Int, Int)
                                    ) extends EnhancedCell {
   override type Self = RemoteEnhancedCell
 
-  override def withCell(newCell: GridPart): RemoteEnhancedCell = {
+  override def withCell(newCell: Cell): RemoteEnhancedCell = {
     RemoteEnhancedCell(newCell, neighbours, workerId, targetCoordinates)
   }
 
@@ -43,12 +48,11 @@ final case class RemoteEnhancedCell(override val cell: GridPart,
 }
 
 object RemoteEnhancedCell {
-  def apply(neighbours: Map[Direction, (Int, Int)], workerId: WorkerId, targetCoordinates: (Int, Int)): RemoteEnhancedCell = RemoteEnhancedCell(EmptyCell.Instance, neighbours, workerId, targetCoordinates)
-  def apply(cell: GridPart, neighbours: Map[Direction, (Int, Int)], workerId: WorkerId, targetCoordinates: (Int, Int)): RemoteEnhancedCell = new RemoteEnhancedCell(cell, neighbours, workerId, targetCoordinates)
+  def apply(neighbours: NeighbourMap, workerId: WorkerId, targetCoordinates: (Int, Int)): RemoteEnhancedCell =
+    RemoteEnhancedCell(EmptyCell.Instance, neighbours, workerId, targetCoordinates)
+  def apply(cell: Cell, neighbours: NeighbourMap, workerId: WorkerId, targetCoordinates: (Int, Int)): RemoteEnhancedCell =
+    new RemoteEnhancedCell(cell, neighbours, workerId, targetCoordinates)
 }
-
-
-
 
 object Direction {
   sealed abstract class Direction(private val xShift: Int, private val yShift: Int) {

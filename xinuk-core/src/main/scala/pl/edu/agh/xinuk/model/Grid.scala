@@ -5,32 +5,13 @@ import pl.edu.agh.xinuk.model.Cell.SmellMap
 import pl.edu.agh.xinuk.model.Direction.Direction
 import pl.edu.agh.xinuk.model.Grid.CellArray
 
-final case class Grid(cells: CellArray) extends AnyVal {
-
-  // TODO ???
-//  def propagatedSignal(calculateSmellAddends: (CellArray, Int, Int) => Vector[Option[Signal]], x: Int, y: Int)(implicit config: XinukConfig): GridPart = {
-//    val current = cells(x)(y)
-//    current match {
-//      case Obstacle => current
-//      case smelling: SmellMedium =>
-//        val currentSmell = current.smell
-//        val addends = calculateSmellAddends(cells, x, y)
-//        val (newSmell, _) = addends.foldLeft(Array.ofDim[Signal](Cell.Size, Cell.Size), 0) { case ((cell, index), signalOpt) =>
-//          val (i, j) = Cell.subCellCoordinates(index)
-//          cell(i)(j) = (currentSmell(i)(j) * config.signalAttenuationFactor) + (signalOpt.getOrElse(Signal.Zero) * config.signalSuppressionFactor)
-//          (cell, index + 1)
-//        }
-//        newSmell(1)(1) = Signal.Zero
-//        smelling.withSmell(newSmell)
-//    }
-//  }
-}
+final case class Grid(cells: CellArray) extends AnyVal
 
 object Grid {
-  type CellArray = Array[Array[GridPart]]
+  type CellArray = Array[Array[Cell]]
 
-  def empty(emptyCellFactory: => GridPart = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
-    Grid(Array.tabulate[GridPart](config.gridSize, config.gridSize)((_, _) => emptyCellFactory))
+  def empty(emptyCellFactory: => Cell = EmptyCell.Instance)(implicit config: XinukConfig): Grid = {
+    Grid(Array.tabulate[Cell](config.gridSize, config.gridSize)((_, _) => emptyCellFactory))
   }
 
   def neighbourCellCoordinates(x: Int, y: Int): Vector[(Int, Int)] = {
@@ -43,13 +24,13 @@ object Grid {
 }
 
 final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
-  def +(other: Signal) = Signal(value + other.value)
+  def +(other: Signal): Signal = Signal(value + other.value)
 
-  def -(other: Signal) = Signal(value - other.value)
+  def -(other: Signal): Signal = Signal(value - other.value)
 
-  def *(factor: Double) = Signal(value * factor)
+  def *(factor: Double): Signal = Signal(value * factor)
 
-  def /(divisor: Double) = Signal(value / divisor)
+  def /(divisor: Double): Signal = Signal(value / divisor)
 
   override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
 }
@@ -74,8 +55,8 @@ object Energy {
   final val Zero = Energy(0)
 }
 
-trait GridPart {
-  type Self <: GridPart
+trait Cell {
+  type Self <: Cell
 
   import Cell._
 
@@ -113,13 +94,13 @@ object Cell {
   def emptySignal: SmellMap = uniformSignal(Signal.Zero)
 }
 
-case object Obstacle extends GridPart {
+case object Obstacle extends Cell {
   override type Self = Obstacle.type
   override val smell: SmellMap = Cell.emptySignal
   override def withSmell(smell: SmellMap): Obstacle.type = Obstacle
 }
 
-final case class BufferCell(cell: GridPart) extends GridPart {
+final case class BufferCell(cell: Cell) extends Cell {
 
   override type Self = BufferCell
 
@@ -128,7 +109,7 @@ final case class BufferCell(cell: GridPart) extends GridPart {
   override def withSmell(smell: SmellMap): BufferCell = copy(cell.withSmell(smell))
 }
 
-final case class EmptyCell(smell: SmellMap) extends GridPart {
+final case class EmptyCell(smell: SmellMap) extends Cell {
   override type Self = EmptyCell
 
   override def withSmell(smell: SmellMap): EmptyCell = copy(smell)

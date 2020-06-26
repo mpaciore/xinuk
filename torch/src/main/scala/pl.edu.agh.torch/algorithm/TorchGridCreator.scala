@@ -7,11 +7,11 @@ import pl.edu.agh.xinuk.model.{EmptyCell, Grid, NonPlanarConnections}
 
 import scala.util.Random
 
-class TorchGridCreator(implicit config: TorchConfig) extends GridCreator {
+object TorchGridCreator extends GridCreator[TorchConfig] {
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid: (Grid, NonPlanarConnections) = {
+  override def initialGrid(implicit config: TorchConfig): (Grid, NonPlanarConnections) = {
     val grid = Grid.empty()
     var humanCount = 0L
     var fireCount = 0L
@@ -52,8 +52,4 @@ class TorchGridCreator(implicit config: TorchConfig) extends GridCreator {
 
     (grid, NonPlanarConnections.empty)
   }
-}
-
-object TorchGridCreator {
-  def apply(implicit config: TorchConfig): TorchGridCreator = new TorchGridCreator
 }

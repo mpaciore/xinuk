@@ -24,7 +24,7 @@ class GuiActor private(worker: ActorRef,
                        workerId: WorkerId,
                        gridXSize: Int,
                        gridYSize: Int,
-                       cellToColor: PartialFunction[GridPart, Color])
+                       cellToColor: PartialFunction[Cell, Color])
                       (implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
@@ -52,14 +52,14 @@ object GuiActor {
 
   final case class GridInfo private(iteration: Long, grid: EnhancedGrid, metrics: Metrics)
 
-  def props(worker: ActorRef, workerId: WorkerId, gridXSize: Int, gridYSize: Int, cellToColor: PartialFunction[GridPart, Color])
+  def props(worker: ActorRef, workerId: WorkerId, gridXSize: Int, gridYSize: Int, cellToColor: PartialFunction[Cell, Color])
            (implicit config: XinukConfig): Props = {
     Props(new GuiActor(worker, workerId, gridXSize, gridYSize, cellToColor))
   }
 
 }
 
-private[gui] class GuiGrid(xSize: Int, ySize: Int, cellToColor: PartialFunction[GridPart, Color], workerId: WorkerId)
+private[gui] class GuiGrid(xSize: Int, ySize: Int, cellToColor: PartialFunction[Cell, Color], workerId: WorkerId)
                           (implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
@@ -130,7 +130,7 @@ private[gui] class GuiGrid(xSize: Int, ySize: Int, cellToColor: PartialFunction[
     )
 
     def set(grid: EnhancedGrid): Unit = {
-      def generateColor(cell: GridPart): Color = {
+      def generateColor(cell: Cell): Color = {
         val random = new Random(cell.getClass.hashCode())
         val hue = random.nextFloat()
         val saturation = 1.0f
@@ -139,8 +139,8 @@ private[gui] class GuiGrid(xSize: Int, ySize: Int, cellToColor: PartialFunction[
       }
 
       val rgbArray: Array[Array[Color]] = grid.xRange.toArray.map(x => grid.yRange.toArray.map(y => {
-        val cell: GridPart = grid.getLocalCellAt(x, y).cell
-        cellToColor.applyOrElse(cell, (_: GridPart) => classToColor.getOrElseUpdate(cell.getClass, generateColor(cell)))
+        val cell: Cell = grid.getLocalCellAt(x, y).cell
+        cellToColor.applyOrElse(cell, (_: Cell) => classToColor.getOrElseUpdate(cell.getClass, generateColor(cell)))
       }))
 
       for {

@@ -8,25 +8,25 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
-import pl.edu.agh.xinuk.algorithm.{GridCreator, MovesController}
+import pl.edu.agh.xinuk.algorithm.{GridCreator, PlanCreator, PlanResolver}
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.Direction.Direction
+import pl.edu.agh.xinuk.model.EnhancedCell.NeighbourMap
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.parallel.ConflictResolver
-import pl.edu.agh.xinuk.simulation.WorkerActor
+import pl.edu.agh.xinuk.simulation.{Metrics, WorkerActor}
 
 import scala.util.{Failure, Success, Try}
 
 class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
-  conflictResolver: ConflictResolver[ConfigType],
-  smellPropagationFunction: (EnhancedGrid, Map[Direction, (Int, Int)]) => SmellMap)(
-  gridCreatorFactory: ConfigType => GridCreator,
-  movesControllerFactory: ConfigType => MovesController,
-  cellToColor: PartialFunction[GridPart, Color] = PartialFunction.empty
+  gridCreator: GridCreator[ConfigType],
+  planCreator: PlanCreator[ConfigType],
+  planResolver: PlanResolver[ConfigType],
+  emptyMetricsFactory: () => Metrics,
+  smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap,
+  cellToColor: PartialFunction[Cell, Color] = PartialFunction.empty
 ) extends LazyLogging {
 
   private val rawConfig: Config =
@@ -56,7 +56,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, movesControllerFactory, conflictResolver, smellPropagationFunction),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreator, planResolver, emptyMetricsFactory, smellPropagationFunction),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId
@@ -66,10 +66,10 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
     if (config.isSupervisor) {
       val workerIds: Vector[WorkerId] = (1 to math.pow(config.workersRoot, 2).toInt).map(WorkerId)(collection.breakOut)
 
-      val (initialGrid, nonPlanarConnections): (Grid, NonPlanarConnections) = gridCreatorFactory(config).initialGrid
+      val (initialGrid, nonPlanarConnections): (Grid, NonPlanarConnections) = gridCreator.initialGrid
 
       // TODO: simplify to skip this step?
-      val enhancedGrid: EnhancedGrid = EnhancedGrid.apply(initialGrid, nonPlanarConnections)
+      val enhancedGrid: EnhancedGrid = EnhancedGrid(initialGrid, nonPlanarConnections)
 
       val dividedGrid: Seq[(WorkerId, EnhancedGrid, Set[WorkerId])] =
         enhancedGrid.divide(config.workersRoot, workerIds)

@@ -144,7 +144,7 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     }
 
     def moveForaminifera(foraminifera: Foraminifera, x: Int, y: Int, moves: BMap[(Int, Int), Stream[Foraminifera]]): ForminAction = {
-      def calculatePossibleDestinations(x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
+      def calculatePossibleDestinations(x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Cell)] = {
         val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
         Grid.SubcellCoordinates
           .map { case (i, j) => grid.cells(x)(y).smell(i)(j) + moves.get((x, y)).map(formins => config.foraminiferaInitialSignal * formins.size).getOrElse(Signal.Zero) }

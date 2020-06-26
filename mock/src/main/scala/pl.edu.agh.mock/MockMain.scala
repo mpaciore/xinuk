@@ -3,11 +3,11 @@ package pl.edu.agh.mock
 import java.awt.Color
 
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.mock.algorithm.{MockGridCreator, MockMovesController}
+import pl.edu.agh.mock.algorithm.{MockGridCreator, MockPlanCreator, MockPlanResolver}
 import pl.edu.agh.mock.model.MockCell
-import pl.edu.agh.mock.model.parallel.MockConflictResolver
+import pl.edu.agh.mock.simulation.MockMetrics
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, GridPart, Obstacle}
+import pl.edu.agh.xinuk.model.{Cell, DefaultSmellPropagation, Obstacle}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
@@ -18,19 +18,19 @@ object MockMain extends LazyLogging {
     new Simulation(
       configPrefix,
       metricHeaders,
-      MockConflictResolver,
-      DefaultSmellPropagation.calculateSmellAddendsStandard
-    )(
-      MockGridCreator.apply(_),
-      MockMovesController.apply(_),
+      MockGridCreator,
+      MockPlanCreator,
+      MockPlanResolver,
+      () => MockMetrics.empty,
+      DefaultSmellPropagation.calculateSmellAddendsStandard,
       {
         case MockCell(_) => Color.WHITE
         case Obstacle => Color.BLUE
-        case cell: GridPart => cellToColorRegions(cell)
+        case cell: Cell => cellToColorRegions(cell)
       }).start()
   }
 
-  private def cellToColorRegions(cell: GridPart): Color = {
+  private def cellToColorRegions(cell: Cell): Color = {
     val smellValue = cell.smell.values.map(_.value).max.toFloat
     val brightness = Math.pow(smellValue, 0.1).toFloat
     if (smellValue < 0.00001) {
@@ -52,7 +52,7 @@ object MockMain extends LazyLogging {
     }
   }
 
-  private def cellToColor(cell: GridPart): Color = {
+  private def cellToColor(cell: Cell): Color = {
     val smellValue = cell.smell.values.map(_.value).max.toFloat
     val brightness = Math.pow(smellValue, 0.1).toFloat
     val hue = 1f
