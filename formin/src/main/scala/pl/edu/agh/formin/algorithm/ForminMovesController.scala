@@ -6,7 +6,6 @@ import com.avsystem.commons.misc.Opt
 import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model._
 import pl.edu.agh.formin.simulation.ForminMetrics
-import pl.edu.agh.xinuk.algorithm.MovesController
 import pl.edu.agh.xinuk.model._
 
 import scala.collection.immutable.TreeSet
@@ -44,10 +43,10 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
   }
 
 
-  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, Cell)] = {
+  def calculatePossibleDestinations(cell: ForaminiferaCell, x: Int, y: Int, grid: Grid): Iterator[(Int, Int, GridPart)] = {
     val neighbourCellCoordinates = Grid.neighbourCellCoordinates(x, y)
     Grid.SubcellCoordinates
-      .map { case (i, j) => cell.smell(i)(j) }
+      .map { case (i, j) => cell.signal(i)(j) }
       .zipWithIndex
       .sorted(implicitly[Ordering[(Signal, Int)]].reverse)
       .iterator
@@ -57,7 +56,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
   }
 
-  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, Cell)], newGrid: Grid): commons.Opt[(Int, Int, Cell)] = {
+  def selectDestinationCell(possibleDestinations: Iterator[(Int, Int, GridPart)], newGrid: Grid): commons.Opt[(Int, Int, GridPart)] = {
     possibleDestinations
       .map { case (i, j, current) => (i, j, current, newGrid.cells(i)(j)) }
       .collectFirstOpt {
@@ -86,7 +85,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
       val emptyCells =
         Grid.neighbourCellCoordinates(x, y).flatMap {
           case (i, j) =>
@@ -130,7 +129,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     def killForaminifera(cell: ForaminiferaCell, x: Int, y: Int): Unit = {
       foraminiferaDeaths += 1
       foraminiferaTotalLifespan += cell.lifespan
-      val vacated = EmptyCell(cell.smell)
+      val vacated = EmptyCell(cell.signal)
       newGrid.cells(x)(y) = vacated
       grid.cells(x)(y) = vacated
     }
@@ -156,7 +155,7 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
       destination match {
         case Opt((i, j, ForaminiferaAccessible(destination))) =>
           newGrid.cells(i)(j) = destination.withForaminifera(cell.energy - config.foraminiferaLifeActivityCost, cell.lifespan + 1)
-          val vacated = EmptyCell(cell.smell)
+          val vacated = EmptyCell(cell.signal)
           newGrid.cells(x)(y) = vacated
           grid.cells(x)(y) = vacated
         case Opt((i, j, inaccessibleDestination)) =>

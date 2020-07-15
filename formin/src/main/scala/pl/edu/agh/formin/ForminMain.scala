@@ -8,7 +8,7 @@ import pl.edu.agh.formin.config.ForminConfig
 import pl.edu.agh.formin.model.parallel.ForminConflictResolver
 import pl.edu.agh.formin.model.{AlgaeCell, ForaminiferaCell}
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, Cell}
+import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, GridPart}
 
 object ForminMain extends LazyLogging {
   private val configPrefix = "formin"
@@ -23,7 +23,7 @@ object ForminMain extends LazyLogging {
     "algaeTotalLifespan"
   )
 
-  private def cellToColor(cell: Cell): Color = {
+  private def cellToColor(cell: GridPart): Color = {
     cell match {
       case AlgaeCell(_, _) => new Color(0, 128, 0)
       case ForaminiferaCell(_, _, _) => new Color(139, 69, 19)
@@ -35,7 +35,7 @@ object ForminMain extends LazyLogging {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation[ForminConfig](configPrefix, metricHeaders, ForminConflictResolver,
       DefaultSmellPropagation.calculateSmellAddendsStandard)(new ForminMovesController(_)(_),
-      { case cell: Cell => cellToColor(cell) }
+      { case cell: GridPart => cellToColor(cell) }
     ).start()
   }
 

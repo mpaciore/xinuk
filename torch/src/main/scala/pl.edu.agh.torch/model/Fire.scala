@@ -1,23 +1,23 @@
 package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
-import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.{EmptyCell, Cell}
+import pl.edu.agh.xinuk.model.GridPart.SmellMap
+import pl.edu.agh.xinuk.model.{EmptyCell, GridPart}
 
 
-final case class FireCell(smell: SmellMap) extends Cell {
+final case class FireCell(signal: SmellMap) extends GridPart {
   override type Self = FireCell
 
-  override def withSmell(smell: SmellMap): FireCell = copy(smell = smell)
+  override def withSmell(smell: SmellMap): FireCell = copy(signal = smell)
 }
 
-trait FireAccessible[+T <: Cell] {
+trait FireAccessible[+T <: GridPart] {
   def withFire(): T
 }
 
 object FireAccessible {
 
-  def unapply(arg: Cell)(implicit config: TorchConfig): Option[FireAccessible[Cell]] = arg match {
+  def unapply(arg: GridPart)(implicit config: TorchConfig): Option[FireAccessible[GridPart]] = arg match {
     case cell: EmptyCell => Some(unapply(cell))
     case cell: EscapeCell => Some(unapply(cell))
     case cell: HumanCell => Some(unapply(cell))
@@ -26,16 +26,16 @@ object FireAccessible {
 
   def unapply(arg: EmptyCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
     }
 
   def unapply(arg: HumanCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
     }
 
   def unapply(arg: EscapeCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
     new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.smellWith(config.fireInitialSignal))
+      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
     }
 }

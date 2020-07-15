@@ -4,29 +4,31 @@ import com.avsystem.commons.misc.{AbstractNamedEnumCompanion, NamedEnum}
 
 trait XinukConfig {
   def gridSize: Int
-  def guiCellSize: Int
+  def iterationsNumber: Long
+
   def signalSuppressionFactor: Double
   def signalAttenuationFactor: Double
+  def signalSpeedRatio: Int
+
   def workersRoot: Int
+  def isSupervisor: Boolean
   def shardingMod: Int
 
+  def guiCellSize: Int
   def guiType: GuiType
-  def isSupervisor: Boolean
-  def signalSpeedRatio: Int
-  def iterationsNumber: Long
 }
 
 sealed trait GuiType extends NamedEnum
 
 object GuiType extends AbstractNamedEnumCompanion[GuiType] {
 
+  override val values: List[GuiType] = caseObjects
+
   case object None extends GuiType {
     override val name: String = "none"
   }
 
-  case object Basic extends GuiType {
-    override def name: String = "basic"
+  case object Grid extends GuiType {
+    override def name: String = "grid"
   }
-
-  override val values: List[GuiType] = caseObjects
 }

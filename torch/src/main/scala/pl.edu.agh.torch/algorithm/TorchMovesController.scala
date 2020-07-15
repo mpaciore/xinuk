@@ -6,8 +6,7 @@ import com.avsystem.commons.misc.Opt
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.torch.model._
 import pl.edu.agh.torch.simulation.TorchMetrics
-import pl.edu.agh.xinuk.algorithm.MovesController
-import pl.edu.agh.xinuk.model.Cell._
+import pl.edu.agh.xinuk.model.GridPart._
 import pl.edu.agh.xinuk.model._
 
 import scala.util.Random
@@ -66,7 +65,7 @@ final class TorchMovesController extends MovesController[TorchConfig] {
       }
     }
 
-    def reproduce(x: Int, y: Int)(creator: PartialFunction[Cell, Cell]): Unit = {
+    def reproduce(x: Int, y: Int)(creator: PartialFunction[GridPart, GridPart]): Unit = {
       val availableCells =
         grid.getCellAt(x, y).neighbours.toList.flatMap {
           case (_, (i, j)) =>
@@ -99,24 +98,24 @@ final class TorchMovesController extends MovesController[TorchConfig] {
           case Opt((i, j, inaccessibleDestination)) =>
             throw new RuntimeException(s"Human selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
-            newGrid.setCellAt(x, y, cell.copy(cell.smell, cell.crowd, cell.speed))
+            newGrid.setCellAt(x, y, cell.copy(cell.signal, cell.crowd, cell.speed))
         }
       } else {
         destination match {
           case Opt((i, j, HumanAccessible(destination))) =>
             newGrid.setCellAt(i, j, destination.withHuman(cell.crowd.head.crowd, cell.crowd.head.speed))
-            newGrid.setCellAt(x, y, cell.copy(cell.smell - cell.crowd.head.smell, cell.crowd.drop(1), cell.speed))
+            newGrid.setCellAt(x, y, cell.copy(cell.signal - cell.crowd.head.signal, cell.crowd.drop(1), cell.speed))
           case Opt((i, j, inaccessibleDestination)) =>
             throw new RuntimeException(s"Human selected inaccessible destination ($i,$j): $inaccessibleDestination")
           case Opt.Empty =>
-            newGrid.setCellAt(x, y, cell.copy(cell.smell, cell.crowd, cell.speed))
+            newGrid.setCellAt(x, y, cell.copy(cell.signal, cell.crowd, cell.speed))
         }
       }
     }
 
     def calculatePossibleDestinations(x: Int, y: Int): Iterator[(Int, Int)] = {
       val enhancedCell = grid.getCellAt(x, y)
-      random.shuffle(enhancedCell.cell.smell
+      random.shuffle(enhancedCell.cell.signal
         .toList
         .map(_.swap)
         .filter { case (_, direction) => enhancedCell.neighbours.contains(direction) })
@@ -125,7 +124,7 @@ final class TorchMovesController extends MovesController[TorchConfig] {
         .map { case (_, direction) => enhancedCell.neighbours(direction) }
     }
 
-    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int)]): commons.Opt[(Int, Int, Cell)] = {
+    def selectDestinationCell(possibleDestinations: Iterator[(Int, Int)]): commons.Opt[(Int, Int, GridPart)] = {
       possibleDestinations
         .map {
           case (i, j) => (i, j, grid.getCellAt(i, j).cell, newGrid.getCellAt(i, j).cell)
@@ -136,7 +135,7 @@ final class TorchMovesController extends MovesController[TorchConfig] {
     }
 
     def stayInPlace(cell: HumanCell, x: Int, y: Int): Unit = {
-      newGrid.setCellAt(x, y, cell.copy(cell.smell, cell.crowd, cell.speed))
+      newGrid.setCellAt(x, y, cell.copy(cell.signal, cell.crowd, cell.speed))
     }
 
     for {

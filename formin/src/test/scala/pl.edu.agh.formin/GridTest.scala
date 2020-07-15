@@ -62,13 +62,13 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
     grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
 
-    grid.cells(2)(2).smell(0)(0).value shouldBe -1
-    grid.cells(2)(2).smell(0)(1).value shouldBe -1
-    grid.cells(2)(2).smell(0)(2).value shouldBe -1
+    grid.cells(2)(2).signal(0)(0).value shouldBe -1
+    grid.cells(2)(2).signal(0)(1).value shouldBe -1
+    grid.cells(2)(2).signal(0)(2).value shouldBe -1
 
-    grid.cells(3)(2).smell(0)(1).value shouldBe -1.5
+    grid.cells(3)(2).signal(0)(1).value shouldBe -1.5
 
-    grid.cells(3)(1).smell(0)(2).value shouldBe -0.5
+    grid.cells(3)(1).signal(0)(2).value shouldBe -0.5
   }
 
   it should "propagate signal correctly for one algae cell" in {
@@ -76,13 +76,13 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(3)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 2)
     grid.cells(3)(1) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 3, 1)
 
-    grid.cells(2)(2).smell(0)(0).value shouldBe 1
-    grid.cells(2)(2).smell(0)(1).value shouldBe 1
-    grid.cells(2)(2).smell(0)(2).value shouldBe 1
+    grid.cells(2)(2).signal(0)(0).value shouldBe 1
+    grid.cells(2)(2).signal(0)(1).value shouldBe 1
+    grid.cells(2)(2).signal(0)(2).value shouldBe 1
 
-    grid.cells(3)(2).smell(0)(1).value shouldBe 1.5
+    grid.cells(3)(2).signal(0)(1).value shouldBe 1.5
 
-    grid.cells(3)(1).smell(0)(2).value shouldBe 0.5
+    grid.cells(3)(1).signal(0)(2).value shouldBe 0.5
   }
 
   it should "propagate signal correctly between algae and foraminifera cells" in {
@@ -93,26 +93,26 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     grid.cells(2)(2) = gridCellWithAlgaeAfterSignalPropagation
     grid.cells(3)(2) = gridCellWithForaminiferaAfterSignalPropagation
 
-    grid.cells(2)(2).smell(2)(1).value shouldBe -0.5
-    grid.cells(2)(2).smell(2)(0).value shouldBe 1
-    grid.cells(2)(2).smell(2)(2).value shouldBe 1
-    grid.cells(2)(2).smell(0)(0).value shouldBe 1
-    grid.cells(2)(2).smell(0)(1).value shouldBe 1
-    grid.cells(2)(2).smell(0)(2).value shouldBe 1
+    grid.cells(2)(2).signal(2)(1).value shouldBe -0.5
+    grid.cells(2)(2).signal(2)(0).value shouldBe 1
+    grid.cells(2)(2).signal(2)(2).value shouldBe 1
+    grid.cells(2)(2).signal(0)(0).value shouldBe 1
+    grid.cells(2)(2).signal(0)(1).value shouldBe 1
+    grid.cells(2)(2).signal(0)(2).value shouldBe 1
 
-    grid.cells(3)(2).smell(0)(0).value shouldBe -1
-    grid.cells(3)(2).smell(0)(1).value shouldBe 0.5
-    grid.cells(3)(2).smell(0)(2).value shouldBe -1
-    grid.cells(3)(2).smell(2)(0).value shouldBe -1
-    grid.cells(3)(2).smell(2)(1).value shouldBe -1
-    grid.cells(3)(2).smell(2)(2).value shouldBe -1
+    grid.cells(3)(2).signal(0)(0).value shouldBe -1
+    grid.cells(3)(2).signal(0)(1).value shouldBe 0.5
+    grid.cells(3)(2).signal(0)(2).value shouldBe -1
+    grid.cells(3)(2).signal(2)(0).value shouldBe -1
+    grid.cells(3)(2).signal(2)(1).value shouldBe -1
+    grid.cells(3)(2).signal(2)(2).value shouldBe -1
   }
 
   it should "not propagate signal on obstacle cell" in {
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(4)(2) = grid.propagatedSignal(DefaultSmellPropagation.calculateSmellAddendsStandard, 4, 2)
-    grid.cells(3)(2).smell(1)(1).value shouldBe -1
-    grid.cells(4)(2).smell(0)(1).value shouldBe 0
+    grid.cells(3)(2).signal(1)(1).value shouldBe -1
+    grid.cells(4)(2).signal(0)(1).value shouldBe 0
   }
 
   it should "calculate neighbour cells correctly for middle one" in {
@@ -131,51 +131,51 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "make correct cell transformations from empty cell" in {
     val emptyCell: EmptyCell = EmptyCell.Instance
-    val emptyCellWithForaminiferaInstantiated: Cell =
+    val emptyCellWithForaminiferaInstantiated: GridPart =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    val emptyCellWithAlgaeInstantiated: Cell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
+    val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val emptyCellWithSmell: EmptyCell =
-      emptyCell.withSmell(emptyCellWithForaminiferaInstantiated.smell)
+      emptyCell.withSignal(emptyCellWithForaminiferaInstantiated.signal)
     val emptyCellWithForaminifera: ForaminiferaCell =
       ForaminiferaAccessible.unapply(emptyCell).withForaminifera(Energy(20), 3)
     val emptyCellWithAlgae: AlgaeCell = AlgaeAccessible.unapply(emptyCell).withAlgae(6)
 
-    emptyCellWithSmell.smell shouldBe emptyCellWithForaminiferaInstantiated.smell
+    emptyCellWithSmell.signal shouldBe emptyCellWithForaminiferaInstantiated.signal
 
-    emptyCellWithForaminifera.smell shouldBe emptyCellWithForaminiferaInstantiated.smell
+    emptyCellWithForaminifera.signal shouldBe emptyCellWithForaminiferaInstantiated.signal
     emptyCellWithForaminifera.energy shouldBe Energy(20)
     emptyCellWithForaminifera.lifespan shouldBe 3
 
-    emptyCellWithAlgae.smell shouldBe emptyCellWithAlgaeInstantiated.smell
+    emptyCellWithAlgae.signal shouldBe emptyCellWithAlgaeInstantiated.signal
     emptyCellWithAlgae.lifespan shouldBe 6
   }
 
   it should "make correct cell transformations from foraminifera cell" in {
     val foraminiferaCell: ForaminiferaCell =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
-    val emptyCellWithAlgaeInstantiated: Cell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
+    val emptyCellWithAlgaeInstantiated: GridPart = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
     val foraminiferaCellWithSmell: ForaminiferaCell =
-      foraminiferaCell.withSmell(emptyCellWithAlgaeInstantiated.smell)
+      foraminiferaCell.withSignal(emptyCellWithAlgaeInstantiated.signal)
 
-    foraminiferaCellWithSmell.smell shouldBe emptyCellWithAlgaeInstantiated.smell
+    foraminiferaCellWithSmell.signal shouldBe emptyCellWithAlgaeInstantiated.signal
     foraminiferaCellWithSmell.energy shouldBe config.foraminiferaStartEnergy
     foraminiferaCellWithSmell.lifespan shouldBe 0
   }
 
   it should "make correct cell transformations from algae cell" in {
     val algaeCell: AlgaeCell = AlgaeAccessible.unapply(EmptyCell.Instance).withAlgae(0)
-    val emptyCellWithForaminiferaInstantiated: Cell =
+    val emptyCellWithForaminiferaInstantiated: GridPart =
       ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     val emptyCell: EmptyCell = EmptyCell.Instance
     val algaeCellWithSmell: AlgaeCell =
-      algaeCell.withSmell(emptyCellWithForaminiferaInstantiated.smell)
+      algaeCell.withSignal(emptyCellWithForaminiferaInstantiated.signal)
     val algaeCellWithForaminifera: ForaminiferaCell =
       ForaminiferaAccessible.unapply(algaeCell).withForaminifera(Energy(20), 3)
 
-    algaeCellWithSmell.smell shouldBe emptyCellWithForaminiferaInstantiated.smell
+    algaeCellWithSmell.signal shouldBe emptyCellWithForaminiferaInstantiated.signal
     algaeCellWithSmell.lifespan shouldBe 0
 
-    algaeCellWithForaminifera.smell shouldBe emptyCell.smell
+    algaeCellWithForaminifera.signal shouldBe emptyCell.signal
     algaeCellWithForaminifera.energy shouldBe Energy(20.4)
     algaeCellWithForaminifera.lifespan shouldBe 3
   }

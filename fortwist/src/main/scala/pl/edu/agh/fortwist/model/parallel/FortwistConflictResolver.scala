@@ -8,9 +8,9 @@ import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 
 object FortwistConflictResolver extends ConflictResolver[FortwistConfig] {
 
-  import Cell._
+  import GridPart._
 
-  override def resolveConflict(current: Cell, incoming: Cell)(implicit config: FortwistConfig): (Cell, FortwistMetrics) = {
+  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: FortwistConfig): (GridPart, FortwistMetrics) = {
     (current, incoming) match {
       case (Obstacle, _) => (Obstacle, FortwistMetrics.empty())
       case (FortwistCell(currentSmell, currentForaminiferas, currentAlgae), FortwistCell(incomingSmell, incomingForaminiferas, incomingAlgae)) =>

@@ -2,16 +2,16 @@ package pl.edu.agh.torch.algorithm
 
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.torch.model.{EscapeAccessible, FireAccessible, HumanAccessible}
-import pl.edu.agh.xinuk.algorithm.GridCreator
+import pl.edu.agh.xinuk.algorithm.WorldCreator
 import pl.edu.agh.xinuk.model.{EmptyCell, Grid, NonPlanarConnections}
 
 import scala.util.Random
 
-object TorchGridCreator extends GridCreator[TorchConfig] {
+object TorchWorldCreator$ extends WorldCreator[TorchConfig] {
 
   private val random = new Random(System.nanoTime())
 
-  override def initialGrid(implicit config: TorchConfig): (Grid, NonPlanarConnections) = {
+  override def buildWorld(implicit config: TorchConfig): (Grid, NonPlanarConnections) = {
     val grid = Grid.empty()
     var humanCount = 0L
     var fireCount = 0L
