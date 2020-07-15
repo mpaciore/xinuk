@@ -8,12 +8,11 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
-import pl.edu.agh.xinuk.algorithm.{GridCreator, PlanCreator, PlanResolver}
+import pl.edu.agh.xinuk.algorithm.{PlanCreator, PlanResolver, WorldCreator}
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
-import pl.edu.agh.xinuk.model.Cell.SmellMap
-import pl.edu.agh.xinuk.model.EnhancedCell.NeighbourMap
 import pl.edu.agh.xinuk.model._
+import pl.edu.agh.xinuk.model.grid.GridWorld
 import pl.edu.agh.xinuk.simulation.{Metrics, WorkerActor}
 
 import scala.util.{Failure, Success, Try}
@@ -21,13 +20,13 @@ import scala.util.{Failure, Success, Try}
 class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
-  gridCreator: GridCreator[ConfigType],
-  planCreator: PlanCreator[ConfigType],
-  planResolver: PlanResolver[ConfigType],
-  emptyMetricsFactory: () => Metrics,
-  smellPropagationFunction: (EnhancedGrid, NeighbourMap) => SmellMap,
-  cellToColor: PartialFunction[Cell, Color] = PartialFunction.empty
-) extends LazyLogging {
+  gridCreator: WorldCreator[ConfigType],
+  planCreatorFactory: () => PlanCreator[ConfigType],
+  planResolverFactory: () => PlanResolver[ConfigType],
+  emptyMetrics: => Metrics,
+  signalPropagation: SignalPropagation,
+  cellToColor: PartialFunction[CellState, Color] = PartialFunction.empty
+)(implicit directions: Seq[Direction]) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -56,7 +55,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val workerRegionRef: ActorRef =
     ClusterSharding(system).start(
       typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreator, planResolver, emptyMetricsFactory, smellPropagationFunction),
+      entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreatorFactory(), planResolverFactory(), emptyMetrics, signalPropagation),
       settings = ClusterShardingSettings(system),
       extractShardId = WorkerActor.extractShardId,
       extractEntityId = WorkerActor.extractEntityId
@@ -64,30 +63,17 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
   def start(): Unit = {
     if (config.isSupervisor) {
-      val workerIds: Vector[WorkerId] = (1 to math.pow(config.workersRoot, 2).toInt).map(WorkerId)(collection.breakOut)
+      val workerToWorld: Map[WorkerId, World] = gridCreator.prepareWorld().build()
 
-      val (initialGrid, nonPlanarConnections): (Grid, NonPlanarConnections) = gridCreator.initialGrid
-
-      // TODO: simplify to skip this step?
-      val enhancedGrid: EnhancedGrid = EnhancedGrid(initialGrid, nonPlanarConnections)
-
-      val dividedGrid: Seq[(WorkerId, EnhancedGrid, Set[WorkerId])] =
-        enhancedGrid.divide(config.workersRoot, workerIds)
-
-      val workerToIncomingNeighbours: Map[WorkerId, Set[WorkerId]] = workerIds.map({ id =>
-        (id, dividedGrid.filter(_._3.contains(id)).map(_._1).toSet)
-      }).toMap
-
-      val workersInfo: Seq[(WorkerId, EnhancedGrid, Set[WorkerId], Set[WorkerId])] =
-        dividedGrid.map({ case (workerId, grid, outgoingNeighbours) =>
-            (workerId, grid, outgoingNeighbours, workerToIncomingNeighbours(workerId))})
-
-      workersInfo.foreach { case (workerId, grid, outgoingNeighbours, incomingNeighbours) =>
-        if (config.guiType != GuiType.None) {
-          system.actorOf(GuiActor.props(workerRegionRef, workerId, grid.xSize, grid.ySize, cellToColor))
+      workerToWorld.foreach( { case (workerId, world) =>
+        (config.guiType, world) match {
+          case (GuiType.None, _) =>
+          case (GuiType.Grid, gridWorld: GridWorld) =>
+            system.actorOf(GuiActor.props(workerRegionRef, workerId, gridWorld.span, cellToColor))
+          case _ => logger.warn("GUI type incompatible with World format.")
         }
-        workerRegionRef ! WorkerActor.NeighboursInitialized(workerId, grid, outgoingNeighbours, incomingNeighbours)
-      }
+        workerRegionRef ! WorkerActor.WorkerInitialized(workerId, world)
+      })
     }
   }
 

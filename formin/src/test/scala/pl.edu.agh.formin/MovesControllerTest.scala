@@ -47,10 +47,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(20)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).signal(0)(0) = Signal(20)
+    grid.cells(2)(2).signal(0)(2) = Signal(15)
+    grid.cells(2)(2).signal(1)(0) = Signal(-5)
+    grid.cells(2)(2).signal(2)(2) = Signal(-666)
 
     val (x, y, destination) = movesController.calculatePossibleDestinations(cell1, 2, 2, grid).next()
 
@@ -66,10 +66,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(20)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).signal(0)(0) = Signal(20)
+    grid.cells(2)(2).signal(0)(2) = Signal(15)
+    grid.cells(2)(2).signal(1)(0) = Signal(-5)
+    grid.cells(2)(2).signal(2)(2) = Signal(-666)
 
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)
@@ -84,10 +84,10 @@ class MovesControllerTest extends FlatSpecLike with Matchers with BeforeAndAfter
     grid.cells(3)(2) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
     grid.cells(2)(3) = ForaminiferaAccessible.unapply(EmptyCell.Instance).withForaminifera(config.foraminiferaStartEnergy, 0)
 
-    grid.cells(2)(2).smell(0)(0) = Signal(4)
-    grid.cells(2)(2).smell(0)(2) = Signal(15)
-    grid.cells(2)(2).smell(1)(0) = Signal(-5)
-    grid.cells(2)(2).smell(2)(2) = Signal(-666)
+    grid.cells(2)(2).signal(0)(0) = Signal(4)
+    grid.cells(2)(2).signal(0)(2) = Signal(15)
+    grid.cells(2)(2).signal(1)(0) = Signal(-5)
+    grid.cells(2)(2).signal(2)(2) = Signal(-666)
 
     val destinations = movesController.calculatePossibleDestinations(cell1, 2, 2, grid)
     val destination = movesController.selectDestinationCell(destinations,grid)

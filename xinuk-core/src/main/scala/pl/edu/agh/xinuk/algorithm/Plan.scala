@@ -1,21 +1,14 @@
 package pl.edu.agh.xinuk.algorithm
 
-import pl.edu.agh.xinuk.model.Cell
+import pl.edu.agh.xinuk.model.{CellId, CellState}
 
-final class MovePlan(val action: Move, val consequence: Move)
+final case class StateUpdate(value: CellState) extends AnyVal
 
-object MovePlan {
-  def apply(action: Move, consequence: Move): MovePlan =
-    new MovePlan(action, consequence)
-
-  def unapply(arg: MovePlan): (Move, Move) = (arg.action, arg.consequence)
+final case class Plan(action: StateUpdate, consequence: StateUpdate) {
+  def toTargeted(actionTarget: CellId, consequenceTarget: CellId): TargetedPlan =
+    TargetedPlan(TargetedStateUpdate(actionTarget, action), TargetedStateUpdate(consequenceTarget, consequence))
 }
 
-final class Move(val update: Cell, val targetCoordinates: (Int, Int))
+final case class TargetedStateUpdate(target: CellId, update: StateUpdate)
 
-object Move {
-  def apply(update: Cell, targetCoordinates: (Int, Int)): Move =
-    new Move(update, targetCoordinates)
-
-  def unapply(arg: Move): (Cell, (Int, Int)) = (arg.update, arg.targetCoordinates)
-}
+final case class TargetedPlan(action: TargetedStateUpdate, consequence: TargetedStateUpdate)

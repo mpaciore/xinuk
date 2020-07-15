@@ -8,14 +8,14 @@ import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 
 object TorchConflictResolver extends ConflictResolver[TorchConfig] {
 
-  import Cell._
+  import GridPart._
 
-  override def resolveConflict(current: Cell, incoming: Cell)(implicit config: TorchConfig): (Cell, TorchMetrics) = {
+  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: TorchConfig): (GridPart, TorchMetrics) = {
     (current, incoming) match {
       case (EmptyCell(currentSmell), incomingCell) =>
-        (incomingCell.withSmell(incomingCell.smell + currentSmell), TorchMetrics.empty())
-      case (currentCell: Cell, EmptyCell(incomingSmell)) =>
-        (currentCell.withSmell(currentCell.smell + incomingSmell), TorchMetrics.empty())
+        (incomingCell.withSignal(incomingCell.signal + currentSmell), TorchMetrics.empty())
+      case (currentCell: GridPart, EmptyCell(incomingSmell)) =>
+        (currentCell.withSignal(currentCell.signal + incomingSmell), TorchMetrics.empty())
       case (EscapeCell(currentSmell), HumanCell(_, _, _)) =>
         (EscapeCell(currentSmell), TorchMetrics(0, 0, 0, 0, 1))
       case (EscapeCell(_), FireCell(incomingCell)) =>

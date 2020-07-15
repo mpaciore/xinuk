@@ -8,14 +8,14 @@ import pl.edu.agh.xinuk.model.parallel.ConflictResolver
 
 object ForminConflictResolver extends ConflictResolver[ForminConfig] {
 
-  import Cell._
+  import GridPart._
 
-  override def resolveConflict(current: Cell, incoming: Cell)(implicit config: ForminConfig): (Cell, ForminMetrics) = {
+  override def resolveConflict(current: GridPart, incoming: GridPart)(implicit config: ForminConfig): (GridPart, ForminMetrics) = {
     (current, incoming) match {
       case (EmptyCell(currentSmell), incomingCell) =>
-        (incomingCell.withSmell(incomingCell.smell + currentSmell), ForminMetrics.empty())
-      case (currentCell: Cell, EmptyCell(incomingSmell)) =>
-        (currentCell.withSmell(currentCell.smell + incomingSmell), ForminMetrics.empty())
+        (incomingCell.withSignal(incomingCell.signal + currentSmell), ForminMetrics.empty())
+      case (currentCell: GridPart, EmptyCell(incomingSmell)) =>
+        (currentCell.withSignal(currentCell.signal + incomingSmell), ForminMetrics.empty())
       case (AlgaeCell(currentSmell, currentLifespan), ForaminiferaCell(energy, incomingSmell, incomingLifespan)) =>
         (ForaminiferaCell(energy + config.algaeEnergeticCapacity, incomingSmell + currentSmell, incomingLifespan), ForminMetrics(0, 0, 0, 0, 0, 1, 0, currentLifespan))
       case (ForaminiferaCell(energy, currentSmell, currentLifespan), AlgaeCell(incomingSmell, incomingLifespan)) =>
