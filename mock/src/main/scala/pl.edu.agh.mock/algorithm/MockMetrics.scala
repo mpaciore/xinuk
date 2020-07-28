@@ -1,6 +1,6 @@
-package pl.edu.agh.mock.simulation
+package pl.edu.agh.mock.algorithm
 
-import pl.edu.agh.xinuk.simulation.Metrics
+import pl.edu.agh.xinuk.algorithm.Metrics
 
 final case class MockMetrics(mockCount: Long, mockMoves: Long) extends Metrics {
   override def log: String = {

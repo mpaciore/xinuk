@@ -24,9 +24,9 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     var foraminiferaCount = 0L
     var algaeCount = 0.0
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && y != 0 && x != config.worldSize - 1 && y != config.worldSize - 1
     } {
       if (random.nextDouble() < config.foraminiferaSpawnChance) {
         val foraminiferas = Vector(Foraminifera.create())
@@ -174,8 +174,8 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
     } {
       this.grid.cells(x)(y) match {
         case FortwistCell(_, foraminiferas, algae) =>
@@ -191,8 +191,8 @@ final class FortwistMovesController(bufferZone: TreeSet[(Int, Int)])(implicit co
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
     } makeMove(x, y)
 
     val metrics = FortwistMetrics(

@@ -26,7 +26,7 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     signalSpeedRatio = 2,
     signalSuppressionFactor = 0.5,
     signalAttenuationFactor = 1,
-    gridSize = 5,
+    worldSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
     foraminiferaInitialSignal = Signal(-1),
@@ -61,9 +61,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == 0 || x == config.gridSize - 1 && y == 0 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == 0 || x == config.worldSize - 1 && y == 0 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -83,9 +83,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -105,9 +105,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == 0 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == 0 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -127,8 +127,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
       if x == 0 || y == 0
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
@@ -149,9 +149,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 || y == 0
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 || y == 0
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -173,17 +173,17 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == 0 && y != 0 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == 0 && y != 0 && y != config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe Obstacle
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 && (y == 0 || y == config.gridSize - 1)
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 && (y == 0 || y == config.worldSize - 1)
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -205,17 +205,17 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && x != config.gridSize - 1 && y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && x != config.worldSize - 1 && y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe Obstacle
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 || y == 0
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 || y == 0
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -237,17 +237,17 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && x != config.gridSize - 1 && y == 0
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && x != config.worldSize - 1 && y == 0
     } {
       grid.cells(x)(y) shouldBe Obstacle
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -269,17 +269,17 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val grid: Grid = worker.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == config.gridSize - 1 && y != 0 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == config.worldSize - 1 && y != 0 && y != config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe Obstacle
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == 0 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == 0 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[BufferCell]
     }
@@ -312,9 +312,9 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
     val workers2Grid: Grid = worker2.underlyingActor.asInstanceOf[WorkerActor[ForminConfig]].grid
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && x != config.gridSize - 1 && y != 0 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && x != config.worldSize - 1 && y != 0 && y != config.worldSize - 1
     } {
       workers2Grid.cells(x)(y) = EmptyCell.Instance
     }
@@ -325,8 +325,8 @@ class ParallelTest extends FlatSpec with Matchers with Eventually with ScalaFutu
 
     worker2 ! WorkerActor.IterationPartFinished(WorkerId(5), WorkerId(4), 1, bufferArray)
 
-    workers2Grid.cells(1)(config.gridSize - 2) shouldBe an[ForaminiferaCell]
-    workers2Grid.cells(2)(config.gridSize - 2) shouldBe an[AlgaeCell]
+    workers2Grid.cells(1)(config.worldSize - 2) shouldBe an[ForaminiferaCell]
+    workers2Grid.cells(2)(config.worldSize - 2) shouldBe an[AlgaeCell]
   }
 
 }

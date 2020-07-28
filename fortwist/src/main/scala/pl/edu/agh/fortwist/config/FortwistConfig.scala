@@ -30,7 +30,7 @@ final case class FortwistConfig(
                                  signalSpeedRatio: Int,
                                  signalSuppressionFactor: Double,
                                  signalAttenuationFactor: Double,
-                                 gridSize: Int,
+                                 worldSize: Int,
                                  foraminiferaSpawnChance: Double,
                                  foraminiferaInitialSignal: Signal,
                                  algaeSignalMultiplier: Signal,

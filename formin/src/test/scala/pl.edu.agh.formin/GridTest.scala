@@ -18,7 +18,7 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
     signalSpeedRatio = 2,
     signalSuppressionFactor = 0.5,
     signalAttenuationFactor = 1,
-    gridSize = 5,
+    worldSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
     foraminiferaInitialSignal = Signal(-1),
@@ -39,9 +39,9 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   "A Grid" should "have obstacles around" in {
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x == 0 || x == config.gridSize - 1 && y == 0 || y == config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x == 0 || x == config.worldSize - 1 && y == 0 || y == config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe Obstacle
     }
@@ -49,9 +49,9 @@ class GridTest extends FlatSpecLike with Matchers with BeforeAndAfter {
 
   it should "have empty cells inside" in {
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && x != config.gridSize - 1 && y != 0 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && x != config.worldSize - 1 && y != 0 && y != config.worldSize - 1
     } {
       grid.cells(x)(y) shouldBe an[EmptyCell]
     }

@@ -1,8 +1,12 @@
 package pl.edu.agh.xinuk.model
 
+import pl.edu.agh.xinuk.config.XinukConfig
+
 trait CellId
 
-trait CellContents
+trait CellContents {
+  def passiveSignal()(implicit config: XinukConfig): SignalMap = SignalMap.empty
+}
 
 case object Empty extends CellContents
 
@@ -10,6 +14,17 @@ case object Obstacle extends CellContents
 
 case class CellState(contents: CellContents, signalMap: SignalMap) {
   def withSignal(signalMap: SignalMap): CellState = CellState(contents, signalMap)
+}
+
+object CellState {
+  def empty()(implicit config: XinukConfig): CellState =
+    CellState(Empty)
+
+  def obstacle()(implicit config: XinukConfig): CellState =
+    CellState(Obstacle)
+
+  def apply(contents: CellContents)(implicit config: XinukConfig): CellState =
+    CellState(contents, SignalMap.empty)
 }
 
 case class Cell(id: CellId, var state: CellState) {
@@ -23,12 +38,9 @@ case class Cell(id: CellId, var state: CellState) {
 }
 
 object Cell {
-  def empty(id: CellId)(implicit directions: Seq[Direction]): Cell =
-    create(id, CellState(Empty, SignalMap.empty))
+  def empty(id: CellId)(implicit config: XinukConfig): Cell =
+    Cell(id, CellState.empty())
 
-  def obstacle(id: CellId)(implicit directions: Seq[Direction]): Cell =
-    create(id, CellState(Obstacle, SignalMap.empty))
-
-  def create(id: CellId, state: CellState): Cell =
-    Cell(id, state)
+  def obstacle(id: CellId)(implicit config: XinukConfig): Cell =
+    Cell(id, CellState.obstacle())
 }

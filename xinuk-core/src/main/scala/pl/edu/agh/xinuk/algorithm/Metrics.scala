@@ -1,4 +1,4 @@
-package pl.edu.agh.xinuk.simulation
+package pl.edu.agh.xinuk.algorithm
 
 trait Metrics {
   def log: String

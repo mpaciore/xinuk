@@ -1,20 +1,22 @@
 package pl.edu.agh.mock.config
 
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
-import pl.edu.agh.xinuk.model.Signal
+import pl.edu.agh.xinuk.model.{Signal, WorldType}
 
-final case class MockConfig(
-                             gridSize: Int,
-                             guiCellSize: Int,
-                             signalSuppressionFactor: Double,
-                             signalAttenuationFactor: Double,
-                             workersRoot: Int,
-                             shardingMod: Int,
+final case class MockConfig(worldSize: Int,
+                            worldType: WorldType,
+                            iterationsNumber: Long,
 
-                             guiType: GuiType,
-                             isSupervisor: Boolean,
-                             signalSpeedRatio: Int,
-                             iterationsNumber: Long,
+                            signalSuppressionFactor: Double,
+                            signalAttenuationFactor: Double,
+                            signalSpeedRatio: Int,
 
-                             mockInitialSignal: Signal
+                            workersRoot: Int,
+                            isSupervisor: Boolean,
+                            shardingMod: Int,
+
+                            guiType: GuiType,
+                            guiCellSize: Int,
+
+                            mockInitialSignal: Signal
                            ) extends XinukConfig

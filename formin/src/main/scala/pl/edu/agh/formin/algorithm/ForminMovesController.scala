@@ -22,9 +22,9 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     var foraminiferaCount = 0L
     var algaeCount = 0L
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
-      if x != 0 && y != 0 && x != config.gridSize - 1 && y != config.gridSize - 1
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
+      if x != 0 && y != 0 && x != config.worldSize - 1 && y != config.worldSize - 1
     } {
       if (random.nextDouble() < config.spawnChance) {
         grid.cells(x)(y) =
@@ -167,8 +167,8 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
     } {
       this.grid.cells(x)(y) match {
         case ForaminiferaCell(energy, _, _) =>
@@ -184,8 +184,8 @@ final class ForminMovesController(bufferZone: TreeSet[(Int, Int)])(implicit conf
     }
 
     for {
-      x <- 0 until config.gridSize
-      y <- 0 until config.gridSize
+      x <- 0 until config.worldSize
+      y <- 0 until config.worldSize
     } makeMove(x, y)
 
     val metrics = ForminMetrics(foraminiferaCount, algaeCount, foraminiferaDeaths, foraminiferaTotalEnergy, foraminiferaReproductionsCount, consumedAlgaeCount, foraminiferaTotalLifespan, algaeTotalLifespan)

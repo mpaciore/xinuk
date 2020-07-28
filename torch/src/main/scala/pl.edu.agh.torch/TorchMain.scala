@@ -3,44 +3,61 @@ package pl.edu.agh.torch
 import java.awt.Color
 
 import com.typesafe.scalalogging.LazyLogging
-import pl.edu.agh.torch.algorithm.{TorchWorldCreator$, TorchPlanCreator, TorchPlanResolver}
-import pl.edu.agh.torch.model.{EscapeCell, FireCell, HumanCell}
-import pl.edu.agh.torch.simulation.TorchMetrics
+import pl.edu.agh.torch.algorithm.{TorchMetrics, TorchPlanCreator, TorchPlanResolver, TorchWorldCreator}
+import pl.edu.agh.torch.model.{Exit, Fire, Person}
 import pl.edu.agh.xinuk.Simulation
-import pl.edu.agh.xinuk.model.{DefaultSmellPropagation, GridPart}
+import pl.edu.agh.xinuk.model.grid.GridSignalPropagation
+import pl.edu.agh.xinuk.model.{CellState, Obstacle, Signal}
 
 object TorchMain extends LazyLogging {
   private val configPrefix = "torch"
   private val metricHeaders = Vector(
     "peopleCount",
     "fireCount",
-    "escapeCount",
+    "exitCount",
     "peopleDeaths",
     "peopleEscapes"
   )
-
-  private def cellToColor(cell: GridPart): Color = {
-    cell match {
-      case HumanCell(_, _, _) => Color.BLUE
-      case FireCell(_) => Color.ORANGE
-      case EscapeCell(_) => new Color(139, 69, 19)
-      case _ => Color.WHITE
-    }
-  }
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation(
       configPrefix,
       metricHeaders,
-      TorchWorldCreator$,
+      TorchWorldCreator,
       TorchPlanCreator,
       TorchPlanResolver,
       TorchMetrics.empty,
-      DefaultSmellPropagation.calculateSmellAddendsStandard,
-      { case cell: GridPart => cellToColor(cell) }
-    ).start()
+      GridSignalPropagation.Standard,
+      {
+        case cellState =>
+          cellState.contents match {
+            case Person(_) => Color.BLUE
+            case Fire => Color.ORANGE
+            case Exit => new Color(139, 69, 19)
+            case Obstacle => Color.BLACK
+            case _ => Color.WHITE
+//            case _ => cellToColorSign(cellState)
+          }
+      }).start()
   }
 
+  private def cellToColorSign(cellState: CellState): Color = {
+    val maxSignal = cellState.signalMap
+      .values
+      .toSeq
+      .sortBy(s => -Math.abs(s.value))
+      .collectFirst({ case s: Signal => s.value })
+      .getOrElse(0d)
+
+    val brightness = Math.min(Math.max(0.2, Math.pow(Math.abs(maxSignal), 0.5)), 1).toFloat
+    val saturation = 1f
+    val hue = if (maxSignal >= 0) {
+      1f
+    } else {
+      0.33f
+    }
+    Color.getHSBColor(hue, saturation, brightness)
+  }
 }
 

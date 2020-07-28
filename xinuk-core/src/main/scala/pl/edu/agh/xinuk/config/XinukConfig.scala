@@ -1,9 +1,11 @@
 package pl.edu.agh.xinuk.config
 
 import com.avsystem.commons.misc.{AbstractNamedEnumCompanion, NamedEnum}
+import pl.edu.agh.xinuk.model.WorldType
 
 trait XinukConfig {
-  def gridSize: Int
+  def worldSize: Int
+  def worldType: WorldType
   def iterationsNumber: Long
 
   def signalSuppressionFactor: Double

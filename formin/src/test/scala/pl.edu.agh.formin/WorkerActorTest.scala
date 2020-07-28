@@ -23,7 +23,7 @@ class WorkerActorTest extends FlatSpecLike with Matchers with Eventually with Sc
     signalSpeedRatio = 2,
     signalSuppressionFactor = 0.5,
     signalAttenuationFactor = 1,
-    gridSize = 5,
+    worldSize = 5,
     spawnChance = 0.1,
     foraminiferaSpawnChance = 0.5,
     foraminiferaInitialSignal = Signal(-1),
