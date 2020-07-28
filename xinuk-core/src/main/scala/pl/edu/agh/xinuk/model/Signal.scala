@@ -1,5 +1,7 @@
 package pl.edu.agh.xinuk.model
 
+import pl.edu.agh.xinuk.config.XinukConfig
+
 
 final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
   def +(other: Signal): Signal = Signal(value + other.value)
@@ -22,23 +24,23 @@ object Signal {
 final case class SignalMap(value: Map[Direction, Signal]) extends AnyVal {
   def apply(direction: Direction): Signal = value(direction)
 
-  def +(other: SignalMap)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) + other(d))).toMap
+  def +(other: SignalMap)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) + other(d))).toMap
 
-  def +(added: Signal)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) + added)).toMap
+  def +(added: Signal)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) + added)).toMap
 
-  def -(other: SignalMap)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) - other(d))).toMap
+  def -(other: SignalMap)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) - other(d))).toMap
 
-  def -(deducted: Signal)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) - deducted)).toMap
+  def -(deducted: Signal)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) - deducted)).toMap
 
-  def *(factor: Double)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) * factor)).toMap
+  def *(factor: Double)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) * factor)).toMap
 
-  def /(divisor: Double)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, this(d) / divisor)).toMap
+  def /(divisor: Double)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, this(d) / divisor)).toMap
 }
 
 object SignalMap {
@@ -48,9 +50,9 @@ object SignalMap {
   implicit def signalMap2Map(signalMap: SignalMap): Map[Direction, Signal] =
     signalMap.value
 
-  def empty(implicit directions: Seq[Direction]): SignalMap =
+  def empty(implicit config: XinukConfig): SignalMap =
     uniform(Signal.zero)
 
-  def uniform(initialSignal: Signal)(implicit directions: Seq[Direction]): SignalMap =
-    directions.map(d => (d, initialSignal)).toMap
+  def uniform(initialSignal: Signal)(implicit config: XinukConfig): SignalMap =
+    config.worldType.directions.map(d => (d, initialSignal)).toMap
 }

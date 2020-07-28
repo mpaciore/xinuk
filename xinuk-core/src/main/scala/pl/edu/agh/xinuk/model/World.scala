@@ -1,5 +1,12 @@
 package pl.edu.agh.xinuk.model
 
+import pl.edu.agh.xinuk.config.XinukConfig
+
+
+trait WorldType {
+  def directions: Seq[Direction]
+}
+
 trait World {
   def cells: Map[CellId, Cell]
 
@@ -15,11 +22,11 @@ trait World {
 
   def cellToWorker: Map[CellId, WorkerId]
 
-  def calculateSignalUpdates(signalPropagation: SignalPropagation)(implicit directions: Seq[Direction]): Map[CellId, SignalMap] = {
+  def calculateSignalUpdates(signalPropagation: SignalPropagation)(implicit config: XinukConfig): Map[CellId, SignalMap] = {
     cells.keys.map { cellId =>
       val neighbourSignals = cellNeighbours(cellId)
         .map { case (direction, neighbourId) => (direction, cells(neighbourId).state.signalMap) }
-      (cellId, signalPropagation.calculateUpdate(directions, neighbourSignals))
+      (cellId, signalPropagation.calculateUpdate(neighbourSignals))
     }
   }.toMap
 }

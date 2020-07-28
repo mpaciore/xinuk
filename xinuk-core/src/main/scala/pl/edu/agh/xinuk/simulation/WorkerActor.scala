@@ -17,21 +17,19 @@ class WorkerActor[ConfigType <: XinukConfig](
   planResolver: PlanResolver[ConfigType],
   emptyMetrics: => Metrics,
   signalPropagation: SignalPropagation
-)(implicit config: ConfigType, directions: Seq[Direction]) extends Actor with Stash {
+)(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
 
-  var logger: Logger = _
-  var id: WorkerId = _
-  var world: World = _
-
   val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
-  var iterationMetrics: Metrics = _
-  var currentIteration: Long = _
-
   val plansStash: mutable.Map[Long, Seq[Seq[TargetedPlan]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
   val consequencesStash: mutable.Map[Long, Seq[Seq[TargetedStateUpdate]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
   val signalUpdatesStash: mutable.Map[Long, Seq[Seq[(CellId, SignalMap)]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
+  var logger: Logger = _
+  var id: WorkerId = _
+  var world: World = _
+  var iterationMetrics: Metrics = _
+  var currentIteration: Long = _
 
   override def receive: Receive = stopped
 
@@ -72,7 +70,7 @@ class WorkerActor[ConfigType <: XinukConfig](
       val plans: Seq[TargetedPlan] = world.localCells.values.flatMap(createPlans).toSeq
       distributePlans(currentIteration, plans)
 
-    case RemotePlans(_, _, iteration, remotePlans) =>
+    case RemotePlans(_, iteration, remotePlans) =>
       plansStash(iteration) :+= remotePlans
       if (plansStash(currentIteration).size == world.incomingWorkerNeighbours.size) {
         val shuffledPlans: Seq[TargetedPlan] = shuffleUngroup(flatGroup(plansStash(currentIteration))(_.action.target))
@@ -81,10 +79,10 @@ class WorkerActor[ConfigType <: XinukConfig](
         acceptedPlans.foreach(plan => applyUpdate(plan.action))
 
         plansStash.remove(currentIteration)
-        distributeConsequences(currentIteration, acceptedPlans.map(_.consequence))
+        distributeConsequences(currentIteration, acceptedPlans.flatMap(_.consequence))
       }
 
-    case RemoteConsequences(_, _, iteration, remoteConsequences) =>
+    case RemoteConsequences(_, iteration, remoteConsequences) =>
       consequencesStash(iteration) :+= remoteConsequences
       if (consequencesStash(currentIteration).size == world.incomingWorkerNeighbours.size) {
         val consequences: Seq[TargetedStateUpdate] = flatGroup(consequencesStash(currentIteration))(_.target).flatMap(_._2).toSeq
@@ -94,7 +92,8 @@ class WorkerActor[ConfigType <: XinukConfig](
         distributeSignal(currentIteration, signalUpdates)
       }
 
-    case RemoteSignal(_, _, iteration, remoteSignalUpdates) =>
+    // TODO send remote cell proxies as well
+    case RemoteSignal(_, iteration, remoteSignalUpdates) =>
       signalUpdatesStash(iteration) :+= remoteSignalUpdates.toSeq
       if (signalUpdatesStash(currentIteration).size == world.incomingWorkerNeighbours.size) {
         val signalUpdates: Map[CellId, SignalMap] = flatGroup(signalUpdatesStash(currentIteration))(_._1).map {
@@ -111,13 +110,15 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def createPlans(cell: Cell): Seq[TargetedPlan] = {
     val neighbourStates = world.cellNeighbours(cell.id)
       .map { case (direction, neighbourId) => (direction, world.cells(neighbourId).state) }
-    val (localPlans, metrics) = planCreator.createPlans(cell.state, neighbourStates)
+    val (localPlans, metrics) = planCreator.createPlans(currentIteration, cell.state, neighbourStates)
     iterationMetrics += metrics
     localPlans.flatMap {
       case (direction, plans) =>
         val actionTarget = world.cellNeighbours(cell.id)(direction)
         val consequenceTarget = cell.id
-        plans.map { _.toTargeted(actionTarget, consequenceTarget) }
+        plans.map {
+          _.toTargeted(actionTarget, consequenceTarget)
+        }
     }.toSeq
   }
 
@@ -143,24 +144,15 @@ class WorkerActor[ConfigType <: XinukConfig](
     signalUpdates.foreach {
       case (cellId, signalUpdate) =>
         val oldSignal = world.cells(cellId).state.signalMap
-        val newSignal = oldSignal * config.signalAttenuationFactor + signalUpdate * config.signalSuppressionFactor
+        val generatedSignal = world.cells(cellId).state.contents.passiveSignal()
+        val newSignal = oldSignal * config.signalAttenuationFactor + signalUpdate * config.signalSuppressionFactor + generatedSignal
         world.cells(cellId).updateSignal(newSignal)
     }
   }
 
   private def distributePlans(iteration: Long, plansToDistribute: Seq[TargetedPlan]): Unit = {
     val grouped = groupByWorker(plansToDistribute) { plan => plan.action.target }
-    distribute(grouped)(Seq.empty, { case (workerId, data) => RemotePlans(id, workerId, iteration, data) })
-  }
-
-  private def distributeConsequences(iteration: Long, consequencesToDistribute: Seq[TargetedStateUpdate]): Unit = {
-    val grouped = groupByWorker(consequencesToDistribute) { update => update.target }
-    distribute(grouped)(Seq.empty, { case (workerId, data) => RemoteConsequences(id, workerId, iteration, data) })
-  }
-
-  private def distributeSignal(iteration: Long, signalToDistribute: Map[CellId, SignalMap]): Unit = {
-    val grouped = groupByWorker(signalToDistribute.toSeq) { case (id, _) => id }
-    distribute(grouped)(Seq.empty, { case (workerId, data) => RemoteSignal(id, workerId, iteration, data.toMap) })
+    distribute(grouped)(Seq.empty, { case (workerId, data) => RemotePlans(workerId, iteration, data) })
   }
 
   private def distribute[A](groups: Map[WorkerId, A])(default: => A, msgCreator: (WorkerId, A) => Any): Unit = {
@@ -169,20 +161,32 @@ class WorkerActor[ConfigType <: XinukConfig](
     }
   }
 
+  private def groupByWorker[A](items: Seq[A])(idExtractor: A => CellId): Map[WorkerId, Seq[A]] = {
+    items.groupBy { item => world.cellToWorker(idExtractor(item)) }
+  }
+
+  private def distributeConsequences(iteration: Long, consequencesToDistribute: Seq[TargetedStateUpdate]): Unit = {
+    val grouped = groupByWorker(consequencesToDistribute) { update => update.target }
+    distribute(grouped)(Seq.empty, { case (workerId, data) => RemoteConsequences(workerId, iteration, data) })
+  }
+
+  private def distributeSignal(iteration: Long, signalToDistribute: Map[CellId, SignalMap]): Unit = {
+    val grouped = groupByWorker(signalToDistribute.toSeq) { case (id, _) => id }
+    distribute(grouped)(Seq.empty, { case (workerId, data) => RemoteSignal(workerId, iteration, data.toMap) })
+  }
+
   private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
     logger.info(WorkerActor.MetricsMarker, "{};{}", iteration.toString, metrics: Any)
   }
 
   private def flatGroup[A](seqs: Seq[Seq[A]])(idExtractor: A => CellId): Map[CellId, Seq[A]] = {
-    seqs.flatten.groupBy { idExtractor(_) }
+    seqs.flatten.groupBy {
+      idExtractor(_)
+    }
   }
 
   private def shuffleUngroup[*, V](groups: Map[*, Seq[V]]): Seq[V] = {
     Random.shuffle(groups.keys.toList).flatMap(k => Random.shuffle(groups(k)))
-  }
-
-  private def groupByWorker[A](items: Seq[A])(idExtractor: A => CellId): Map[WorkerId, Seq[A]] = {
-    items.groupBy { item => world.cellToWorker(idExtractor(item)) }
   }
 }
 
@@ -192,47 +196,50 @@ object WorkerActor {
 
   final val MetricsMarker = MarkerFactory.getMarker("METRICS")
 
+  def props[ConfigType <: XinukConfig](regionRef: => ActorRef,
+                                       planCreator: PlanCreator[ConfigType],
+                                       planResolver: PlanResolver[ConfigType],
+                                       emptyMetrics: => Metrics,
+                                       signalPropagation: SignalPropagation,
+                                      )(implicit config: ConfigType): Props = {
+    Props(new WorkerActor(regionRef, planCreator, planResolver, emptyMetrics, signalPropagation))
+  }
+
+  def extractShardId(implicit config: XinukConfig): ExtractShardId = {
+    case SubscribeGridInfo(id) => idToShard(id)
+    case WorkerInitialized(id, _) => idToShard(id)
+    case RemotePlans(id, _, _) => idToShard(id)
+    case RemoteConsequences(id, _, _) => idToShard(id)
+    case RemoteSignal(id, _, _) => idToShard(id)
+  }
+
+  @inline private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
+
+  def extractEntityId: ExtractEntityId = {
+    case msg@SubscribeGridInfo(id) =>
+      (idToEntity(id), msg)
+    case msg@WorkerInitialized(id, _) =>
+      (idToEntity(id), msg)
+    case msg@RemotePlans(id, _, _) =>
+      (idToEntity(id), msg)
+    case msg@RemoteConsequences(id, _, _) =>
+      (idToEntity(id), msg)
+    case msg@RemoteSignal(id, _, _) =>
+      (idToEntity(id), msg)
+  }
+
+  @inline private def idToEntity(id: WorkerId): String = id.value.toString
+
   final case class StartIteration private(i: Long) extends AnyVal
 
   final case class WorkerInitialized(id: WorkerId, world: World)
 
   final case class SubscribeGridInfo(id: WorkerId)
 
-  final case class RemotePlans private(from: WorkerId, to: WorkerId, iteration: Long, plans: Seq[TargetedPlan])
+  final case class RemotePlans private(id: WorkerId, iteration: Long, plans: Seq[TargetedPlan])
 
-  final case class RemoteConsequences private(from: WorkerId, to: WorkerId, iteration: Long, consequences: Seq[TargetedStateUpdate])
+  final case class RemoteConsequences private(id: WorkerId, iteration: Long, consequences: Seq[TargetedStateUpdate])
 
-  final case class RemoteSignal private(from: WorkerId, to: WorkerId, iteration: Long, signalUpdates: Map[CellId, SignalMap])
+  final case class RemoteSignal private(id: WorkerId, iteration: Long, signalUpdates: Map[CellId, SignalMap])
 
-  def props[ConfigType <: XinukConfig](regionRef: => ActorRef,
-                                       planCreator: PlanCreator[ConfigType],
-                                       planResolver: PlanResolver[ConfigType],
-                                       emptyMetrics: => Metrics,
-                                       signalPropagation: SignalPropagation,
-                                      )(implicit config: ConfigType, directions: Seq[Direction]): Props = {
-    Props(new WorkerActor(regionRef, planCreator, planResolver, emptyMetrics, signalPropagation))
-  }
-
-  private def idToShard(id: WorkerId)(implicit config: XinukConfig): String = (id.value % config.shardingMod).toString
-
-  def extractShardId(implicit config: XinukConfig): ExtractShardId = {
-    case SubscribeGridInfo(id) => idToShard(id)
-    case WorkerInitialized(id, _) => idToShard(id)
-    case RemotePlans(_, id, _, _) => idToShard(id)
-    case RemoteConsequences(_, id, _, _) => idToShard(id)
-    case RemoteSignal(_, id, _, _) => idToShard(id)
-  }
-
-  def extractEntityId: ExtractEntityId = {
-    case msg@SubscribeGridInfo(id) =>
-      (id.value.toString, msg)
-    case msg@WorkerInitialized(id, _) =>
-      (id.value.toString, msg)
-    case msg@RemotePlans(_, to, _, _) =>
-      (to.value.toString, msg)
-    case msg@RemoteConsequences(_, to, _, _) =>
-      (to.value.toString, msg)
-    case msg@RemoteSignal(_, to, _, _) =>
-      (to.value.toString, msg)
-  }
 }

@@ -1,41 +1,28 @@
 package pl.edu.agh.torch.model
 
 import pl.edu.agh.torch.config.TorchConfig
-import pl.edu.agh.xinuk.model.GridPart.SmellMap
-import pl.edu.agh.xinuk.model.{EmptyCell, GridPart}
+import pl.edu.agh.xinuk.config.XinukConfig
+import pl.edu.agh.xinuk.model.{CellContents, CellState, Empty, SignalMap}
 
-
-final case class FireCell(signal: SmellMap) extends GridPart {
-  override type Self = FireCell
-
-  override def withSmell(smell: SmellMap): FireCell = copy(signal = smell)
+case object Fire extends CellContents {
+  override def passiveSignal()(implicit config: XinukConfig): SignalMap = SignalMap.uniform(config.asInstanceOf[TorchConfig].fireInitialSignal)
 }
 
-trait FireAccessible[+T <: GridPart] {
-  def withFire(): T
+trait FireAccessible {
+  def withFire(): CellState
 }
 
 object FireAccessible {
 
-  def unapply(arg: GridPart)(implicit config: TorchConfig): Option[FireAccessible[GridPart]] = arg match {
-    case cell: EmptyCell => Some(unapply(cell))
-    case cell: EscapeCell => Some(unapply(cell))
-    case cell: HumanCell => Some(unapply(cell))
+  def unapply(arg: CellState)(implicit config: TorchConfig): Option[FireAccessible] = arg.contents match {
+    case Empty => Some(unapplyAny(arg))
+    case Exit => Some(unapplyAny(arg))
+    case Person(_) => Some(unapplyAny(arg))
     case _ => None
   }
 
-  def unapply(arg: EmptyCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
-    new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
-    }
-
-  def unapply(arg: HumanCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
-    new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
-    }
-
-  def unapply(arg: EscapeCell)(implicit config: TorchConfig): FireAccessible[FireCell] =
-    new FireAccessible[FireCell] {
-      override def withFire(): FireCell = FireCell(arg.signalWith(config.fireInitialSignal))
+  def unapplyAny(arg: CellState)(implicit config: TorchConfig): FireAccessible =
+    new FireAccessible {
+      override def withFire(): CellState = CellState(Fire, arg.signalMap + config.fireInitialSignal)
     }
 }

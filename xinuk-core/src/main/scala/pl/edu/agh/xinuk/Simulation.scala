@@ -8,25 +8,25 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
-import pl.edu.agh.xinuk.algorithm.{PlanCreator, PlanResolver, WorldCreator}
+import pl.edu.agh.xinuk.algorithm.{Metrics, PlanCreator, PlanResolver, WorldCreator}
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridWorld
-import pl.edu.agh.xinuk.simulation.{Metrics, WorkerActor}
+import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.util.{Failure, Success, Try}
 
 class Simulation[ConfigType <: XinukConfig : ValueReader](
   configPrefix: String,
   metricHeaders: Vector[String],
-  gridCreator: WorldCreator[ConfigType],
+  worldCreator: WorldCreator[ConfigType],
   planCreatorFactory: () => PlanCreator[ConfigType],
   planResolverFactory: () => PlanResolver[ConfigType],
   emptyMetrics: => Metrics,
   signalPropagation: SignalPropagation,
   cellToColor: PartialFunction[CellState, Color] = PartialFunction.empty
-)(implicit directions: Seq[Direction]) extends LazyLogging {
+) extends LazyLogging {
 
   private val rawConfig: Config =
     Try(ConfigFactory.parseFile(new File("xinuk.conf")))
@@ -63,7 +63,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
   def start(): Unit = {
     if (config.isSupervisor) {
-      val workerToWorld: Map[WorkerId, World] = gridCreator.prepareWorld().build()
+      val workerToWorld: Map[WorkerId, World] = worldCreator.prepareWorld().build()
 
       workerToWorld.foreach( { case (workerId, world) =>
         (config.guiType, world) match {

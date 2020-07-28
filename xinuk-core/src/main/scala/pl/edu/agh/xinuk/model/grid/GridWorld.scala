@@ -4,6 +4,10 @@ import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridDirection._
 
+object GridWorldType extends WorldType {
+  override def directions: Seq[Direction] = GridDirection.values
+}
+
 final class GridWorld(val cells: Map[CellId, Cell],
                       val cellNeighbours: Map[CellId, Map[Direction, CellId]],
                       val workerId: WorkerId,
@@ -45,7 +49,7 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
 
   override def apply(cellId: CellId): Cell = cellsMutable(cellId)
 
-  override def update(cellId: CellId, cellState: CellState): Unit = cellsMutable(cellId) = Cell.create(cellId, cellState)
+  override def update(cellId: CellId, cellState: CellState): Unit = cellsMutable(cellId) = Cell(cellId, cellState)
 
   def withWrappedBoundaries(): GridWorldBuilder = {
     def wrapped(cellId: GridCellId) = GridCellId(Math.floorMod(cellId.x, xSize), Math.floorMod(cellId.y, ySize))
@@ -69,9 +73,9 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
 
   private def valid(cellId: GridCellId): Boolean = cellId.x >= 0 && cellId.x < xSize && cellId.y >= 0 && cellId.y < ySize
 
-  private def ySize: Int = config.gridSize
+  private def ySize: Int = config.worldSize
 
-  private def xSize: Int = config.gridSize
+  private def xSize: Int = config.worldSize
 
   override def connectOneWay(from: CellId, direction: Direction, to: CellId): Unit = {
     val cellNeighbours = neighboursMutable(from)

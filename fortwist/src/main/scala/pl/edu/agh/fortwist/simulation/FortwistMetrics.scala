@@ -1,6 +1,6 @@
 package pl.edu.agh.fortwist.simulation
 
-import pl.edu.agh.xinuk.simulation.Metrics
+import pl.edu.agh.xinuk.algorithm.Metrics
 
 final case class FortwistMetrics(foraminiferaCount: Long,
                                  algaeCount: Double,

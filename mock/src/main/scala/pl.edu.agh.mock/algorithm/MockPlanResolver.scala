@@ -2,18 +2,14 @@ package pl.edu.agh.mock.algorithm
 
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.Mock
-import pl.edu.agh.mock.simulation.MockMetrics
-import pl.edu.agh.xinuk.algorithm.{PlanResolver, StateUpdate}
+import pl.edu.agh.xinuk.algorithm.{Metrics, PlanResolver, StateUpdate}
 import pl.edu.agh.xinuk.model.{CellState, Empty}
-import pl.edu.agh.xinuk.simulation.Metrics
 
-case class MockPlanResolver() extends PlanResolver[MockConfig] {
-
-  import pl.edu.agh.xinuk.model.grid.GridDirection._
+final case class MockPlanResolver() extends PlanResolver[MockConfig] {
 
   override def isUpdateValid(state: CellState, update: StateUpdate)(implicit config: MockConfig): Boolean = {
-    state match {
-      case CellState(Empty, _) => true
+    state.contents match {
+      case Empty => true
       case _ => false
     }
   }

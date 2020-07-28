@@ -1,6 +1,6 @@
 package pl.edu.agh.formin.simulation
 
-import pl.edu.agh.xinuk.simulation.Metrics
+import pl.edu.agh.xinuk.algorithm.Metrics
 
 final case class ForminMetrics(foraminiferaCount: Long,
                                algaeCount: Long,

@@ -2,18 +2,15 @@ package pl.edu.agh.mock.algorithm
 
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.Mock
-import pl.edu.agh.mock.simulation.MockMetrics
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, StateUpdate}
 import pl.edu.agh.xinuk.model.{CellState, Direction, Empty, SignalMap}
-import pl.edu.agh.xinuk.simulation.Metrics
 
 import scala.util.Random
 
-case class MockPlanCreator() extends PlanCreator[MockConfig] {
+final case class MockPlanCreator() extends PlanCreator[MockConfig] {
 
-  import pl.edu.agh.xinuk.model.grid.GridDirection._
-
-  override def createPlans(cellState: CellState, neighbourStates: Map[Direction, CellState])(implicit config: MockConfig): (Map[Direction, Seq[Plan]], Metrics) = {
+  override def createPlans(iteration: Long, cellState: CellState, neighbourStates: Map[Direction, CellState])
+                          (implicit config: MockConfig): (Map[Direction, Seq[Plan]], MockMetrics) = {
     cellState match {
       case CellState(Mock, signalMap) => (randomMove(signalMap, neighbourStates), MockMetrics(1, 0))
       case _ => (Map.empty, MockMetrics.empty)
@@ -33,8 +30,8 @@ case class MockPlanCreator() extends PlanCreator[MockConfig] {
 
       val direction = availableDirections.keys.toSeq(Random.nextInt(availableDirections.size))
 
-      val action = StateUpdate(CellState(Mock, SignalMap.uniform(config.mockInitialSignal)))
-      val consequence = StateUpdate(CellState(Empty, signalMap))
+      val action = StateUpdate(CellState(Mock, SignalMap.empty))
+      val consequence = StateUpdate(CellState(Empty, SignalMap.empty))
 
       Map((direction, Seq(Plan(action, consequence))))
     }

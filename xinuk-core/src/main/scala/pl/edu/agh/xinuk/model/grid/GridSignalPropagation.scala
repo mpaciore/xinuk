@@ -1,5 +1,6 @@
 package pl.edu.agh.xinuk.model.grid
 
+import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.{Direction, Signal, SignalMap, SignalPropagation}
 
 object GridSignalPropagation {
@@ -8,8 +9,8 @@ object GridSignalPropagation {
     final val Circular: SignalPropagation = GridSignalPropagationCircular
 
   private final object GridSignalPropagationStandard extends SignalPropagation {
-    def calculateUpdate(directions: Seq[Direction], neighbourSignals: Map[Direction, SignalMap]): SignalMap = {
-      directions.map({
+    def calculateUpdate(neighbourSignals: Map[Direction, SignalMap])(implicit config: XinukConfig): SignalMap = {
+      config.worldType.directions.map({
         case cardinal@(GridDirection.Top | GridDirection.Right | GridDirection.Bottom | GridDirection.Left) =>
           (
             cardinal,
@@ -34,8 +35,8 @@ object GridSignalPropagation {
 
     def cornerToCorner: Double = 1.0 / (3 * Math.sqrt(2))
 
-    def calculateUpdate(directions: Seq[Direction], neighbourSignals: Map[Direction, SignalMap]): SignalMap = {
-      directions.map({
+    def calculateUpdate(neighbourSignals: Map[Direction, SignalMap])(implicit config: XinukConfig): SignalMap = {
+      config.worldType.directions.map({
         case cardinal@(GridDirection.Top | GridDirection.Right | GridDirection.Bottom | GridDirection.Left) =>
           (
             cardinal,
