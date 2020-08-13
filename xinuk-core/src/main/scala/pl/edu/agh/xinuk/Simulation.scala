@@ -72,7 +72,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
             system.actorOf(GuiActor.props(workerRegionRef, workerId, gridWorld.span, cellToColor))
           case _ => logger.warn("GUI type incompatible with World format.")
         }
-        workerRegionRef ! WorkerActor.WorkerInitialized(workerId, world)
+        WorkerActor.send(workerRegionRef, workerId, WorkerActor.WorkerInitialized(world))
       })
     }
   }
