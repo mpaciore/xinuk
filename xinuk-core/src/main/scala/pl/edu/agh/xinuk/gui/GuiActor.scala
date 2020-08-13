@@ -13,7 +13,7 @@ import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridCellId
-import pl.edu.agh.xinuk.simulation.WorkerActor._
+import pl.edu.agh.xinuk.simulation.WorkerActor.{MsgWrapper, SubscribeGridInfo}
 
 import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
@@ -32,7 +32,7 @@ class GuiActor private(worker: ActorRef,
   private lazy val gui: GuiGrid = new GuiGrid(worldSpan, cellToColor, workerId)
 
   override def preStart: Unit = {
-    worker ! SubscribeGridInfo(workerId)
+    worker ! MsgWrapper(workerId, SubscribeGridInfo())
     log.info("GUI started")
   }
 
