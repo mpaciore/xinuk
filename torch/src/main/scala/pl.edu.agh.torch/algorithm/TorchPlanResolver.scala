@@ -8,13 +8,14 @@ import pl.edu.agh.xinuk.model.{CellContents, CellState, Empty, Obstacle}
 final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
   override def isUpdateValid(state: CellState, update: StateUpdate)(implicit config: TorchConfig): Boolean =
     (state.contents, update.value.contents) match {
-      case (Obstacle, _) => false   // cannot update Obstacle
-      case (_, Obstacle) => false   // cannot update with Obstacle
-      case (_, Exit) => false       // cannot update with Exit
-      case (_, Empty) => true       // update with Empty has special meaning
-      case (Fire, _) => false       // cannot update Fire except Empty update
-      case (_, Fire) => true        // Fire can update anything except Obstacle
-      case _ => true                // anything else should be possible
+      case (Obstacle, _) => false           // cannot update Obstacle
+      case (_, Obstacle) => false           // cannot update with Obstacle
+      case (_, Exit) => false               // cannot update with Exit
+      case (_, Empty) => true               // update with Empty has special meaning
+      case (Fire, _) => false               // cannot update Fire except Empty update
+      case (_, Fire) => true                // Fire can update anything except Obstacle and Fire
+      case (Person(_), Person(_)) => false  // People cannot crowd
+      case _ => true                        // anything else should be possible
     }
 
   override def applyUpdate(state: CellState, update: StateUpdate)(implicit config: TorchConfig): (CellState, TorchMetrics) = {

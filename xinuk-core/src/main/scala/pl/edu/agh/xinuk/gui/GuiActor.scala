@@ -50,7 +50,7 @@ class GuiActor private(worker: ActorRef,
 
 object GuiActor {
 
-  final case class GridInfo private(iteration: Long, cells: Map[CellId, Cell], metrics: Metrics)
+  final case class GridInfo private(iteration: Long, cells: Set[Cell], metrics: Metrics)
 
   def props(worker: ActorRef, workerId: WorkerId, worldSpan: ((Int, Int), (Int, Int)), cellToColor: PartialFunction[CellState, Color])
            (implicit config: XinukConfig): Props = {
@@ -74,7 +74,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
   private val (alignedLocation, alignedSize) = alignFrame()
 
   def top: MainFrame = new MainFrame {
-    title = "Xinuk"
+    title = s"Xinuk ${workerId.value}"
     background = bgcolor
     location = alignedLocation
     preferredSize = alignedSize
@@ -111,7 +111,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
     (new Point(xOffset + xPos * width, yOffset + yPos * height), new Dimension(width, height))
   }
 
-  def setNewValues(iteration: Long, cells: Map[CellId, Cell]): Unit = {
+  def setNewValues(iteration: Long, cells: Set[Cell]): Unit = {
     cellView.set(cells)
   }
 
@@ -135,8 +135,8 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
 
     icon = new ImageIcon(img)
 
-    def set(cells: Map[CellId, Cell]): Unit = {
-      cells.values.foreach {
+    def set(cells: Set[Cell]): Unit = {
+      cells.foreach {
         case Cell(GridCellId(x, y), state) =>
           val startX = (x - xOffset) * guiCellSize
           val startY = (y - yOffset) * guiCellSize

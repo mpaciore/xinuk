@@ -3,24 +3,23 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.Mock
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, StateUpdate}
-import pl.edu.agh.xinuk.model.{CellState, Direction, Empty, SignalMap}
+import pl.edu.agh.xinuk.model.{CellContents, CellState, Direction, Empty, SignalMap}
 
 import scala.util.Random
 
 final case class MockPlanCreator() extends PlanCreator[MockConfig] {
 
-  override def createPlans(iteration: Long, cellState: CellState, neighbourStates: Map[Direction, CellState])
+  override def createPlans(iteration: Long, cellState: CellState, neighbourContents: Map[Direction, CellContents])
                           (implicit config: MockConfig): (Map[Direction, Seq[Plan]], MockMetrics) = {
-    cellState match {
-      case CellState(Mock, signalMap) => (randomMove(signalMap, neighbourStates), MockMetrics(1, 0))
+    cellState.contents match {
+      case Mock => (randomMove(neighbourContents), MockMetrics(1, 0))
       case _ => (Map.empty, MockMetrics.empty)
     }
   }
 
-
-  def randomMove(signalMap: SignalMap, neighbours: Map[Direction, CellState])(implicit config: MockConfig): Map[Direction, Seq[Plan]] = {
+  def randomMove(neighbours: Map[Direction, CellContents])(implicit config: MockConfig): Map[Direction, Seq[Plan]] = {
     val availableDirections = neighbours.filter {
-      case (_, CellState(Empty, _)) => true
+      case (_, Empty) => true
       case _ => false
     }
 

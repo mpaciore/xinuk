@@ -3,8 +3,8 @@ package pl.edu.agh.torch.algorithm
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.torch.model.{Exit, Fire, Person}
 import pl.edu.agh.xinuk.algorithm.WorldCreator
-import pl.edu.agh.xinuk.model.grid.{GridCellId, GridWorldBuilder}
 import pl.edu.agh.xinuk.model.{CellContents, CellState, WorldBuilder}
+import pl.edu.agh.xinuk.model.grid.{GridCellId, GridWorldBuilder}
 
 import scala.util.Random
 

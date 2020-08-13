@@ -10,15 +10,19 @@ trait WorldType {
 trait World {
   def cells: Map[CellId, Cell]
 
-  def localCells: Map[CellId, Cell]
+  def localCellIds: Set[CellId]
 
   def cellNeighbours: Map[CellId, Map[Direction, CellId]]
 
   def workerId: WorkerId
 
-  def outgoingWorkerNeighbours: Set[WorkerId]
+  def outgoingCells: Map[WorkerId, Set[CellId]]
 
-  def incomingWorkerNeighbours: Set[WorkerId]
+  def incomingCells: Map[WorkerId, Set[CellId]]
+
+  def outgoingWorkerNeighbours: Set[WorkerId] = outgoingCells.keySet + workerId
+
+  def incomingWorkerNeighbours: Set[WorkerId] = incomingCells.keySet + workerId
 
   def cellToWorker: Map[CellId, WorkerId]
 
