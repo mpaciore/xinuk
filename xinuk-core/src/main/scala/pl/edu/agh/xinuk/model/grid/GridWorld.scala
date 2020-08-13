@@ -2,7 +2,6 @@ package pl.edu.agh.xinuk.model.grid
 
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.grid.GridDirection._
 
 object GridWorldType extends WorldType {
   override def directions: Seq[Direction] = GridDirection.values
@@ -11,15 +10,15 @@ object GridWorldType extends WorldType {
 final class GridWorld(val cells: Map[CellId, Cell],
                       val cellNeighbours: Map[CellId, Map[Direction, CellId]],
                       val workerId: WorkerId,
-                      val outgoingWorkerNeighbours: Set[WorkerId],
-                      val incomingWorkerNeighbours: Set[WorkerId],
+                      val outgoingCells: Map[WorkerId, Set[CellId]],
+                      val incomingCells: Map[WorkerId, Set[CellId]],
                       val cellToWorker: Map[CellId, WorkerId],
                      )(implicit config: XinukConfig) extends World {
 
-  override def localCells: Map[CellId, Cell] = cells.filter { case (k, _) => cellToWorker(k) == workerId }
+  private val localCellIdsSet: Set[CellId] = cells.keys.filter(k => cellToWorker(k) == workerId).toSet
 
   def span: ((Int, Int), (Int, Int)) = {
-    val coords = localCells.keys.map { case GridCellId(x, y) => (x, y) }
+    val coords = localCellIds.map { case GridCellId(x, y) => (x, y) }
     val xMin = coords.map(_._1).min
     val xMax = coords.map(_._1).max
     val xSize = xMax - xMin + 1
@@ -28,16 +27,18 @@ final class GridWorld(val cells: Map[CellId, Cell],
     val ySize = yMax - yMin + 1
     ((xMin, yMin), (xSize, ySize))
   }
+
+  override def localCellIds: Set[CellId] = localCellIdsSet
 }
 
 object GridWorld {
   def apply(cells: Map[CellId, Cell],
             cellNeighbours: Map[CellId, Map[Direction, CellId]],
             workerId: WorkerId,
-            outgoingWorkerNeighbours: Set[WorkerId],
-            incomingWorkerNeighbours: Set[WorkerId],
+            outgoingCells: Map[WorkerId, Set[CellId]],
+            incomingCells: Map[WorkerId, Set[CellId]],
             cellToWorker: Map[CellId, WorkerId])(implicit config: XinukConfig): GridWorld =
-    new GridWorld(cells, cellNeighbours, workerId, outgoingWorkerNeighbours, incomingWorkerNeighbours, cellToWorker)(config)
+    new GridWorld(cells, cellNeighbours, workerId, outgoingCells, incomingCells, cellToWorker)(config)
 }
 
 case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder {
@@ -103,14 +104,14 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
       case (workerId, (localIds, _)) => localIds.map { cellId => (cellId, workerId) }
     }
 
-    val outgoingNeighbours: Map[WorkerId, Set[WorkerId]] = workerDomains.map {
-      case (workerId, (_, remoteIds)) => (workerId, remoteIds.map(globalCellToWorker) + workerId)
+    val globalOutgoingCells: Map[WorkerId, Map[WorkerId, Set[CellId]]] = workerDomains.map {
+      case (workerId, (_, remoteIds)) => (workerId, remoteIds.groupBy(globalCellToWorker))
     }
 
-    val incomingNeighbours: Map[WorkerId, Set[WorkerId]] = workerDomains.keys.map {
-      id => (id, outgoingNeighbours
+    val globalIncomingCells: Map[WorkerId, Map[WorkerId, Set[CellId]]] = workerDomains.keys.map {
+      id => (id, globalOutgoingCells
         .filter { case (_, outgoing) => outgoing.contains(id)}
-        .map( { case (otherId, _) => otherId}).toSet)
+        .map( { case (otherId, outgoing) => (otherId, outgoing(id)) }))
     }.toMap
 
     workerDomains.map({ case (workerId, (localIds, remoteIds)) =>
@@ -129,13 +130,13 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
 
       val neighbours = neighboursOfLocal ++ neighboursOfRemote
 
-      val outgoingWorkers = outgoingNeighbours(workerId)
+      val outgoingCells = globalOutgoingCells(workerId)
 
-      val incomingWorkers = incomingNeighbours(workerId)
+      val incomingCells = globalIncomingCells(workerId)
 
       val cellToWorker = globalCellToWorker.filter({ case (id, _) => localIds.contains(id) || remoteIds.contains(id) })
 
-      (workerId, GridWorld(cells, neighbours, workerId, outgoingWorkers, incomingWorkers, cellToWorker))
+      (workerId, GridWorld(cells, neighbours, workerId, outgoingCells, incomingCells, cellToWorker))
     })
   }
 

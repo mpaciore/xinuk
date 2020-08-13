@@ -32,6 +32,10 @@ case class Cell(id: CellId, var state: CellState) {
     state = newState
   }
 
+  def updateContents(contents: CellContents): Unit = {
+    state = CellState(contents, state.signalMap)
+  }
+
   def updateSignal(signalUpdate: SignalMap): Unit = {
     state = CellState(state.contents, signalUpdate)
   }

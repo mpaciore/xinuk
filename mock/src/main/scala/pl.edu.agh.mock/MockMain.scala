@@ -11,7 +11,10 @@ import pl.edu.agh.xinuk.model.{CellState, Obstacle}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
-  private val metricHeaders = Vector()
+  private val metricHeaders = Vector(
+    "mockCount",
+    "mockMoves"
+  )
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
