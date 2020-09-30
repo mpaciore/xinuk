@@ -12,7 +12,7 @@ final case class Signal(value: Double) extends AnyVal with Ordered[Signal] {
 
   def /(divisor: Double): Signal = Signal(value / divisor)
 
-  override def compare(that: Signal): Int = Ordering.Double.compare(value, that.value)
+  override def compare(that: Signal): Int = Ordering.Double.TotalOrdering.compare(value, that.value)
 }
 
 object Signal {

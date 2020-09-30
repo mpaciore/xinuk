@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Torch parallel" type="CompoundRunConfigurationType">
+    <toRun name="Torch parallel supervisor" type="Application" />
+    <toRun name="Torch parallel worker" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,25 +1,23 @@
 cancelable in Global := true
 
 val Version = new {
-  val Akka = "2.5.11"
+  val Akka = "2.5.31"
+  val AkkaKryo = "1.0.0"
   val Logback = "1.2.3"
-  val Guava = "23.0"
-  val AvsCommons = "1.29.0"
-  val ScalaTest = "3.0.5"
-  val Mockito = "2.16.0"
-  val ScalaLogging = "3.8.0"
-  val Ficus = "1.4.3"
-  val ScalaSwing = "2.0.2"
+  val AvsCommons = "2.0.0-M12"
+  val ScalaTest = "3.2.2"
+  val Mockito = "3.5.10"
+  val ScalaLogging = "3.9.2"
+  val Ficus = "1.5.0"
+  val ScalaSwing = "2.1.1"
   val JFreeChart = "1.5.0"
+  val JacksonScala = "2.11.2"
 }
-
-val akkaKryoVersion = SettingKey[String]("akkaKryoVersion")
 
 inThisBuild(Seq(
   organization := "pl.edu.agh",
   version := "1.1-SNAPSHOT",
-  scalaVersion := "2.12.6",
-  crossScalaVersions := Seq("2.11.12", "2.12.6"),
+  scalaVersion := "2.13.3",
 
   scalacOptions ++= Seq(
     "-feature",
@@ -30,26 +28,21 @@ inThisBuild(Seq(
     "-language:dynamics",
     "-language:experimental.macros",
     "-language:higherKinds",
-    "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:-missing-interpolator,-adapted-args,-unused,_"
   ),
 ))
 
 lazy val xinuk = project.in(file("."))
-  .aggregate(`xinuk-core`, formin, fortwist, torch)
+  .aggregate(`xinuk-core`, formin, fortwist, torch, mock, urban)
   .disablePlugins(AssemblyPlugin)
 
 lazy val `xinuk-core` = project
   .settings(
     name := "xinuk-core",
-    akkaKryoVersion := (scalaBinaryVersion.value match {
-      case "2.11" => "0.5.0"
-      case "2.12" => "0.5.2"
-    }),
     libraryDependencies ++= Seq(
       "com.avsystem.commons" %% "commons-core" % Version.AvsCommons,
-      "com.github.romix.akka" %% "akka-kryo-serialization" % akkaKryoVersion.value,
+      "io.altoo" %% "akka-kryo-serialization" % Version.AkkaKryo,
       "com.iheart" %% "ficus" % Version.Ficus,
       "com.typesafe.akka" %% "akka-actor" % Version.Akka,
       "com.typesafe.akka" %% "akka-slf4j" % Version.Akka,
@@ -57,6 +50,7 @@ lazy val `xinuk-core` = project
       "com.typesafe.akka" %% "akka-cluster-sharding" % Version.Akka,
       "com.typesafe.scala-logging" %% "scala-logging" % Version.ScalaLogging,
       "org.scala-lang.modules" %% "scala-swing" % Version.ScalaSwing,
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % Version.JacksonScala,
       "org.jfree" % "jfreechart" % Version.JFreeChart,
       "org.scalatest" %% "scalatest" % Version.ScalaTest % Test,
       "com.typesafe.akka" %% "akka-testkit" % Version.Akka % Test,
@@ -77,6 +71,12 @@ def modelProject(projectName: String)(mainClassName: String): Project = {
       mainClass in assembly := Some(mainClassName),
       assemblyJarName in assembly := s"$projectName.jar",
       test in assembly := {},
+      assemblyMergeStrategy in assembly := {
+        case "module-info.class" => MergeStrategy.first
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      }
     ).dependsOn(`xinuk-core`)
 }
 
@@ -84,3 +84,4 @@ lazy val formin = modelProject("formin")("pl.edu.agh.formin.ForminMain")
 lazy val fortwist = modelProject("fortwist")("pl.edu.agh.fortwist.FortwistMain")
 lazy val torch = modelProject("torch")("pl.edu.agh.torch.TorchMain")
 lazy val mock = modelProject("mock")("pl.edu.agh.mock.MockMain")
+lazy val urban = modelProject("urban")("pl.edu.agh.urban.UrbanMain")

@@ -8,8 +8,8 @@ final case class MockMetrics(mockCount: Long, mockMoves: Long) extends Metrics {
   }
 
   override def series: Vector[(String, Double)] = Vector(
-    "Count" -> mockCount,
-    "Moves" -> mockMoves
+    "Count" -> mockCount.toDouble,
+    "Moves" -> mockMoves.toDouble
   )
 
   override def +(other: Metrics): MockMetrics = other match {

@@ -16,8 +16,8 @@ object TorchWorldCreator extends WorldCreator[TorchConfig] {
     val worldBuilder = GridWorldBuilder().withGridConnections()
 
     for {
-      x <- 0 until config.worldSize
-      y <- 0 until config.worldSize
+      x <- 0 until config.worldWidth
+      y <- 0 until config.worldHeight
       if (random.nextDouble() < config.spawnChance)
     } {
       val contents: Option[CellContents] = random.nextInt(3) match {

@@ -3,7 +3,7 @@ import os
 import re
 
 IMG_DIR = './out/img/proper2'
-GIF_DIR = './out/gif/proper2'
+GIF_DIR = 'out/gif/proper2'
 DURATION = 0.4
 
 

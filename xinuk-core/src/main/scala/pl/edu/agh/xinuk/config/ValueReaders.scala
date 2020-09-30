@@ -7,6 +7,7 @@ import pl.edu.agh.xinuk.model.grid.GridWorldType
 import pl.edu.agh.xinuk.model.{Signal, WorldType}
 
 object ValueReaders extends FicusInstances with ArbitraryTypeReader {
+
   implicit val worldTypeReader: ValueReader[WorldType] =
     new ValueReader[WorldType] {
       override def read(config: Config, path: String): WorldType = config.getString(path) match {

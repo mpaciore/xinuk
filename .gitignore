@@ -30,4 +30,5 @@ project/plugins/project/
 *.iml
 out
 gen
-
+/venv/
+/urbanData/

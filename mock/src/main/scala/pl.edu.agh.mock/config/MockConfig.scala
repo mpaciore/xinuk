@@ -3,8 +3,9 @@ package pl.edu.agh.mock.config
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model.{Signal, WorldType}
 
-final case class MockConfig(worldSize: Int,
-                            worldType: WorldType,
+final case class MockConfig(worldType: WorldType,
+                            worldWidth: Int,
+                            worldHeight: Int,
                             iterationsNumber: Long,
 
                             signalSuppressionFactor: Double,

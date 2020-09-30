@@ -31,7 +31,7 @@ class GuiActor private(worker: ActorRef,
 
   private lazy val gui: GuiGrid = new GuiGrid(worldSpan, cellToColor, workerId)
 
-  override def preStart: Unit = {
+  override def preStart(): Unit = {
     worker ! MsgWrapper(workerId, SubscribeGridInfo())
     log.info("GUI started")
   }
@@ -65,17 +65,17 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
   private val ((xOffset, yOffset), (xSize, ySize)) = worldSpan
-  private val bgcolor = new Color(220, 220, 220)
+  private val bgColor = new Color(220, 220, 220)
   private val cellView = new ParticleCanvas(xOffset, yOffset, xSize, ySize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
-    background = bgcolor
+    background = bgColor
   }
   private val chartPage = new Page("Plot", chartPanel)
   private val (alignedLocation, alignedSize) = alignFrame()
 
   def top: MainFrame = new MainFrame {
     title = s"Xinuk ${workerId.value}"
-    background = bgcolor
+    background = bgColor
     location = alignedLocation
     preferredSize = alignedSize
 
@@ -83,10 +83,10 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
 
       val cellPanel: BorderPanel = new BorderPanel {
         val view: BorderPanel = new BorderPanel {
-          background = bgcolor
+          background = bgColor
           layout(cellView) = Center
         }
-        background = bgcolor
+        background = bgColor
         layout(view) = Center
       }
 
@@ -102,13 +102,24 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
   }
 
   private def alignFrame(): (Point, Dimension) = {
-    val xOffset = 100
-    val yOffset = 100
-    val width = xSize * config.guiCellSize + 25
-    val height = ySize * config.guiCellSize + 75
     val xPos = (workerId.value - 1) / config.workersRoot
     val yPos = (workerId.value - 1) % config.workersRoot
-    (new Point(xOffset + xPos * width, yOffset + yPos * height), new Dimension(width, height))
+
+    val xGlobalOffset = 100
+    val yGlobalOffset = 0
+
+    val xWindowAdjustment = 24
+    val yWindowAdjustment = 70
+
+    val xLocalOffset = xOffset * config.guiCellSize + xPos * xWindowAdjustment
+    val yLocalOffset = yOffset * config.guiCellSize + yPos * yWindowAdjustment
+
+    val width = xSize * config.guiCellSize + xWindowAdjustment
+    val height = ySize * config.guiCellSize + yWindowAdjustment
+
+    val location = new Point(xGlobalOffset + xLocalOffset, yGlobalOffset + yLocalOffset)
+    val size = new Dimension(width, height)
+    (location, size)
   }
 
   def setNewValues(iteration: Long, cells: Set[Cell]): Unit = {
@@ -165,7 +176,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
     }
 
     metrics.series.foreach { case (name, value) =>
-      nameToSeries.getOrElseUpdate(name, createSeries(name)).add(iteration, value)
+      nameToSeries.getOrElseUpdate(name, createSeries(name)).add(iteration.toDouble, value)
     }
   }
 

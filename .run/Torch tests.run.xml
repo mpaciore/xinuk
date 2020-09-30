@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Torch tests" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="pl.edu.agh.torch.TorchMain" />
+    <module name="torch" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/torch_tests -XX:+UnlockCommercialFeatures" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="pl.edu.agh.fortwist.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

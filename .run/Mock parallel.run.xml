@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Mock parallel" type="CompoundRunConfigurationType">
+    <toRun name="Mock parallel worker" type="Application" />
+    <toRun name="Mock parallel supervisor" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

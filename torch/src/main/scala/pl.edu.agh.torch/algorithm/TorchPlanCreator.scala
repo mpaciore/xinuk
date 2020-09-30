@@ -9,7 +9,7 @@ import scala.util.Random
 
 case class TorchPlanCreator() extends PlanCreator[TorchConfig] {
 
-  override def createPlans(iteration: Long, cellState: CellState, neighbourContents: Map[Direction, CellContents])
+  override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
                           (implicit config: TorchConfig): (Map[Direction, Seq[Plan]], TorchMetrics) = {
     cellState.contents match {
       case Fire => (spreadFire(iteration, neighbourContents), TorchMetrics.fire)
