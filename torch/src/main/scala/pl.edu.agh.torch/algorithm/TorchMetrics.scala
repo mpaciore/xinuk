@@ -12,11 +12,11 @@ final case class TorchMetrics(peopleCount: Long,
   }
 
   override def series: Vector[(String, Double)] = Vector(
-    "people count" -> peopleCount,
-    "fire count" -> fireCount,
-    "exit count" -> exitCount,
-    "people deaths" -> peopleDeaths,
-    "people escapes" -> peopleEscapes
+    "people count" -> peopleCount.toDouble,
+    "fire count" -> fireCount.toDouble,
+    "exit count" -> exitCount.toDouble,
+    "people deaths" -> peopleDeaths.toDouble,
+    "people escapes" -> peopleEscapes.toDouble
   )
 
   override def +(other: Metrics): TorchMetrics = {

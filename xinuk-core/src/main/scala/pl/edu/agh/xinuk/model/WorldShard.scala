@@ -7,7 +7,7 @@ trait WorldType {
   def directions: Seq[Direction]
 }
 
-trait World {
+trait WorldShard {
   def cells: Map[CellId, Cell]
 
   def localCellIds: Set[CellId]
@@ -26,11 +26,11 @@ trait World {
 
   def cellToWorker: Map[CellId, WorkerId]
 
-  def calculateSignalUpdates(signalPropagation: SignalPropagation)(implicit config: XinukConfig): Map[CellId, SignalMap] = {
+  def calculateSignalUpdates(iteration: Long, signalPropagation: SignalPropagation)(implicit config: XinukConfig): Map[CellId, SignalMap] = {
     cells.keys.map { cellId =>
-      val neighbourSignals = cellNeighbours(cellId)
-        .map { case (direction, neighbourId) => (direction, cells(neighbourId).state.signalMap) }
-      (cellId, signalPropagation.calculateUpdate(neighbourSignals))
+      val neighbourStates = cellNeighbours(cellId)
+        .map { case (direction, neighbourId) => (direction, cells(neighbourId).state) }
+      (cellId, signalPropagation.calculateUpdate(iteration, neighbourStates))
     }
   }.toMap
 }
@@ -47,5 +47,5 @@ trait WorldBuilder {
     connectOneWay(to, direction.opposite, from)
   }
 
-  def build(): Map[WorkerId, World]
+  def build(): Map[WorkerId, WorldShard]
 }

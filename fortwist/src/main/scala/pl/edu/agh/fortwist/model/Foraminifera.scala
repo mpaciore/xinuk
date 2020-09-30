@@ -22,7 +22,7 @@ object FortwistCell {
 }
 
 final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
-  override def compare(that: Energy): Int = Ordering.Double.compare(value, that.value)
+  override def compare(that: Energy): Int = Ordering.Double.TotalOrdering.compare(value, that.value)
 
   def -(other: Energy): Energy = Energy(value - other.value)
 

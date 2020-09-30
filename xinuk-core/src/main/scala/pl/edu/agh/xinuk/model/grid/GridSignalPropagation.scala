@@ -1,56 +1,55 @@
 package pl.edu.agh.xinuk.model.grid
 
 import pl.edu.agh.xinuk.config.XinukConfig
-import pl.edu.agh.xinuk.model.{Direction, Signal, SignalMap, SignalPropagation}
+import pl.edu.agh.xinuk.model.{CellState, Direction, Signal, SignalMap, SignalPropagation}
 
 object GridSignalPropagation {
 
   final val Standard: SignalPropagation = GridSignalPropagationStandard
-    final val Circular: SignalPropagation = GridSignalPropagationCircular
+  final val Bending: SignalPropagation = GridSignalPropagationBending
+
+  @inline private def getPropagatedSignal(neighbourStates: Map[Direction, CellState], neighbourDirection: Direction, signalDirection: Direction)
+                                         (implicit config: XinukConfig): Signal = {
+    neighbourStates.get(neighbourDirection).map(_.signalMap(signalDirection)).getOrElse(Signal.zero)
+  }
+
+  @inline private def getGeneratedSignal(neighbourStates: Map[Direction, CellState], neighbourDirection: Direction, iteration: Long)
+                                        (implicit config: XinukConfig): Signal = {
+    neighbourStates.get(neighbourDirection).map(_.contents.generateSignal(iteration)).getOrElse(Signal.zero)
+  }
 
   private final object GridSignalPropagationStandard extends SignalPropagation {
-    def calculateUpdate(neighbourSignals: Map[Direction, SignalMap])(implicit config: XinukConfig): SignalMap = {
+    def calculateUpdate(iteration: Long, neighbourStates: Map[Direction, CellState])(implicit config: XinukConfig): SignalMap = {
       config.worldType.directions.map({
         case cardinal@(GridDirection.Top | GridDirection.Right | GridDirection.Bottom | GridDirection.Left) =>
           (
             cardinal,
-            cardinal.withAdjacent.map { d => neighbourSignals.get(cardinal).map(_ (d)).getOrElse(Signal.zero) }.reduce(_ + _)
+            cardinal.withAdjacent.map { d => getPropagatedSignal(neighbourStates, cardinal, d) }.reduce(_ + _) +
+              getGeneratedSignal(neighbourStates, cardinal, iteration)
           )
         case diagonal@(GridDirection.TopLeft | GridDirection.TopRight | GridDirection.BottomRight | GridDirection.BottomLeft) =>
           (
             diagonal,
-            neighbourSignals.get(diagonal).map(_ (diagonal)).getOrElse(Signal.zero)
+            getPropagatedSignal(neighbourStates, diagonal, diagonal) +
+              getGeneratedSignal(neighbourStates, diagonal, iteration)
           )
         case direction => (direction, Signal.zero)
       }).toMap
     }
   }
 
-  private final object GridSignalPropagationCircular extends SignalPropagation {
-    def sideToSide: Double = 1.0 / 3
+  private final object GridSignalPropagationBending extends SignalPropagation {
+    def direct: Double = 0.42
+    def adjacent: Double = 0.29
 
-    def sideToCorner: Double = 1.0 / Math.sqrt(10)
-
-    def cornerToSide: Double = 1.0 / Math.sqrt(13)
-
-    def cornerToCorner: Double = 1.0 / (3 * Math.sqrt(2))
-
-    def calculateUpdate(neighbourSignals: Map[Direction, SignalMap])(implicit config: XinukConfig): SignalMap = {
-      config.worldType.directions.map({
-        case cardinal@(GridDirection.Top | GridDirection.Right | GridDirection.Bottom | GridDirection.Left) =>
-          (
-            cardinal,
-            neighbourSignals.get(cardinal).map(_ (cardinal) * sideToSide).getOrElse(Signal.zero) +
-              cardinal.adjacent.map { d => neighbourSignals.get(cardinal).map(_ (d) * cornerToSide).getOrElse(Signal.zero) }.reduce(_ + _)
-          )
-        case diagonal@(GridDirection.TopLeft | GridDirection.TopRight | GridDirection.BottomRight | GridDirection.BottomLeft) =>
-          (
-            diagonal,
-            neighbourSignals.get(diagonal).map(_ (diagonal) * cornerToCorner).getOrElse(Signal.zero) +
-              diagonal.adjacent.map { d => neighbourSignals.get(diagonal).map(_ (d) * sideToCorner).getOrElse(Signal.zero) }.reduce(_ + _)
-          )
-        case direction => (direction, Signal.zero)
-      }).toMap
+    def calculateUpdate(iteration: Long, neighbourStates: Map[Direction, CellState])(implicit config: XinukConfig): SignalMap = {
+      config.worldType.directions.map(direction =>
+        (direction,
+          getPropagatedSignal(neighbourStates, direction, direction) * direct +
+            direction.adjacent.map { d => getPropagatedSignal(neighbourStates, direction, d) }.reduce(_ + _) * adjacent +
+            getGeneratedSignal(neighbourStates, direction, iteration)
+        )
+      ).toMap
     }
   }
 

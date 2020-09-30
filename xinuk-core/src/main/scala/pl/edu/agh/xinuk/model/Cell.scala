@@ -5,12 +5,16 @@ import pl.edu.agh.xinuk.config.XinukConfig
 trait CellId
 
 trait CellContents {
-  def passiveSignal()(implicit config: XinukConfig): SignalMap = SignalMap.empty
+  def generateSignal(iteration: Long)(implicit config: XinukConfig): Signal = Signal.zero
+
+  def signalFactor(iteration: Long)(implicit config: XinukConfig): Double = 1.0
 }
 
 case object Empty extends CellContents
 
-case object Obstacle extends CellContents
+case object Obstacle extends CellContents {
+  override def signalFactor(iteration: Long)(implicit config: XinukConfig): Double = 0.0
+}
 
 case class CellState(contents: CellContents, signalMap: SignalMap) {
   def withSignal(signalMap: SignalMap): CellState = CellState(contents, signalMap)

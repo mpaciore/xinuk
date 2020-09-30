@@ -12,7 +12,7 @@ import pl.edu.agh.xinuk.algorithm.{Metrics, PlanCreator, PlanResolver, WorldCrea
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.gui.GuiActor
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.grid.GridWorld
+import pl.edu.agh.xinuk.model.grid.GridWorldShard
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.util.{Failure, Success, Try}
@@ -38,12 +38,12 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
   implicit val config: ConfigType = {
-    val forminConfig = rawConfig.getConfig(configPrefix)
-    logger.info(WorkerActor.MetricsMarker, forminConfig.root().render(ConfigRenderOptions.concise()))
+    val applicationConfig = rawConfig.getConfig(configPrefix)
+    logger.info(WorkerActor.MetricsMarker, applicationConfig.root().render(ConfigRenderOptions.concise()))
     logger.info(WorkerActor.MetricsMarker, logHeader)
 
     import net.ceedubs.ficus.Ficus._
-    Try(forminConfig.as[ConfigType]("config")) match {
+    Try(applicationConfig.as[ConfigType]("config")) match {
       case Success(parsedConfig) =>
         parsedConfig
       case Failure(parsingError) =>
@@ -63,12 +63,12 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
   def start(): Unit = {
     if (config.isSupervisor) {
-      val workerToWorld: Map[WorkerId, World] = worldCreator.prepareWorld().build()
+      val workerToWorld: Map[WorkerId, WorldShard] = worldCreator.prepareWorld().build()
 
       workerToWorld.foreach( { case (workerId, world) =>
         (config.guiType, world) match {
           case (GuiType.None, _) =>
-          case (GuiType.Grid, gridWorld: GridWorld) =>
+          case (GuiType.Grid, gridWorld: GridWorldShard) =>
             system.actorOf(GuiActor.props(workerRegionRef, workerId, gridWorld.span, cellToColor))
           case _ => logger.warn("GUI type incompatible with World format.")
         }

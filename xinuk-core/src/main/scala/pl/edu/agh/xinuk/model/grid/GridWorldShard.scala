@@ -7,13 +7,12 @@ object GridWorldType extends WorldType {
   override def directions: Seq[Direction] = GridDirection.values
 }
 
-final class GridWorld(val cells: Map[CellId, Cell],
-                      val cellNeighbours: Map[CellId, Map[Direction, CellId]],
-                      val workerId: WorkerId,
-                      val outgoingCells: Map[WorkerId, Set[CellId]],
-                      val incomingCells: Map[WorkerId, Set[CellId]],
-                      val cellToWorker: Map[CellId, WorkerId],
-                     )(implicit config: XinukConfig) extends World {
+final class GridWorldShard(val cells: Map[CellId, Cell],
+                           val cellNeighbours: Map[CellId, Map[Direction, CellId]],
+                           val workerId: WorkerId,
+                           val outgoingCells: Map[WorkerId, Set[CellId]],
+                           val incomingCells: Map[WorkerId, Set[CellId]],
+                           val cellToWorker: Map[CellId, WorkerId])(implicit config: XinukConfig) extends WorldShard {
 
   private val localCellIdsSet: Set[CellId] = cells.keys.filter(k => cellToWorker(k) == workerId).toSet
 
@@ -31,14 +30,14 @@ final class GridWorld(val cells: Map[CellId, Cell],
   override def localCellIds: Set[CellId] = localCellIdsSet
 }
 
-object GridWorld {
+object GridWorldShard {
   def apply(cells: Map[CellId, Cell],
             cellNeighbours: Map[CellId, Map[Direction, CellId]],
             workerId: WorkerId,
             outgoingCells: Map[WorkerId, Set[CellId]],
             incomingCells: Map[WorkerId, Set[CellId]],
-            cellToWorker: Map[CellId, WorkerId])(implicit config: XinukConfig): GridWorld =
-    new GridWorld(cells, cellNeighbours, workerId, outgoingCells, incomingCells, cellToWorker)(config)
+            cellToWorker: Map[CellId, WorkerId])(implicit config: XinukConfig): GridWorldShard =
+    new GridWorldShard(cells, cellNeighbours, workerId, outgoingCells, incomingCells, cellToWorker)(config)
 }
 
 case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder {
@@ -59,8 +58,7 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
       (0 until xSize).map(x => GridCellId(x, 0)),
       (0 until xSize).map(x => GridCellId(x, ySize - 1)),
       (0 until ySize).map(y => GridCellId(0, y)),
-      (0 until ySize).map(y => GridCellId(xSize - 1, y)),
-    ).flatten.toSet
+      (0 until ySize).map(y => GridCellId(xSize - 1, y))).flatten.toSet
 
     for {
       from <- boundary
@@ -74,9 +72,9 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
 
   private def valid(cellId: GridCellId): Boolean = cellId.x >= 0 && cellId.x < xSize && cellId.y >= 0 && cellId.y < ySize
 
-  private def ySize: Int = config.worldSize
+  private def ySize: Int = config.worldHeight
 
-  private def xSize: Int = config.worldSize
+  private def xSize: Int = config.worldWidth
 
   override def connectOneWay(from: CellId, direction: Direction, to: CellId): Unit = {
     val cellNeighbours = neighboursMutable(from)
@@ -97,7 +95,7 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
     this
   }
 
-  def build(): Map[WorkerId, GridWorld] = {
+  def build(): Map[WorkerId, GridWorldShard] = {
     val workerDomains = divide()
 
     val globalCellToWorker: Map[CellId, WorkerId] = workerDomains.flatMap {
@@ -136,7 +134,7 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
 
       val cellToWorker = globalCellToWorker.filter({ case (id, _) => localIds.contains(id) || remoteIds.contains(id) })
 
-      (workerId, GridWorld(cells, neighbours, workerId, outgoingCells, incomingCells, cellToWorker))
+      (workerId, GridWorldShard(cells, neighbours, workerId, outgoingCells, incomingCells, cellToWorker))
     })
   }
 

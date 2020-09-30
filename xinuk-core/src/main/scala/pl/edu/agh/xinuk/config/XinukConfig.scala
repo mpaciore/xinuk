@@ -4,8 +4,9 @@ import com.avsystem.commons.misc.{AbstractNamedEnumCompanion, NamedEnum}
 import pl.edu.agh.xinuk.model.WorldType
 
 trait XinukConfig {
-  def worldSize: Int
   def worldType: WorldType
+  def worldWidth: Int
+  def worldHeight: Int
   def iterationsNumber: Long
 
   def signalSuppressionFactor: Double
