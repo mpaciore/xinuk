@@ -31,7 +31,6 @@ final case class FortwistMetrics(foraminiferaCount: Long,
           foraminiferaReproductionsCount + otherForaminiferaReproductionsCount,
           consumedAlgaeCount + otherConsumedAlgaeCount, foraminiferaTotalLifespan + otherForaminiferaTotalLifespan,
           foraminiferaMoves + otherForaminiferaMoves)
-      case null => this
       case _ => throw new UnsupportedOperationException(s"Cannot add: non-FortwistMetrics to FortwistMetrics")
     }
   }

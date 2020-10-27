@@ -20,19 +20,3 @@ object FortwistCell {
   def create(foraminiferas: Vector[Foraminifera] = Vector.empty): FortwistCell =
     FortwistCell(SignalMap.empty, foraminiferas, Energy.Zero)
 }
-
-final case class Energy(value: Double) extends AnyVal with Ordered[Energy] {
-  override def compare(that: Energy): Int = Ordering.Double.TotalOrdering.compare(value, that.value)
-
-  def -(other: Energy): Energy = Energy(value - other.value)
-
-  def +(other: Energy): Energy = Energy(value + other.value)
-
-  def *(factor: Double): Energy = Energy(value * factor)
-
-  def unary_- : Energy = Energy(-value)
-}
-
-object Energy {
-  final val Zero = Energy(0)
-}

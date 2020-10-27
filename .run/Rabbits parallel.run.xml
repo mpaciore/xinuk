@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Mock parallel" type="CompoundRunConfigurationType">
+  <configuration default="false" name="Rabbits parallel" type="CompoundRunConfigurationType">
     <toRun name="Rabbits parallel supervisor" type="Application" />
     <toRun name="Rabbits parallel worker" type="Application" />
     <method v="2" />

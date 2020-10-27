@@ -7,7 +7,7 @@ trait PlanCreator[Config <: XinukConfig] {
   def initialize(worldShard: WorldShard)(implicit config: Config): Unit = ()
 
   def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
-                 (implicit config: Config): (Map[Direction, Seq[Plan]], Metrics)
+                 (implicit config: Config): (Plans, Metrics)
 
   def finalize(worldShard: WorldShard)(implicit config: Config): Unit = ()
 }

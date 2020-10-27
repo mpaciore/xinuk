@@ -33,7 +33,6 @@ object FortwistMain extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
-    import pl.edu.agh.fortwist.config.FortwistValueReaders._
     new Simulation[FortwistConfig](configPrefix, metricHeaders, FortwistConflictResolver,
       SignalPropagation.Standard, FortwistCell.create())(
       new FortwistMovesController(_)(_),

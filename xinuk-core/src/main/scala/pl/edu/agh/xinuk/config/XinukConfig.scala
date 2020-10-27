@@ -17,8 +17,8 @@ trait XinukConfig {
   def isSupervisor: Boolean
   def shardingMod: Int
 
-  def guiCellSize: Int
   def guiType: GuiType
+  def guiCellSize: Int
 }
 
 sealed trait GuiType extends NamedEnum

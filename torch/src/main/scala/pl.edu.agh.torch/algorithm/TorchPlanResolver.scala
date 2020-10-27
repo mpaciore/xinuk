@@ -3,11 +3,11 @@ package pl.edu.agh.torch.algorithm
 import pl.edu.agh.torch.config.TorchConfig
 import pl.edu.agh.torch.model.{Exit, Fire, Person}
 import pl.edu.agh.xinuk.algorithm.{PlanResolver, StateUpdate}
-import pl.edu.agh.xinuk.model.{CellContents, CellState, Empty, Obstacle}
+import pl.edu.agh.xinuk.model.{CellContents, Empty, Obstacle}
 
 final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
-  override def isUpdateValid(state: CellState, update: StateUpdate)(implicit config: TorchConfig): Boolean =
-    (state.contents, update.value.contents) match {
+  override def isUpdateValid(contents: CellContents, update: StateUpdate)(implicit config: TorchConfig): Boolean =
+    (contents, update.value) match {
       case (Obstacle, _) => false           // cannot update Obstacle
       case (_, Obstacle) => false           // cannot update with Obstacle
       case (_, Exit) => false               // cannot update with Exit
@@ -18,10 +18,9 @@ final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
       case _ => true                        // anything else should be possible
     }
 
-  override def applyUpdate(state: CellState, update: StateUpdate)(implicit config: TorchConfig): (CellState, TorchMetrics) = {
-    val newSignal = state.signalMap + update.value.signalMap
+  override def applyUpdate(contents: CellContents, update: StateUpdate)(implicit config: TorchConfig): (CellContents, TorchMetrics) = {
 
-    val (newContents: CellContents, metrics: TorchMetrics) = (state.contents, update.value.contents) match {
+    val (newContents: CellContents, metrics: TorchMetrics) = (contents, update.value) match {
       case (_, Empty) =>
         // Empty update should be treated as the old contents leaving the cell
         (Empty, TorchMetrics.empty)
@@ -38,10 +37,10 @@ final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
       case (Empty, person: Person) =>
         (person, TorchMetrics.empty)
 
-      case _ => throw new IllegalArgumentException(s"Illegal update applied: state = $state, update = $update")
+      case _ => throw new IllegalArgumentException(s"Illegal update applied: state = $contents, update = $update")
     }
 
-    (CellState(newContents, newSignal), metrics)
+    (newContents, metrics)
   }
 }
 

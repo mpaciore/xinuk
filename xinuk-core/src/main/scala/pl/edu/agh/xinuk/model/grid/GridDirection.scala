@@ -46,5 +46,4 @@ object GridDirection {
   case object Left extends GridDirection(0, -1)
 
   case object TopLeft extends GridDirection(-1, -1)
-
 }

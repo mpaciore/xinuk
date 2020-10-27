@@ -16,12 +16,16 @@ final case class MockMetrics(mockCount: Long, mockMoves: Long) extends Metrics {
     case MockMetrics.EMPTY => this
     case MockMetrics(otherMockCount, otherMockMoves) =>
       MockMetrics(mockCount + otherMockCount, mockMoves + otherMockMoves)
-    case null => this
     case _ => throw new UnsupportedOperationException(s"Cannot add non-MockMetrics to MockMetrics")
   }
 }
 
 object MockMetrics {
+  val MetricHeaders = Vector(
+    "mockCount",
+    "mockMoves"
+  )
+
   private val EMPTY = MockMetrics(0, 0)
 
   def empty: MockMetrics = EMPTY

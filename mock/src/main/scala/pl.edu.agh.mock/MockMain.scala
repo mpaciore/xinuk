@@ -11,29 +11,28 @@ import pl.edu.agh.xinuk.model.{CellState, Obstacle}
 
 object MockMain extends LazyLogging {
   private val configPrefix = "mock"
-  private val metricHeaders = Vector(
-    "mockCount",
-    "mockMoves"
-  )
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation(
       configPrefix,
-      metricHeaders,
+      MockMetrics.MetricHeaders,
       MockWorldCreator,
       MockPlanCreator,
       MockPlanResolver,
       MockMetrics.empty,
       GridSignalPropagation.Standard,
-      {
-        case cellState =>
-          cellState.contents match {
-            case Mock => Color.WHITE
-            case Obstacle => Color.BLUE
-            case _ => cellToColorRegions(cellState)
-          }
-      }).start()
+      cellToColor
+    ).start()
+  }
+
+  private def cellToColor: PartialFunction[CellState, Color] = {
+    case cellState =>
+      cellState.contents match {
+        case Mock => Color.WHITE
+        case Obstacle => Color.BLUE
+        case _ => cellToColorRegions(cellState)
+      }
   }
 
   private def cellToColorRegions(cellState: CellState): Color = {
@@ -58,13 +57,12 @@ object MockMain extends LazyLogging {
     }
   }
 
-  private def cellToColor(cellState: CellState): Color = {
+  private def cellToColorUniform(cellState: CellState): Color = {
     val smellValue = cellState.signalMap.values.map(_.value).max.toFloat
     val brightness = Math.pow(smellValue, 0.1).toFloat
     val hue = 1f
     val saturation = 0.69f
     Color.getHSBColor(hue, saturation, brightness)
   }
-
 }
 

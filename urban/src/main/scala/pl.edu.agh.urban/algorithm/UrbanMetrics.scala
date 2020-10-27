@@ -16,7 +16,6 @@ final case class UrbanMetrics(v1: Long, v2: Long) extends Metrics {
     case UrbanMetrics.EMPTY => this
     case UrbanMetrics(otherV1, otherV2) =>
       UrbanMetrics(v1 + otherV1, v2 + otherV2)
-    case null => this
     case _ => throw new UnsupportedOperationException(s"Cannot add non-UrbanMetrics to UrbanMetrics")
   }
 }
