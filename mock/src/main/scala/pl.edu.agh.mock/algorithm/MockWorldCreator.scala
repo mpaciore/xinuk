@@ -11,7 +11,7 @@ object MockWorldCreator extends WorldCreator[MockConfig] {
   override def prepareWorld()(implicit config: MockConfig): GridWorldBuilder = {
     val worldBuilder: GridWorldBuilder = GridWorldBuilder().withGridConnections()//.withWrappedBoundaries()
 
-    makeGrid(1, worldBuilder)
+    makeGrid(3, worldBuilder)
 
     worldBuilder
   }

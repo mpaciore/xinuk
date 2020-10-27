@@ -2,16 +2,16 @@ package pl.edu.agh.urban.algorithm
 
 import pl.edu.agh.urban.config.{Serialization, UrbanConfig}
 import pl.edu.agh.urban.model.{Person, PersonMarker, UrbanCell}
-import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator}
+import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridCellId
 
 final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
 
-  private val noop: (Map[Direction, Seq[Plan]], UrbanMetrics) = (Map.empty, UrbanMetrics.empty)
+  private val noop: (Plans, UrbanMetrics) = (Plans.empty, UrbanMetrics.empty)
 
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
-                          (implicit config: UrbanConfig): (Map[Direction, Seq[Plan]], UrbanMetrics) = {
+                          (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
     if (config.pathCreation != "none") {
       noop
     } else {
@@ -19,7 +19,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
     }
   }
 
-  private def move(iteration: Long, cellId: CellId, contents: UrbanCell, neighbourContents: Map[Direction, CellContents]): (Map[Direction, Seq[Plan]], UrbanMetrics) = {
+  private def move(iteration: Long, cellId: CellId, contents: UrbanCell, neighbourContents: Map[Direction, CellContents]): (Plans, UrbanMetrics) = {
     noop
 //    val results: Seq[(Map[Direction, Seq[Plan]], UrbanMetrics)] = Seq(
 //      contents.occupant.map(movePerson).getOrElse(noop),

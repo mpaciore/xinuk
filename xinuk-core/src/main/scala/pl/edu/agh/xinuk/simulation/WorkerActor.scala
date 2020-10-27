@@ -77,11 +77,10 @@ class WorkerActor[ConfigType <: XinukConfig](
       plansStash(iteration) :+= remotePlans
       if (plansStash(currentIteration).size == worldShard.incomingWorkerNeighbours.size) {
         val shuffledPlans: Seq[TargetedPlan] = shuffleUngroup(flatGroup(plansStash(currentIteration))(_.action.target))
-        // discarded plans might be used for further retry rounds
         val (acceptedPlans, discardedPlans) = processPlans(shuffledPlans)
         plansStash.remove(currentIteration)
 
-        distributeConsequences(currentIteration, acceptedPlans.flatMap(_.consequence))
+        distributeConsequences(currentIteration, acceptedPlans.flatMap(_.consequence) ++ discardedPlans.flatMap(_.alternative))
       }
 
     case RemoteConsequences(iteration, remoteConsequences) =>
@@ -125,16 +124,19 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def createPlans(cell: Cell): Seq[TargetedPlan] = {
     val neighbourStates = worldShard.cellNeighbours(cell.id)
       .map { case (direction, neighbourId) => (direction, worldShard.cells(neighbourId).state.contents) }
-    val (localPlans, metrics) = planCreator.createPlans(currentIteration, cell.id, cell.state, neighbourStates)
+    val (plans, metrics) = planCreator.createPlans(currentIteration, cell.id, cell.state, neighbourStates)
     iterationMetrics += metrics
-    localPlans.flatMap {
+    plans.outwardsPlans.flatMap {
       case (direction, plans) =>
         val actionTarget = worldShard.cellNeighbours(cell.id)(direction)
         val consequenceTarget = cell.id
+        val alternativeTarget = cell.id
         plans.map {
-          _.toTargeted(actionTarget, consequenceTarget)
+          _.toTargeted(actionTarget, consequenceTarget, alternativeTarget)
         }
-    }.toSeq
+    }.toSeq ++ plans.localPlans.map {
+      _.toTargeted(cell.id, cell.id, cell.id)
+    }
   }
 
   private def processPlans(plans: Seq[TargetedPlan]): (Seq[TargetedPlan], Seq[TargetedPlan]) = {
@@ -151,14 +153,14 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def validatePlan(plan: TargetedPlan): Boolean = {
     val target = worldShard.cells(plan.action.target)
     val action = plan.action.update
-    planResolver.isUpdateValid(target.state, action)
+    planResolver.isUpdateValid(target.state.contents, action)
   }
 
   private def applyUpdate(stateUpdate: TargetedStateUpdate): Unit = {
     val target = worldShard.cells(stateUpdate.target)
     val action = stateUpdate.update
-    val (result, metrics) = planResolver.applyUpdate(target.state, action)
-    target.update(result)
+    val (result, metrics) = planResolver.applyUpdate(target.state.contents, action)
+    target.updateContents(result)
     iterationMetrics += metrics
   }
 

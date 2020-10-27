@@ -3,23 +3,23 @@ package pl.edu.agh.mock.algorithm
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.Mock
 import pl.edu.agh.xinuk.algorithm.{Metrics, PlanResolver, StateUpdate}
-import pl.edu.agh.xinuk.model.{CellState, Empty}
+import pl.edu.agh.xinuk.model.{CellContents, Empty}
 
 final case class MockPlanResolver() extends PlanResolver[MockConfig] {
 
-  override def isUpdateValid(state: CellState, update: StateUpdate)(implicit config: MockConfig): Boolean = {
-    state.contents match {
+  override def isUpdateValid(contents: CellContents, update: StateUpdate)(implicit config: MockConfig): Boolean = {
+    contents match {
       case Empty => true
       case _ => false
     }
   }
 
-  override def applyUpdate(state: CellState, update: StateUpdate)(implicit config: MockConfig): (CellState, Metrics) = {
-    val newState = update.value.withSignal(state.signalMap + update.value.signalMap)
+  override def applyUpdate(contents: CellContents, update: StateUpdate)(implicit config: MockConfig): (CellContents, Metrics) = {
+    val newContents = update.value
     val metrics = update.value match {
-      case CellState(Mock, _) => MockMetrics(0, 1)
+      case Mock => MockMetrics(0, 1)
       case _ => MockMetrics.empty
     }
-    (newState, metrics)
+    (newContents, metrics)
   }
 }
