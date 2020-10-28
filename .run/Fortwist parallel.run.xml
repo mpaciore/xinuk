@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Fortwist parallel" type="CompoundRunConfigurationType">
+    <toRun name="Fortwist parallel supervisor" type="Application" />
+    <toRun name="Fortwist parallel worker" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>
