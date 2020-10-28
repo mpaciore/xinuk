@@ -1,4 +1,4 @@
-package pl.edu.agh.fortwist.simulation
+package pl.edu.agh.fortwist.algorithm
 
 import pl.edu.agh.xinuk.algorithm.Metrics
 
@@ -16,20 +16,24 @@ final case class FortwistMetrics(foraminiferaCount: Long,
   }
 
   override def series: Vector[(String, Double)] = Vector(
-    "Foraminifera" -> foraminiferaCount,
-    "Algae" -> algaeCount
+    "Foraminifera" -> foraminiferaCount.toDouble,
+    "Algae" -> algaeCount.toDouble
   )
 
   override def +(other: Metrics): FortwistMetrics = {
     other match {
-      case FortwistMetrics.EMPTY => this
+      case FortwistMetrics.Empty => this
       case FortwistMetrics(otherForaminiferaCount, otherAlgaeCount, otherForaminiferaDeaths,
       otherForaminiferaTotalEnergy, otherForaminiferaReproductionsCount, otherConsumedAlgaeCount,
       otherForaminiferaTotalLifespan, otherForaminiferaMoves) =>
-        FortwistMetrics(foraminiferaCount + otherForaminiferaCount, algaeCount + otherAlgaeCount,
-          foraminiferaDeaths + otherForaminiferaDeaths, foraminiferaTotalEnergy + otherForaminiferaTotalEnergy,
+        FortwistMetrics(
+          foraminiferaCount + otherForaminiferaCount,
+          algaeCount + otherAlgaeCount,
+          foraminiferaDeaths + otherForaminiferaDeaths,
+          foraminiferaTotalEnergy + otherForaminiferaTotalEnergy,
           foraminiferaReproductionsCount + otherForaminiferaReproductionsCount,
-          consumedAlgaeCount + otherConsumedAlgaeCount, foraminiferaTotalLifespan + otherForaminiferaTotalLifespan,
+          consumedAlgaeCount + otherConsumedAlgaeCount,
+          foraminiferaTotalLifespan + otherForaminiferaTotalLifespan,
           foraminiferaMoves + otherForaminiferaMoves)
       case _ => throw new UnsupportedOperationException(s"Cannot add: non-FortwistMetrics to FortwistMetrics")
     }
@@ -37,7 +41,18 @@ final case class FortwistMetrics(foraminiferaCount: Long,
 }
 
 object FortwistMetrics {
-  private val EMPTY = FortwistMetrics(0, 0, 0, 0, 0, 0, 0, 0)
+  val MetricHeaders = Vector(
+    "foraminiferaCount",
+    "algaeCount",
+    "foraminiferaDeaths",
+    "foraminiferaTotalEnergy",
+    "foraminiferaReproductionsCount",
+    "consumedAlgaeCount",
+    "foraminiferaTotalLifespan",
+    "foraminiferaMoves"
+  )
 
-  def empty(): FortwistMetrics = EMPTY
+  private val Empty = FortwistMetrics(0, 0, 0, 0, 0, 0, 0, 0)
+
+  def empty: FortwistMetrics = Empty
 }

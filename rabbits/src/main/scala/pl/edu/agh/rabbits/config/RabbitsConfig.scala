@@ -7,7 +7,7 @@ import pl.edu.agh.xinuk.model.{Signal, WorldType}
 SC - spawn chance, SC ∈ [0,1] && SC ∈ R
 RSC - rabbit spawn chance; RSC ∈ N.
 
-RSSV - foraminifera start signal value; RSSV ∈ [0,1] && RSSV ∈ R.
+RSSV - rabbit start signal value; RSSV ∈ [0,1] && RSSV ∈ R.
 LSSV - lettuce start signal value; LSSV ∈ [0,1] && LSSV ∈ R.
 
 RSE - rabbit start energy; RSE ∈ [0,1] && RSE ∈ R.
