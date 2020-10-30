@@ -1,8 +1,9 @@
 package pl.edu.agh.mock.algorithm
 
+import pl.edu.agh.mock.algorithm.MockUpdate.{AddMock, RemoveMock}
 import pl.edu.agh.mock.config.MockConfig
 import pl.edu.agh.mock.model.Mock
-import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans, StateUpdate}
+import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
 import pl.edu.agh.xinuk.model.{CellContents, CellId, CellState, Direction, Empty}
 
 import scala.util.Random
@@ -29,10 +30,7 @@ final case class MockPlanCreator() extends PlanCreator[MockConfig] {
 
       val direction = availableDirections.keys.toSeq(Random.nextInt(availableDirections.size))
 
-      val action = StateUpdate(Mock)
-      val consequence = StateUpdate(Empty)
-
-      Plans(Map((direction, Seq(Plan(action, consequence)))))
+      Plans(Map((direction, Seq(Plan(AddMock, RemoveMock)))))
     }
   }
 }
