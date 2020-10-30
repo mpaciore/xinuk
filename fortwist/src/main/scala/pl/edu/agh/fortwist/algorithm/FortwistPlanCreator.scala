@@ -1,6 +1,6 @@
 package pl.edu.agh.fortwist.algorithm
 
-import pl.edu.agh.fortwist.algorithm.FortwistUpdateTag.{Add, Change, Remove}
+import pl.edu.agh.fortwist.algorithm.FortwistUpdate.SeabedUpdate
 import pl.edu.agh.fortwist.config.FortwistConfig
 import pl.edu.agh.fortwist.model.{Foraminifera, Seabed}
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
@@ -30,20 +30,20 @@ final case class FortwistPlanCreator() extends PlanCreator[FortwistConfig] {
         if (foraminifera.energy > config.foraminiferaReproductionThreshold) {
           foraminiferaReproductionsCount += 1
           (None, Plan(
-            Add(Seabed(Seq(Foraminifera()))),
-            Change(Seabed(Seq(foraminifera.changed(-config.foraminiferaReproductionCost))))
+            SeabedUpdate(foraminiferasToAdd = Seq(Foraminifera())),
+            SeabedUpdate(foraminiferasToChange = Seq(foraminifera.changed(-config.foraminiferaReproductionCost)))
           ))
         } else if (currentAlgae > config.algaeEnergeticCapacity) {
           consumedAlgaeCount += config.algaeEnergeticCapacity
           currentAlgae -= config.algaeEnergeticCapacity
           (None, Plan(
-            Change(Seabed(Seq(foraminifera.changed(config.algaeEnergeticCapacity)), -config.algaeEnergeticCapacity))
+            SeabedUpdate(foraminiferasToChange = Seq(foraminifera.changed(config.algaeEnergeticCapacity)), algaeDiff = -config.algaeEnergeticCapacity)
           ))
         } else if (foraminifera.energy < config.foraminiferaLifeActivityCost) {
           foraminiferaDeaths += 1
           foraminiferaTotalLifespan += foraminifera.lifespan
           (None, Plan(
-            Remove(Seabed(Seq(foraminifera)))
+            SeabedUpdate(foraminiferasToRemove = Seq(foraminifera.id))
           ))
         } else {
           foraminiferaMoves += 1
@@ -52,13 +52,13 @@ final case class FortwistPlanCreator() extends PlanCreator[FortwistConfig] {
             .sortBy(_._2)(Ordering[Signal].reverse)
             .head._1
           (Some(direction), Plan(
-            Add(Seabed(Seq(foraminifera.changed(-config.foraminiferaLifeActivityCost)))),
-            Remove(Seabed(Seq(foraminifera)))
+            SeabedUpdate(foraminiferasToAdd = Seq(foraminifera.changed(-config.foraminiferaLifeActivityCost))),
+            SeabedUpdate(foraminiferasToRemove = Seq(foraminifera.id))
           ))
         }
     }
 
-    val algaeGrowthPlan = Plan(Add(Seabed(Seq(), Seabed.algaeGrowth(currentAlgae))))
+    val algaeGrowthPlan = Plan(SeabedUpdate(algaeDiff = Seabed.algaeGrowth(currentAlgae)))
 
     val outwardsPlans: Map[Direction, Seq[Plan]] = forminPlans.filter(_._1.isDefined)
       .map { case (dirOpt, plan) => (dirOpt.get, plan) }

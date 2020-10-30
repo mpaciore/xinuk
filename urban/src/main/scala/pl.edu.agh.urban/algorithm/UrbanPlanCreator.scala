@@ -12,7 +12,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
 
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
                           (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
-    if (config.pathCreation != "none") {
+    if (config.pathCreation != "None") {
       noop
     } else {
       move(iteration, cellId, cellState.contents.asInstanceOf[UrbanCell], neighbourContents)
@@ -67,12 +67,8 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
   //    }
   //  }
 
-  override def initialize(worldShard: WorldShard)(implicit config: UrbanConfig): Unit = {
-    // TODO initialize entrances
-  }
-
   override def finalize(worldShard: WorldShard)(implicit config: UrbanConfig): Unit = {
-    if (config.pathCreation != "none") {
+    if (config.pathCreation != "None") {
       val signal: Map[GridCellId, SignalMap] = worldShard
         .localCellIds
         .map(worldShard.cells(_))
