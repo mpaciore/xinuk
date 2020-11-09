@@ -1,9 +1,5 @@
 package pl.edu.agh.urban.model
 
-case class Entrance() {
+import pl.edu.agh.urban.config.TargetType
 
-}
-
-object Entrance {
-
-}
+case class Entrance(id: String, targetTypes: Set[TargetType], population: Long, lastDepartureTime: Double)

@@ -4,13 +4,11 @@ import pl.edu.agh.urban.config.{TileType, UrbanConfig}
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model.{CellContents, Signal}
 
-import scala.collection.mutable.{Seq => MutableSeq}
-
 case class UrbanCell(
                       tileType: TileType,
-                      var entrance: Option[Entrance] = None,
-                      var occupant: Option[Person] = None,
-                      var markers: MutableSeq[PersonMarker] = MutableSeq.empty
+                      entrance: Option[Entrance] = None,
+                      occupant: Option[Person] = None,
+                      markers: Seq[PersonMarker] = Seq.empty
                     ) extends CellContents {
   override def generateSignal(iteration: Long)(implicit config: XinukConfig): Signal = {
     occupant match {
@@ -20,4 +18,6 @@ case class UrbanCell(
   }
 
   override def signalFactor(iteration: Long)(implicit config: XinukConfig): Double = tileType.walkingFactor
+
+  def isWalkable: Boolean = tileType.walkingFactor > 0.0
 }

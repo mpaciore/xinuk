@@ -3,7 +3,7 @@ package pl.edu.agh.urban.algorithm
 import java.awt.Color
 
 import pl.edu.agh.urban.config.UrbanConfig
-import pl.edu.agh.urban.model.{SignalSourceCell, UrbanCell}
+import pl.edu.agh.urban.model.{Entrance, SignalSourceCell, UrbanCell}
 import pl.edu.agh.xinuk.algorithm.WorldCreator
 import pl.edu.agh.xinuk.model.CellState
 import pl.edu.agh.xinuk.model.grid.{GridCellId, GridWorldBuilder}
@@ -46,8 +46,31 @@ object UrbanWorldCreator extends WorldCreator[UrbanConfig] {
   }
 
   private def prepareTargets(worldBuilder: GridWorldBuilder)(implicit config: UrbanConfig): Unit = {
+    def split(value: Int, parts: Int): Seq[Int] = {
+      if (parts <= 0) {
+        Seq.empty
+      } else {
+        val quotient: Int = value / parts
+        val remainder: Int = value % parts
+
+        Seq.tabulate(parts) {
+          case index if index < remainder => quotient + 1
+          case _ => quotient
+        }
+      }
+    }
+
     config.targets.foreach {
-      target => // create entrance instance with fraction of population according to the number of entrances
+      target =>
+        val population = target.population.getOrElse("residential", 0)
+        val entrancesNumber = target.entrances.size
+
+        target.entrances.zip(split(population, entrancesNumber)).foreach {
+          case (entranceCoordinates, entrancePopulation) =>
+            val oldCell = worldBuilder(entranceCoordinates.gridId).state.contents.asInstanceOf[UrbanCell]
+            val entrance = Entrance(target.id, target.targetTypes, entrancePopulation, 0)
+            worldBuilder(entranceCoordinates.gridId) = CellState(oldCell.copy(entrance = Some(entrance)))
+        }
     }
   }
 }

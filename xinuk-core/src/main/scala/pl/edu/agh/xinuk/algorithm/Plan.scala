@@ -30,14 +30,34 @@ object Plan {
   }
 }
 
-final case class Plans(outwardsPlans: Map[Direction, Seq[Plan]], localPlans: Seq[Plan])
+final case class Plans(plans: Seq[(Option[Direction], Plan)] = Seq.empty) {
+  def ++(other: Plans): Plans = {
+    Plans(plans ++ other.plans)
+  }
+
+  def :+(plan: (Option[Direction], Plan)): Plans = {
+    Plans(plans :+ plan)
+  }
+
+  def outwardsPlans: Map[Direction, Seq[Plan]] = {
+    plans.filter(_._1.isDefined)
+      .map { case (dirOpt, plan) => (dirOpt.get, plan) }
+      .groupBy(_._1)
+      .map {case (dir, groups) => (dir, groups.map(_._2)) }
+  }
+
+  def localPlans: Seq[Plan] = {
+    plans.filter(_._1.isEmpty)
+      .map(_._2)
+  }
+}
 
 object Plans {
+  private val Empty: Plans = Plans()
+
   def empty: Plans = Empty
 
-  private def Empty: Plans = Plans(Map.empty, Seq.empty)
-
-  def apply(outwardsPlans: Map[Direction, Seq[Plan]]): Plans = new Plans(outwardsPlans, Seq.empty)
+  def apply(plan: (Option[Direction], Plan)): Plans = new Plans(Seq(plan))
 }
 
 final case class TargetedStateUpdate(target: CellId, update: Update)

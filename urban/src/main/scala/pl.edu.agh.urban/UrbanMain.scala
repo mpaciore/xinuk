@@ -8,13 +8,12 @@ import pl.edu.agh.xinuk.model.grid.GridSignalPropagation
 
 object UrbanMain extends LazyLogging {
   private val configPrefix = "urban"
-  private val metricHeaders = Vector()
 
   def main(args: Array[String]): Unit = {
     import pl.edu.agh.xinuk.config.ValueReaders._
     new Simulation(
       configPrefix,
-      metricHeaders,
+      UrbanMetrics.MetricHeaders,
       UrbanWorldCreator,
       UrbanPlanCreator,
       UrbanPlanResolver,

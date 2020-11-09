@@ -35,7 +35,6 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
         logger.info("Falling back to reference.conf")
         ConfigFactory.empty()
       }.withFallback(ConfigFactory.load("cluster.conf"))
-  private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
 
   implicit val config: ConfigType = {
     val applicationConfig = rawConfig.getConfig(configPrefix)
@@ -45,6 +44,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
     import net.ceedubs.ficus.Ficus._
     Try(applicationConfig.as[ConfigType]("config")) match {
       case Success(parsedConfig) =>
+        logger.info("Config parsed successfully.")
         parsedConfig
       case Failure(parsingError) =>
         logger.error("Config parsing error.", parsingError)
@@ -52,16 +52,19 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
         throw new IllegalArgumentException
     }
   }
-  private val workerRegionRef: ActorRef =
-    ClusterSharding(system).start(
-      typeName = WorkerActor.Name,
-      entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreatorFactory(), planResolverFactory(), emptyMetrics, signalPropagation),
-      settings = ClusterShardingSettings(system),
-      extractShardId = WorkerActor.extractShardId,
-      extractEntityId = WorkerActor.extractEntityId
-    )
+
+  private val system = ActorSystem(rawConfig.getString("application.name"), rawConfig)
+
+  private val workerRegionRef: ActorRef = ClusterSharding(system).start(
+    typeName = WorkerActor.Name,
+    entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreatorFactory(), planResolverFactory(), emptyMetrics, signalPropagation),
+    settings = ClusterShardingSettings(system),
+    extractShardId = WorkerActor.extractShardId,
+    extractEntityId = WorkerActor.extractEntityId
+  )
 
   def start(): Unit = {
+
     if (config.isSupervisor) {
       val workerToWorld: Map[WorkerId, WorldShard] = worldCreator.prepareWorld().build()
 
