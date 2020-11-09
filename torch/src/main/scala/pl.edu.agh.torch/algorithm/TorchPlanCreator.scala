@@ -25,7 +25,7 @@ final case class TorchPlanCreator() extends PlanCreator[TorchConfig] {
     if (iteration % config.fireSpreadingFrequency == 0) {
       val availableDirections: Seq[Direction] = neighbourContents.filterNot(_._2 == Obstacle).keys.toSeq
       val targetDirection = availableDirections(Random.nextInt(availableDirections.size))
-      Plans(Map((targetDirection, Seq(Plan(CreateFire)))))
+      Plans(Some(targetDirection) -> Plan(CreateFire))
     } else {
       Plans.empty
     }
@@ -38,11 +38,12 @@ final case class TorchPlanCreator() extends PlanCreator[TorchConfig] {
       val directions =
         Random.shuffle(cellSignal.filter { case (direction, _) => neighbourContents.contains(direction) &&
           (neighbourContents(direction) == Empty || neighbourContents(direction) == Exit) }.toSeq)
-        .sortBy(_._2)(Ordering[Signal].reverse)
-        .map(_._1)
+          .sortBy(_._2)
+          .reverse
+          .map(_._1)
 
       if (directions.nonEmpty) {
-        Plans(Map((directions.head, Seq(Plan(AddPerson(person), RemovePerson)))))
+        Plans(Some(directions.head) -> Plan(AddPerson(person), RemovePerson))
       } else {
         Plans.empty
       }

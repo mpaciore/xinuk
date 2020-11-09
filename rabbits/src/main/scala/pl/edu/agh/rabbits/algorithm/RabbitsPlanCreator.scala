@@ -6,7 +6,6 @@ import pl.edu.agh.rabbits.model.{Lettuce, Rabbit}
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
 import pl.edu.agh.xinuk.model._
 
-import scala.math.Ordering
 import scala.util.Random
 
 final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
@@ -14,7 +13,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
                           (implicit config: RabbitsConfig): (Plans, RabbitsMetrics) = {
     cellState.contents match {
-      case lettuce: Lettuce => lettucePlanning(iteration, neighbourContents)
+      case _: Lettuce => lettucePlanning(iteration, neighbourContents)
       case rabbit: Rabbit => rabbitPlanning(rabbit, cellState.signalMap, neighbourContents)
       case _ => (Plans.empty, RabbitsMetrics.empty)
     }
@@ -24,7 +23,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
                              (implicit config: RabbitsConfig): (Plans, RabbitsMetrics) = {
     val ageLettucePlan = Plan(KeepLettuce)
 
-    val spreadMap: Map[Direction, Seq[Plan]] = if (iteration % config.lettuceReproductionFrequency == 0) {
+    val spreadMap: Seq[(Option[Direction], Plan)] = if (iteration % config.lettuceReproductionFrequency == 0) {
       val availableDirections = neighbourContents.filter {
         case (_, Empty) => true
         case (_, _: Rabbit) => true
@@ -33,21 +32,21 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
       if (availableDirections.nonEmpty) {
         val direction: Direction = availableDirections(Random.nextInt(availableDirections.size))
         val spreadLettucePlan = Plan(CreateLettuce)
-        Map((direction, Seq(spreadLettucePlan)))
+        Seq(Some(direction) -> spreadLettucePlan)
       } else {
-        Map.empty
+        Seq.empty
       }
     } else {
-      Map.empty
+      Seq.empty
     }
 
-    (Plans(spreadMap, Seq(ageLettucePlan)), RabbitsMetrics.empty)
+    (Plans(spreadMap :+ (None -> ageLettucePlan)), RabbitsMetrics.empty)
   }
 
   private def rabbitPlanning(rabbit: Rabbit, signalMap: SignalMap, neighbourContents: Map[Direction, CellContents])
                             (implicit config: RabbitsConfig): (Plans, RabbitsMetrics) = {
     val plans = if (rabbit.energy < config.rabbitLifeActivityCost) {
-      Plans(Map.empty, Seq(Plan(KillRabbit)))
+      Plans(None ->Plan(KillRabbit))
     } else {
       val availableDirections = neighbourContents.filter {
         case (_, Empty) => true
@@ -60,24 +59,22 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
       if (availableDirections.nonEmpty) {
         if (rabbit.energy > config.rabbitReproductionThreshold) {
           val direction: Direction = availableDirections(Random.nextInt(availableDirections.size))
-          Plans(Map((direction, Seq(Plan(
+          Plans(Some(direction) -> Plan(
             CreateRabbit,
             KeepRabbit(Rabbit(rabbit.energy - config.rabbitReproductionCost, rabbit.lifespan + 1)),
             KeepRabbit(agedRabbit)
-          )))))
+          ))
         } else {
           val direction: Direction = availableDirections.map { direction => (direction, signalMap(direction)) }
-            .sortBy(_._2)(Ordering[Signal].reverse).head._1
-          Plans(Map((direction, Seq(Plan(
+            .maxBy(_._2)._1
+          Plans(Some(direction) -> Plan(
             AddRabbit(agedRabbit),
             RemoveRabbit,
             KeepRabbit(agedRabbit)
-          )))))
+          ))
         }
       } else {
-        Plans(Map.empty, Seq(Plan(
-          KeepRabbit(agedRabbit)
-        )))
+        Plans(None -> Plan(KeepRabbit(agedRabbit)))
       }
     }
 

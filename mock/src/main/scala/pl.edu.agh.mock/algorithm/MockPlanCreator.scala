@@ -30,7 +30,7 @@ final case class MockPlanCreator() extends PlanCreator[MockConfig] {
 
       val direction = availableDirections.keys.toSeq(Random.nextInt(availableDirections.size))
 
-      Plans(Map((direction, Seq(Plan(AddMock, RemoveMock)))))
+      Plans(Some(direction) -> Plan(AddMock, RemoveMock))
     }
   }
 }

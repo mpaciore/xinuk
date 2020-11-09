@@ -4,9 +4,7 @@ import pl.edu.agh.fortwist.algorithm.FortwistUpdate.SeabedUpdate
 import pl.edu.agh.fortwist.config.FortwistConfig
 import pl.edu.agh.fortwist.model.{Foraminifera, Seabed}
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
-import pl.edu.agh.xinuk.model.{CellContents, CellId, CellState, Direction, Signal}
-
-import scala.math.Ordering
+import pl.edu.agh.xinuk.model.{CellContents, CellId, CellState, Direction}
 
 final case class FortwistPlanCreator() extends PlanCreator[FortwistConfig] {
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
@@ -29,46 +27,37 @@ final case class FortwistPlanCreator() extends PlanCreator[FortwistConfig] {
       foraminifera =>
         if (foraminifera.energy > config.foraminiferaReproductionThreshold) {
           foraminiferaReproductionsCount += 1
-          (None, Plan(
+          None -> Plan(
             SeabedUpdate(foraminiferasToAdd = Seq(Foraminifera())),
             SeabedUpdate(foraminiferasToChange = Seq(foraminifera.changed(-config.foraminiferaReproductionCost)))
-          ))
+          )
         } else if (currentAlgae > config.algaeEnergeticCapacity) {
           consumedAlgaeCount += config.algaeEnergeticCapacity
           currentAlgae -= config.algaeEnergeticCapacity
-          (None, Plan(
+          None -> Plan(
             SeabedUpdate(foraminiferasToChange = Seq(foraminifera.changed(config.algaeEnergeticCapacity)), algaeDiff = -config.algaeEnergeticCapacity)
-          ))
+          )
         } else if (foraminifera.energy < config.foraminiferaLifeActivityCost) {
           foraminiferaDeaths += 1
           foraminiferaTotalLifespan += foraminifera.lifespan
-          (None, Plan(
+          None -> Plan(
             SeabedUpdate(foraminiferasToRemove = Seq(foraminifera.id))
-          ))
+          )
         } else {
           foraminiferaMoves += 1
           val direction: Direction = neighbourContents.keys.toSeq
             .map { direction => (direction, cellState.signalMap(direction)) }
-            .sortBy(_._2)(Ordering[Signal].reverse)
-            .head._1
-          (Some(direction), Plan(
+            .maxBy(_._2)._1
+          Some(direction) -> Plan(
             SeabedUpdate(foraminiferasToAdd = Seq(foraminifera.changed(-config.foraminiferaLifeActivityCost))),
             SeabedUpdate(foraminiferasToRemove = Seq(foraminifera.id))
-          ))
+          )
         }
     }
 
     val algaeGrowthPlan = Plan(SeabedUpdate(algaeDiff = Seabed.algaeGrowth(currentAlgae)))
 
-    val outwardsPlans: Map[Direction, Seq[Plan]] = forminPlans.filter(_._1.isDefined)
-      .map { case (dirOpt, plan) => (dirOpt.get, plan) }
-      .groupBy(_._1)
-      .map { case (dir, tuples) => (dir, tuples.map(_._2))}
-
-    val localPlans: Seq[Plan] = forminPlans.filter(_._1.isEmpty)
-      .map(_._2)
-
-    (Plans(outwardsPlans, localPlans :+ algaeGrowthPlan), FortwistMetrics(
+    (Plans(forminPlans :+ (None -> algaeGrowthPlan)), FortwistMetrics(
       foraminiferaCount,
       algaeCount,
       foraminiferaDeaths,

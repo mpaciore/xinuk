@@ -12,6 +12,7 @@ import pl.edu.agh.xinuk.model.grid.GridCellId
 
 final case class UrbanConfig(worldType: WorldType,
                              iterationsNumber: Long,
+                             iterationFinishedLogFrequency: Long,
 
                              signalSuppressionFactor: Double,
                              signalAttenuationFactor: Double,
@@ -29,11 +30,11 @@ final case class UrbanConfig(worldType: WorldType,
                              originalScale: Double,
                              zoomOut: Int,
 
-                             personalSpaceRange: Double,
                              personalSpaceDetection: Double,
                              personSignal: Signal,
                              targetSignal: Signal,
                              timeStep: Double,
+                             startTime: Double,
 
                              pathCreation: String,
 
@@ -42,7 +43,8 @@ final case class UrbanConfig(worldType: WorldType,
                              tileTypesFilename: String,
                              targetsFilename: String,
                              personBehaviorFilename: String,
-                             staticSignalDir: String
+                             staticSignalDir: String,
+                             staticPathsDir: String
                             ) extends XinukConfig {
   implicit def config: UrbanConfig = this
 
@@ -52,9 +54,9 @@ final case class UrbanConfig(worldType: WorldType,
 
   val scale: Double = originalScale * zoomOut
 
-  val markerSpreadSpeed: Int = (personalSpaceRange / scale).ceil.toInt
+  val markerDetectionDistance: Int = (personalSpaceDetection / scale).ceil.toInt
 
-  val markerTtl: Int = markerSpreadSpeed
+  val markerSpreadSpeed: Int = markerDetectionDistance
 
   val mapImage: BufferedImage = Serialization.loadMapImage()
 
@@ -64,18 +66,30 @@ final case class UrbanConfig(worldType: WorldType,
 
   val personBehavior: PersonBehavior = Serialization.loadPersonBehavior()
 
-  val staticSignal: Map[String, Map[GridCellId, SignalMap]] = Serialization.loadStaticSignal()
+  val staticPaths: Map[String, Map[GridCellId, Direction]] = Serialization.loadStaticPaths()
 
   val colorToTileType: Map[Color, TileType] = tileTypes.map { tileType => (tileType.color, tileType) }.toMap
 
   val idToTileType: Map[TileTypeId, TileType] = tileTypes.map { tileType => (tileType.id, tileType) }.toMap
 
   val cellToTargetEntrance: Map[GridCellId, TargetInfo] =
-  targets.flatMap { building => building.entrances.map { entrance => (entrance.gridId, building) } }.toMap
+    targets.flatMap { building => building.entrances.map { entrance => (entrance.gridId, building) } }.toMap
 
   val targetTypeToTargets: Map[TargetType, Seq[TargetInfo]] =
-  TargetType.values.map { targetType => (targetType, targets.filter { _.targetTypes.contains(targetType) } ) }.toMap
+    TargetType.values.map { targetType => (targetType, targets.filter(_.targetTypes.contains(targetType))) }.toMap
 
+  def getTimeOfDay(time: Double): Option[TimeOfDay] = {
+    val currentTime = LocalTime.ofSecondOfDay(time.toLong % 86400L)
+    personBehavior.routine.find {
+      case (_, spawnProfile) => currentTime.isAfter(spawnProfile.beginning) && currentTime.isBefore(spawnProfile.end)
+    }.map(_._1)
+  }
+
+  def getHumanSpawnInterval(timeOfDay: TimeOfDay, population: Long): Long = {
+    val percent = personBehavior.routine(timeOfDay).departurePercent // percent of population departing each 15 minutes
+    val secondsPerHuman = 900d / (population * percent / 100d)
+    secondsPerHuman.ceil.toLong
+  }
 }
 
 object UrbanConfig {

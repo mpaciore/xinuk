@@ -2,8 +2,10 @@ package pl.edu.agh.xinuk.gui
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
+import java.io.File
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import javax.imageio.ImageIO
 import javax.swing.{ImageIcon, UIManager}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
@@ -123,7 +125,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
   }
 
   def setNewValues(iteration: Long, cells: Set[Cell]): Unit = {
-    cellView.set(cells)
+    cellView.set(iteration, cells)
   }
 
   private class ParticleCanvas(xOffset: Int, yOffset: Int, xSize: Int, ySize: Int, guiCellSize: Int) extends Label {
@@ -146,7 +148,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
 
     icon = new ImageIcon(img)
 
-    def set(cells: Set[Cell]): Unit = {
+    def set(iteration: Long, cells: Set[Cell]): Unit = {
       cells.foreach {
         case Cell(GridCellId(x, y), state) =>
           val startX = (x - xOffset) * guiCellSize
@@ -156,13 +158,20 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
         case _ =>
       }
       this.repaint()
+      if (iteration % config.iterationFinishedLogFrequency == 0) persistFrame(iteration)
+    }
+
+    private def persistFrame(iteration: Long):Boolean = {
+      val file = new File(f"out/img/$iteration%05d.png")
+      file.mkdirs()
+      ImageIO.write(img, "png", file)
     }
   }
 
   private val nameToSeries = mutable.Map.empty[String, XYSeries]
   private val dataset = new XYSeriesCollection()
   private val chart = ChartFactory.createXYLineChart(
-    "Iteration metrics chart", "X", "Y size", dataset, PlotOrientation.VERTICAL, true, true, false
+    "Iteration metrics chart", "X", "Y", dataset, PlotOrientation.VERTICAL, true, true, false
   )
   private val panel = new ChartPanel(chart)
   chartPanel.layout(swing.Component.wrap(panel)) = Center

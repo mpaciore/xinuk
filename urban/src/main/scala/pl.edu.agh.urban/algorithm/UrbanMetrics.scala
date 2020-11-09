@@ -1,27 +1,53 @@
 package pl.edu.agh.urban.algorithm
 
 import pl.edu.agh.xinuk.algorithm.Metrics
+import pl.edu.agh.xinuk.model.grid.GridCellId
 
-final case class UrbanMetrics(v1: Long, v2: Long) extends Metrics {
+final case class UrbanMetrics(
+                               peopleCreated: Long,
+                               peopleRemoved: Long,
+                               socialDistanceViolationCount: Long,
+                               socialDistanceViolationLocations: Seq[GridCellId]
+                             ) extends Metrics {
   override def log: String = {
-    s"$v1;$v2"
+    s"$peopleCreated;$peopleRemoved;$socialDistanceViolationCount;$socialDistanceViolationLocations"
   }
 
   override def series: Vector[(String, Double)] = Vector(
-    "V1" -> v1.toDouble,
-    "V2" -> v2.toDouble
+    "People entering area" -> peopleCreated.toDouble,
+    "People exiting area" -> peopleRemoved.toDouble,
+    "Social distance violations" -> socialDistanceViolationCount.toDouble
   )
 
   override def +(other: Metrics): UrbanMetrics = other match {
-    case UrbanMetrics.EMPTY => this
-    case UrbanMetrics(otherV1, otherV2) =>
-      UrbanMetrics(v1 + otherV1, v2 + otherV2)
+    case UrbanMetrics.Empty => this
+    case UrbanMetrics(otherPeopleCreated, otherPeopleRemoved, otherSocialDistanceViolationCount,
+    otherSocialDistanceViolationLocations) =>
+      UrbanMetrics(peopleCreated + otherPeopleCreated,
+        peopleRemoved + otherPeopleRemoved,
+        socialDistanceViolationCount + otherSocialDistanceViolationCount,
+        socialDistanceViolationLocations ++ otherSocialDistanceViolationLocations)
     case _ => throw new UnsupportedOperationException(s"Cannot add non-UrbanMetrics to UrbanMetrics")
   }
 }
 
 object UrbanMetrics {
-  private val EMPTY = UrbanMetrics(0, 0)
+  val MetricHeaders = Vector(
+    "peopleCreated",
+    "peopleRemoved",
+    "socialDistanceViolationCount",
+    "socialDistanceViolationLocations"
+  )
 
-  def empty: UrbanMetrics = EMPTY
+  private val Empty = UrbanMetrics(0, 0, 0, Seq.empty)
+  private val PersonCreated = UrbanMetrics(1, 0, 0, Seq.empty)
+  private val PersonRemoved = UrbanMetrics(0, 1, 0, Seq.empty)
+
+  def empty: UrbanMetrics = Empty
+
+  def personCreated: UrbanMetrics = PersonCreated
+
+  def personRemoved: UrbanMetrics = PersonRemoved
+
+  def violation(location: GridCellId): UrbanMetrics = UrbanMetrics(0, 0, 1, Seq(location))
 }
