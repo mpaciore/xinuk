@@ -18,9 +18,115 @@ import pl.edu.agh.xinuk.model.{Direction, Signal, SignalMap, WorkerId}
 
 
 object Serialization {
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
 
-  private val mapper: ObjectMapper = {
+  private val mapper = MapperConfig.Mapper
+
+  def loadMapImage()(implicit config: UrbanConfig): BufferedImage = {
+    val path = Paths.get(config.urbanDataRootPath, config.mapImageFilename)
+    ImageIO.read(path.toFile)
+  }
+
+  def loadTileTypes()(implicit config: UrbanConfig): Seq[TileType] = {
+    val path = Paths.get(config.urbanDataRootPath, config.tileTypesFilename)
+    mapper.readValue(path.toFile, new TypeReference[Seq[TileType]]() {})
+  }
+
+  def loadTargets()(implicit config: UrbanConfig): Seq[TargetInfo] = {
+    val path = Paths.get(config.urbanDataRootPath, config.targetsFilename)
+    mapper.readValue(path.toFile, new TypeReference[Seq[TargetInfo]]() {})
+  }
+
+  def loadPersonBehavior()(implicit config: UrbanConfig): PersonBehavior = {
+    val path = Paths.get(config.urbanDataRootPath, config.personBehaviorFilename)
+    mapper.readValue(path.toFile, new TypeReference[PersonBehavior]() {})
+  }
+
+  def loadStaticPaths()(implicit config: UrbanConfig): Map[String, Map[GridCellId, Direction]] = {
+    val path: Path = Paths.get(config.urbanDataRootPath, config.staticPathsDir)
+    path.toFile.list().map {
+//    List("BB01.json").map { // todo remove
+      filename =>
+        val file = Paths.get(path.toString, filename).toFile
+        val buildingId = file.getName.split('.').head
+        val buildingStaticPaths = mapper.readValue(file, new TypeReference[Map[GridCellId, Direction]]() {})
+
+        // TODO remove
+        val mb = 1024*1024
+        val timestamp = java.time.Instant.now
+        val runtime = Runtime.getRuntime
+        runtime.gc()
+        val used = (runtime.totalMemory - runtime.freeMemory) / mb
+        val free = runtime.freeMemory / mb
+        val total = runtime.totalMemory / mb
+        val max = runtime.maxMemory / mb
+        println(s"$buildingId: loaded at $timestamp, memory: used $used MB, free $free MB, total $total MB, max $max MB")
+
+        (buildingId, buildingStaticPaths)
+    }.toMap
+  }
+
+  def dumpStaticSignal(signal: Map[GridCellId, SignalMap], buildingId: String, workerId: WorkerId)(implicit config: UrbanConfig): Unit = {
+    val path = Paths.get(config.urbanDataRootPath, config.staticSignalDir, buildingId, f"${workerId.value}%04d.json")
+    path.getParent.toFile.mkdirs()
+    path.toFile.createNewFile()
+    writeSignalFile(signal, path.toFile)
+  }
+
+  private def writeSignalFile(signal: Map[GridCellId, SignalMap], file: File): Unit =
+    mapper.writeValue(file, signal)
+
+  // old unused methods that might yet be useful
+
+  private def readSignalDirectory(buildingPath: Path): Map[GridCellId, SignalMap] = {
+    buildingPath.toFile.list().map {
+      filename =>
+        mapper.readValue(
+          Paths.get(buildingPath.toString, filename).toFile,
+          new TypeReference[Map[GridCellId, SignalMap]]() {}
+        ).toSeq
+    }.reduce(_ ++ _).toMap
+  }
+
+  private def loadStaticSignal()(implicit config: UrbanConfig): Map[String, Map[GridCellId, SignalMap]] = {
+    val path: Path = Paths.get(config.urbanDataRootPath, config.staticSignalDir)
+    path.toFile.list().map {
+      buildingId =>
+        val buildingPath = Paths.get(path.toString, buildingId)
+        val buildingSignal = readSignalDirectory(buildingPath)
+        (buildingId, buildingSignal)
+    }.toMap
+  }
+
+  private def convertStaticSignalToPaths(): Unit = {
+    val inPath: Path = Paths.get("urbanData", "staticSignal")
+    val outPath: Path = Paths.get("urbanData", "staticPaths")
+
+    inPath.toFile.list().foreach {
+      buildingId =>
+        val buildingPath = Paths.get(inPath.toString, buildingId)
+        val buildingSignal = readSignalDirectory(buildingPath)
+
+        val buildingDirections: Map[GridCellId, Direction] = buildingSignal.map {
+          case (cellId, signalMap) =>
+            val bestDirection: Direction = signalMap.maxBy(_._2)._1
+            if (signalMap(bestDirection).value > 0d) {
+              (cellId, Some(bestDirection))
+            } else {
+              (cellId, None)
+            }
+        }.filter(_._2.isDefined)
+          .map { case (cellId, directionOpt) => (cellId, directionOpt.get)}
+
+        val outFile = Paths.get(outPath.toString, f"$buildingId.json").toFile
+
+        mapper.writeValue(outFile, buildingDirections)
+        println(f"$buildingId done")
+    }
+  }
+}
+
+private object MapperConfig {
+  val Mapper: ObjectMapper = {
     val mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
 
@@ -54,56 +160,15 @@ object Serialization {
     mapper
   }
 
-  def loadMapImage()(implicit config: UrbanConfig): BufferedImage = {
-    val path = Paths.get(config.urbanDataRootPath, config.mapImageFilename)
-    ImageIO.read(path.toFile)
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
+
+  private def readNode(p: JsonParser): JsonNode = {
+    p.getCodec.readTree(p)
   }
-
-  def loadTileTypes()(implicit config: UrbanConfig): Seq[TileType] = {
-    val path = Paths.get(config.urbanDataRootPath, config.tileTypesFilename)
-    mapper.readValue(path.toFile, new TypeReference[Seq[TileType]]() {})
-  }
-
-  def loadTargets()(implicit config: UrbanConfig): Seq[TargetInfo] = {
-    val path = Paths.get(config.urbanDataRootPath, config.targetsFilename)
-    mapper.readValue(path.toFile, new TypeReference[Seq[TargetInfo]]() {})
-  }
-
-  def loadPersonBehavior()(implicit config: UrbanConfig): PersonBehavior = {
-    val path = Paths.get(config.urbanDataRootPath, config.personBehaviorFilename)
-    mapper.readValue(path.toFile, new TypeReference[PersonBehavior]() {})
-  }
-
-  def loadStaticSignal()(implicit config: UrbanConfig): Map[String, Map[GridCellId, SignalMap]] = {
-    val path: Path = Paths.get(config.urbanDataRootPath, config.staticSignalDir)
-    path.toFile.list().map {
-//    List("BB01").map { // TODO remove
-        buildingId =>
-          val buildingPath = Paths.get(path.toString, buildingId)
-          val buildingSignal = buildingPath.toFile.list().map {
-            filename => readSignalFile(Paths.get(buildingPath.toString, filename).toFile).toSeq
-          }.reduce(_ ++ _)
-            .toMap
-          (buildingId, buildingSignal)
-      }.toMap
-  }
-
-  private def readSignalFile(file: File): Map[GridCellId, SignalMap] =
-    mapper.readValue(file, new TypeReference[Map[GridCellId, SignalMap]]() {})
-
-  def dumpStaticSignal(signal: Map[GridCellId, SignalMap], buildingId: String, workerId: WorkerId)(implicit config: UrbanConfig): Unit = {
-    val path = Paths.get(config.urbanDataRootPath, config.staticSignalDir, buildingId, f"${workerId.value}%04d.json")
-    path.getParent.toFile.mkdirs()
-    path.toFile.createNewFile()
-    writeSignalFile(signal, path.toFile)
-  }
-
-  private def writeSignalFile(signal: Map[GridCellId, SignalMap], file: File): Unit =
-    mapper.writeValue(file, signal)
 
   private object ColorDeserializer extends JsonDeserializer[Color] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): Color = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val r = node.get(0).asInt
       val g = node.get(1).asInt
       val b = node.get(2).asInt
@@ -113,7 +178,7 @@ object Serialization {
 
   private object CoordinatesDeserializer extends JsonDeserializer[Coordinates] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): Coordinates = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val x = node.get(0).asInt
       val y = node.get(1).asInt
       Coordinates(x, y)
@@ -122,7 +187,7 @@ object Serialization {
 
   private object TileTypeIdDeserializer extends JsonDeserializer[TileTypeId] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): TileTypeId = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val value = node.textValue()
       TileTypeId.values.find(_.value == value).get
     }
@@ -130,7 +195,7 @@ object Serialization {
 
   private object TargetTypeDeserializer extends JsonDeserializer[TargetType] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): TargetType = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val value = node.textValue()
       TargetType.values.find(_.value == value).get
     }
@@ -138,7 +203,7 @@ object Serialization {
 
   private object TimeOfDayDeserializer extends JsonDeserializer[TimeOfDay] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): TimeOfDay = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val value = node.textValue()
       TimeOfDay.values.find(_.value == value).get
     }
@@ -179,7 +244,7 @@ object Serialization {
 
   private object DirectionDeserializer extends JsonDeserializer[Direction] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): Direction = {
-      val node: JsonNode = p.getCodec.readTree(p)
+      val node: JsonNode = readNode(p)
       val value = node.textValue()
       GridDirection.values.find(_.toString == value).get
     }
@@ -206,7 +271,7 @@ object Serialization {
   private object SignalDeserializer extends JsonDeserializer[Signal] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): Signal = {
       import com.fasterxml.jackson.databind.JsonNode
-      val value = p.getCodec.readTree[JsonNode](p).asDouble()
+      val value = readNode(p).asDouble()
       Signal(value)
     }
   }
@@ -220,7 +285,7 @@ object Serialization {
   private object LocalTimeDeserializer extends JsonDeserializer[LocalTime] {
     override def deserialize(p: JsonParser, ctxt: DeserializationContext): LocalTime = {
       import com.fasterxml.jackson.databind.JsonNode
-      val value = p.getCodec.readTree[JsonNode](p).textValue()
+      val value = readNode(p).textValue()
       LocalTime.parse(value, formatter)
     }
   }

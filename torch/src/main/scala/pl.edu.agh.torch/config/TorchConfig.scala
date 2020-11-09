@@ -7,6 +7,7 @@ final case class TorchConfig(worldType: WorldType,
                              worldWidth: Int,
                              worldHeight: Int,
                              iterationsNumber: Long,
+                             iterationFinishedLogFrequency: Long,
 
                              signalSuppressionFactor: Double,
                              signalAttenuationFactor: Double,
