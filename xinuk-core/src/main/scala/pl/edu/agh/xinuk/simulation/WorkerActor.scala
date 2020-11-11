@@ -5,7 +5,6 @@ import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import org.slf4j.{Logger, LoggerFactory, MarkerFactory}
 import pl.edu.agh.xinuk.algorithm._
 import pl.edu.agh.xinuk.config.XinukConfig
-import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model._
 
 import scala.collection.mutable
@@ -259,6 +258,8 @@ object WorkerActor {
   final case class MsgWrapper(id: WorkerId, value: Any)
 
   final case class SubscribeGridInfo()
+
+  final case class GridInfo (iteration: Long, cells: Set[Cell], metrics: Metrics)
 
   final case class WorkerInitialized(world: WorldShard)
 

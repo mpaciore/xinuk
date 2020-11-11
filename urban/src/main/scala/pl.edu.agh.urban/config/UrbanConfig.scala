@@ -9,6 +9,8 @@ import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridCellId
 
+import scala.util.Random
+
 
 final case class UrbanConfig(worldType: WorldType,
                              iterationsNumber: Long,
@@ -35,6 +37,11 @@ final case class UrbanConfig(worldType: WorldType,
                              targetSignal: Signal,
                              timeStep: Double,
                              startTime: Double,
+
+                             wanderSegmentsMean: Long,
+                             wanderSegmentsSpread: Long,
+                             wanderSegmentDurationMean: Double,
+                             wanderSegmentDurationStd: Double,
 
                              pathCreation: String,
 
@@ -85,11 +92,13 @@ final case class UrbanConfig(worldType: WorldType,
     }.map(_._1)
   }
 
-  def getHumanSpawnInterval(timeOfDay: TimeOfDay, population: Long): Long = {
+  def getPersonSpawnProbability(timeOfDay: TimeOfDay, population: Long): Double = {
     val percent = personBehavior.routine(timeOfDay).departurePercent // percent of population departing each 15 minutes
-    val secondsPerHuman = 900d / (population * percent / 100d)
-    secondsPerHuman.ceil.toLong
+    (population * percent / 100d) / (900d / timeStep)
   }
+  def randomSegmentDuration(): Double = wanderSegmentDurationMean + Random.nextGaussian() * wanderSegmentDurationStd
+
+  def randomSegments(): Long = wanderSegmentsMean + Random.nextLong(wanderSegmentsSpread * 2 + 1) - wanderSegmentsSpread
 }
 
 object UrbanConfig {
