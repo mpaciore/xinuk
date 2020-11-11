@@ -106,6 +106,8 @@ case class TargetType(@(JsonValue@getter) value: String) extends AnyVal
 object TargetType {
   val Parking: TargetType = TargetType("Parking")
 
+  val Bike: TargetType = TargetType("Bike")
+
   val Bus: TargetType = TargetType("Bus")
 
   val Outside: TargetType = TargetType("Outside")

@@ -1,15 +1,16 @@
 package pl.edu.agh.urban.algorithm
 
+import com.typesafe.scalalogging.LazyLogging
 import pl.edu.agh.urban.algorithm.UrbanUpdate._
 import pl.edu.agh.urban.config.{Serialization, TargetType, UrbanConfig}
-import pl.edu.agh.urban.model.{Entrance, Person, PersonMarker, UrbanCell}
+import pl.edu.agh.urban.model._
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
 import pl.edu.agh.xinuk.model._
 import pl.edu.agh.xinuk.model.grid.GridCellId
 
 import scala.util.Random
 
-final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
+final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLogging {
 
   private val noop: (Plans, UrbanMetrics) = (Plans.empty, UrbanMetrics.empty)
 
@@ -36,7 +37,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
     }
     if (personMovementIteration) {
       allMoves = allMoves :+ contents.occupant.map(person => handlePerson(cellId, person, markerRound, signalMap, neighbourContents)).getOrElse(noop)
-      allMoves = allMoves :+ contents.entrance.map(entrance => handleEntrance(entrance, time, markerRound)).getOrElse(noop)
+      allMoves = allMoves :+ contents.entrance.map(entrance => handleEntrance(cellId, entrance, time, markerRound)).getOrElse(noop)
     }
     allMoves = allMoves ++ contents.markers.map(marker => handleMarker(marker, markerRound, neighbourContents))
 
@@ -46,26 +47,76 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
     }.getOrElse((Plans.empty, UrbanMetrics.empty))
   }
 
-  private def handleEntrance(entrance: Entrance, time: Double, markerRound: Long)
+  private def randomFrom[A](list: Seq[A]): A = {
+    list(Random.nextInt(list.size))
+  }
+
+  private def randomTargetByType(targetType: TargetType)(implicit config: UrbanConfig): Option[(String, TravelMode)] = {
+    Some(randomFrom(config.targetTypeToTargets(targetType)).id, TravelMode.Travel)
+  }
+
+  private def nearestTargetByType(cellId: GridCellId, targetType: TargetType)
+                           (implicit config: UrbanConfig): Option[(String, TravelMode)] = {
+    val targetInfo = config.targetTypeToTargets(targetType)
+      .minBy(targetInfo => GridCellId.distance(cellId, targetInfo.center.gridId))
+    Some(targetInfo.id, TravelMode.Travel)
+  }
+
+  private def chooseTarget(cellId: GridCellId, targetType: TargetType)
+                          (implicit config: UrbanConfig): Option[(String, TravelMode)] = {
+    targetType match {
+      case TargetType.Parking =>
+        nearestTargetByType(cellId, targetType)
+      case TargetType.Bike =>
+        None // bikers are not treated as pedestrians
+      case TargetType.Bus =>
+        randomTargetByType(targetType)
+      case TargetType.Outside =>
+        randomTargetByType(targetType)
+      case TargetType.Playground =>
+        nearestTargetByType(cellId, targetType)
+      case TargetType.Wander =>
+        Some(randomFrom(config.targets).id, TravelMode.Wander)
+      case TargetType.Residential =>
+        randomTargetByType(targetType)
+      case TargetType.Service =>
+        randomTargetByType(targetType)
+      case TargetType.Social =>
+        randomTargetByType(targetType)
+      case _ =>
+        None
+    }
+  }
+
+  private def handleEntrance(cellId: GridCellId, entrance: Entrance, time: Double, markerRound: Long)
                             (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
     if (entrance.targetTypes.contains(TargetType.Residential)) {
-      val currentTimeOfDay = config.getTimeOfDay(time)
-      if (currentTimeOfDay.isDefined) {
-        val currentSpawnInterval = config.getHumanSpawnInterval(currentTimeOfDay.get, entrance.population)
-        val randomSkew = Random.nextInt(10) - 5
-        if (time - entrance.lastDepartureTime + randomSkew > currentSpawnInterval) {
-          (Plans(None -> Plan(
-            CreatePerson(Person(entrance.id, Some("BB01")), markerRound),
-            UpdateEntrance(time)
-          )), UrbanMetrics.empty)
+      config.getTimeOfDay(time).map { currentTimeOfDay =>
+        val personSpawnProbability = config.getPersonSpawnProbability(currentTimeOfDay, entrance.population)
+        if (Random.nextDouble() <= personSpawnProbability) {
+          val targetDistribution = config.personBehavior.routine(currentTimeOfDay).targets
+          var rand = Random.nextDouble()
+          val targetType = targetDistribution.find { case (_, probability) =>
+            rand -= probability / 100d
+            rand <= 0
+          }.map(_._1).get
+
+          chooseTarget(cellId, targetType).map { case (target, travelMode) =>
+            val person = travelMode match {
+              case TravelMode.Travel =>
+                Person.travelling(entrance.id, target)
+              case TravelMode.Wander =>
+                Person.wandering(entrance.id, target)
+            }
+
+              (Plans(None -> Plan(CreatePerson(person, markerRound))), UrbanMetrics.empty)
+          }.getOrElse(noop)
         } else {
           noop
         }
-      } else {
-        noop
-      }
+      }.getOrElse(noop)
     } else {
-      noop
+      noop // TODO returning logic
     }
   }
 
@@ -74,43 +125,65 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] {
     signalMap.map { case (d, s) => (d, if (signalTotal > 0) s.value / signalTotal else 0d) }
   }
 
-  private def chooseDirection(optimalDirectionOpt: Option[Direction], dynamicSignal: SignalMap, allowedDirections: Set[Direction]): Option[Direction] = {
-    optimalDirectionOpt.map { optimalDirection =>
-      val optimalDirectionValue = 1d
-      val suboptimalDirectionValue = 0.8d
+  private def chooseDirection(optimalDirection: Direction, dynamicSignal: SignalMap, allowedDirections: Set[Direction]): Option[Direction] = {
+    val optimalDirectionValue = 1d
+    val suboptimalDirectionsValueFactor = 0.8d
 
-      val dynamicSignalPercentages = signalToPercents(dynamicSignal)
+    val directionInitialScoring: Map[Direction, Double] = optimalDirection.withAdjacent
+      .map(direction => direction -> optimalDirectionValue * suboptimalDirectionsValueFactor)
+      .toMap ++ Map(optimalDirection -> optimalDirectionValue)
 
-      val directionScoring: Map[Direction, Double] = optimalDirection.withAdjacent
-        .map(direction => direction -> suboptimalDirectionValue)
-        .toMap ++ Map(optimalDirection -> optimalDirectionValue)
+    val dynamicSignalPercentages = signalToPercents(dynamicSignal)
+    val directionScoring = directionInitialScoring.filter { case (direction, _) => allowedDirections.contains(direction) }
+      .map { case (direction, value) => (direction, value - dynamicSignalPercentages.getOrElse(direction, 0d) / 2) }
 
-      directionScoring.filter { case (direction, _) => allowedDirections.contains(direction) }
-        .map { case (direction, value) => (direction, value - dynamicSignalPercentages.getOrElse(direction, 0d) / 2) }
-        .maxBy(_._2)._1
+    if (directionScoring.isEmpty) {
+      None
+    } else {
+      Some(directionScoring.maxBy(_._2)._1)
     }
   }
 
   private def handlePerson(cellId: GridCellId, person: Person, markerRound: Long, signalMap: SignalMap, neighbourContents: Map[Direction, CellContents])
                           (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
-    if (person.target.isDefined) {
-      val allowedDirections = neighbourContents.filter(_._2.asInstanceOf[UrbanCell].isWalkable).keySet
-      val staticDirection = config.staticPaths(person.target.get).get(cellId)
-
-      val direction = chooseDirection(staticDirection, signalMap, allowedDirections)
-
-      if (direction.isDefined) {
-        (Plans(direction -> Plan(
-          AddPerson(person, markerRound),
-          RemovePerson(person.id),
-          KeepPerson(person.id, markerRound)
-        )), UrbanMetrics.empty)
-      } else {
-        (Plans(None -> Plan(KeepPerson(person.id, markerRound))), UrbanMetrics.empty)
-      }
-    } else {
-      noop
+    val updatedPerson: Person = person.travelMode match {
+      case TravelMode.Travel =>
+        person
+      case TravelMode.Wander =>
+        if (person.wanderingSegmentTimeRemaining > 0) {
+          // update wandering duration
+          person.copy(wanderingSegmentTimeRemaining = person.wanderingSegmentTimeRemaining - config.timeStep)
+        } else {
+          if (person.wanderingSegmentsRemaining > 0) {
+            // change target
+            person.copy(
+              target = randomFrom(config.targets).id,
+              wanderingSegmentTimeRemaining = config.randomSegmentDuration(),
+              wanderingSegmentsRemaining = person.wanderingSegmentsRemaining - 1
+            )
+          } else {
+            // return to source
+            person.copy(target = person.source, travelMode = TravelMode.Travel)
+          }
+        }
     }
+
+    val allowedDirections = neighbourContents.filter(_._2.asInstanceOf[UrbanCell].isWalkable).keySet
+    val staticDirection = config.staticPaths(updatedPerson.target).get(cellId)
+
+    staticDirection.map { staticDirection =>
+      chooseDirection(staticDirection, signalMap, allowedDirections)
+    }.map { chosenDirection =>
+      (Plans(chosenDirection -> Plan(
+        AddPerson(updatedPerson, markerRound),
+        RemovePerson(updatedPerson.id),
+        KeepPerson(updatedPerson, markerRound)
+      )), UrbanMetrics.empty)
+    }.getOrElse {
+      logger.warn(s"No direction available from $cellId to ${updatedPerson.target}")
+      (Plans(None -> Plan(KeepPerson(updatedPerson, markerRound))), UrbanMetrics.empty)
+    }
+
   }
 
   private def checkAndPurgeMarkers(cellId: GridCellId, contents: UrbanCell, markerRound: Long): (Plans, UrbanMetrics) = {

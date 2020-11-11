@@ -16,7 +16,7 @@ final class GridWorldShard(val cells: Map[CellId, Cell],
 
   private val localCellIdsSet: Set[CellId] = cells.keys.filter(k => cellToWorker(k) == workerId).toSet
 
-  def span: ((Int, Int), (Int, Int)) = {
+  def bounds: GridWorldShard.Bounds = {
     val coords = localCellIds.map { case GridCellId(x, y) => (x, y) }
     val xMin = coords.map(_._1).min
     val xMax = coords.map(_._1).max
@@ -24,7 +24,7 @@ final class GridWorldShard(val cells: Map[CellId, Cell],
     val yMin = coords.map(_._2).min
     val yMax = coords.map(_._2).max
     val ySize = yMax - yMin + 1
-    ((xMin, yMin), (xSize, ySize))
+    GridWorldShard.Bounds(xMin, yMin, xSize, ySize)
   }
 
   override def localCellIds: Set[CellId] = localCellIdsSet
@@ -38,6 +38,8 @@ object GridWorldShard {
             incomingCells: Map[WorkerId, Set[CellId]],
             cellToWorker: Map[CellId, WorkerId])(implicit config: XinukConfig): GridWorldShard =
     new GridWorldShard(cells, cellNeighbours, workerId, outgoingCells, incomingCells, cellToWorker)(config)
+
+  case class Bounds(xMin: Int, yMin: Int, xSize: Int, ySize: Int)
 }
 
 case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder {
