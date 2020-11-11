@@ -13,10 +13,8 @@ object UrbanUpdate {
 
   case class AddPerson(person: Person, round: Long) extends Update
 
-  case class KeepPerson(id: String, round: Long) extends Update
+  case class KeepPerson(person: Person, round: Long) extends Update
 
   case class RemovePerson(id: String) extends Update
-
-  case class UpdateEntrance(lastDepartureTime: Double) extends Update
 
 }

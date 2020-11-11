@@ -44,23 +44,10 @@ object Serialization {
   def loadStaticPaths()(implicit config: UrbanConfig): Map[String, Map[GridCellId, Direction]] = {
     val path: Path = Paths.get(config.urbanDataRootPath, config.staticPathsDir)
     path.toFile.list().map {
-//    List("BB01.json").map { // todo remove
       filename =>
         val file = Paths.get(path.toString, filename).toFile
         val buildingId = file.getName.split('.').head
         val buildingStaticPaths = mapper.readValue(file, new TypeReference[Map[GridCellId, Direction]]() {})
-
-        // TODO remove
-        val mb = 1024*1024
-        val timestamp = java.time.Instant.now
-        val runtime = Runtime.getRuntime
-        runtime.gc()
-        val used = (runtime.totalMemory - runtime.freeMemory) / mb
-        val free = runtime.freeMemory / mb
-        val total = runtime.totalMemory / mb
-        val max = runtime.maxMemory / mb
-        println(s"$buildingId: loaded at $timestamp, memory: used $used MB, free $free MB, total $total MB, max $max MB")
-
         (buildingId, buildingStaticPaths)
     }.toMap
   }

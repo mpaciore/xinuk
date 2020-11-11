@@ -1,8 +1,8 @@
 package pl.edu.agh.urban.algorithm
 
-import pl.edu.agh.urban.algorithm.UrbanUpdate.{AddMarker, AddPerson, CreatePerson, KeepPerson, PurgeMarkers, RemovePerson, UpdateEntrance}
+import pl.edu.agh.urban.algorithm.UrbanUpdate._
 import pl.edu.agh.urban.config.UrbanConfig
-import pl.edu.agh.urban.model.{Person, PersonMarker, UrbanCell}
+import pl.edu.agh.urban.model.{Person, PersonMarker, TravelMode, UrbanCell}
 import pl.edu.agh.xinuk.algorithm.{PlanResolver, Update}
 import pl.edu.agh.xinuk.model.CellContents
 
@@ -16,10 +16,10 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
 
       case (UrbanCell(_, _, None, _), _: CreatePerson) => true
       case (UrbanCell(_, _, None, _), _: AddPerson) => true
-      case (UrbanCell(_, _, Some(Person(_, _, _, id)), _), KeepPerson(personId, _)) => id == personId
-      case (UrbanCell(_, _, Some(Person(_, _, _, id)), _), RemovePerson(personId)) => id == personId
+      case (UrbanCell(_, _, Some(person: Person), _), KeepPerson(personToKeep, _)) => person.id == personToKeep.id
+      case (UrbanCell(_, _, Some(person: Person), _), RemovePerson(personId)) => person.id == personId
 
-      case (UrbanCell(_, Some(_), _, _), _: UpdateEntrance) => true
+//      case (UrbanCell(_, Some(_), _, _), _: UpdateEntrance) => true
 
       case _ => false
     }
@@ -41,26 +41,28 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
         (cell.copy(markers = newMarkers), UrbanMetrics.empty)
 
       case (cell: UrbanCell, CreatePerson(person, round)) =>
-        if (cell.entrance.isDefined && person.target.isDefined && cell.entrance.get.id == person.target.get) {
-          (cell, UrbanMetrics.personCreated + UrbanMetrics.personRemoved)
-        } else {
-          (cell.copy(occupant = Some(person), markers = cell.markers :+ person.createPersonMarker(round)), UrbanMetrics.personCreated)
-        }
+        val (newContents, metrics) = addPerson(cell, person, round)
+        (newContents, metrics + UrbanMetrics.personCreated)
       case (cell: UrbanCell, AddPerson(person, round)) =>
-        if (cell.entrance.isDefined && person.target.isDefined && cell.entrance.get.id == person.target.get) {
-          (cell, UrbanMetrics.personRemoved)
-        } else {
-          (cell.copy(occupant = Some(person), markers = cell.markers :+ person.createPersonMarker(round)), UrbanMetrics.empty)
-        }
-      case (cell: UrbanCell, KeepPerson(_, round)) =>
-        (cell.copy(markers = cell.markers :+ cell.occupant.get.createPersonMarker(round)), UrbanMetrics.empty)
+        addPerson(cell, person, round)
+      case (cell: UrbanCell, KeepPerson(person, round)) =>
+        (cell.copy(occupant = Some(person), markers = cell.markers :+ person.createPersonMarker(round)), UrbanMetrics.empty)
       case (cell: UrbanCell, RemovePerson(_)) =>
         (cell.copy(occupant = None), UrbanMetrics.empty)
 
-      case (cell@UrbanCell(_, Some(entrance), _, _), UpdateEntrance(lastDepartureTime)) =>
-        (cell.copy(entrance = Some(entrance.copy(lastDepartureTime = lastDepartureTime))), UrbanMetrics.empty)
+//      case (cell@UrbanCell(_, Some(entrance), _, _), UpdateEntrance(lastDepartureTime)) =>
+//        (cell.copy(entrance = Some(entrance.copy(lastDepartureTime = lastDepartureTime))), UrbanMetrics.empty)
 
       case _ => throw new IllegalArgumentException(s"Illegal update applied: contents = $contents, update = $update")
+    }
+  }
+
+  private def addPerson(cell: UrbanCell, person: Person, markerRound: Long)
+                       (implicit config: UrbanConfig): (CellContents, UrbanMetrics) = {
+    if (person.travelMode == TravelMode.Travel && cell.entrance.isDefined && cell.entrance.get.id == person.target) {
+      (cell, UrbanMetrics.personRemoved)
+    } else {
+      (cell.copy(occupant = Some(person), markers = cell.markers :+ person.createPersonMarker(markerRound)), UrbanMetrics.empty)
     }
   }
 }

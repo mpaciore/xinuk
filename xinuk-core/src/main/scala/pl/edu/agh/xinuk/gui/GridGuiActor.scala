@@ -2,20 +2,17 @@ package pl.edu.agh.xinuk.gui
 
 import java.awt.image.BufferedImage
 import java.awt.{Color, Dimension}
-import java.io.File
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import javax.imageio.ImageIO
 import javax.swing.{ImageIcon, UIManager}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartFactory, ChartPanel}
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
 import pl.edu.agh.xinuk.algorithm.Metrics
 import pl.edu.agh.xinuk.config.XinukConfig
-import pl.edu.agh.xinuk.gui.GuiActor.GridInfo
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.grid.GridCellId
-import pl.edu.agh.xinuk.simulation.WorkerActor.{MsgWrapper, SubscribeGridInfo}
+import pl.edu.agh.xinuk.model.grid.{GridCellId, GridWorldShard}
+import pl.edu.agh.xinuk.simulation.WorkerActor.{GridInfo, MsgWrapper, SubscribeGridInfo}
 
 import scala.collection.mutable
 import scala.swing.BorderPanel.Position._
@@ -23,15 +20,15 @@ import scala.swing.TabbedPane.Page
 import scala.swing._
 import scala.util.{Random, Try}
 
-class GuiActor private(worker: ActorRef,
-                       workerId: WorkerId,
-                       worldSpan: ((Int, Int), (Int, Int)),
-                       cellToColor: PartialFunction[CellState, Color])
-                      (implicit config: XinukConfig) extends Actor with ActorLogging {
+class GridGuiActor private(worker: ActorRef,
+                           workerId: WorkerId,
+                           bounds: GridWorldShard.Bounds,
+                           cellToColor: PartialFunction[CellState, Color])
+                          (implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(worldSpan, cellToColor, workerId)
+  private lazy val gui: GuiGrid = new GuiGrid(bounds, cellToColor, workerId)
 
   override def preStart(): Unit = {
     worker ! MsgWrapper(workerId, SubscribeGridInfo())
@@ -45,30 +42,25 @@ class GuiActor private(worker: ActorRef,
 
   def started: Receive = {
     case GridInfo(iteration, cells, metrics) =>
-      gui.setNewValues(iteration, cells)
+      gui.setNewValues(cells)
       gui.updatePlot(iteration, metrics)
   }
 }
 
-object GuiActor {
-
-  final case class GridInfo private(iteration: Long, cells: Set[Cell], metrics: Metrics)
-
-  def props(worker: ActorRef, workerId: WorkerId, worldSpan: ((Int, Int), (Int, Int)), cellToColor: PartialFunction[CellState, Color])
+object GridGuiActor {
+  def props(worker: ActorRef, workerId: WorkerId, bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color])
            (implicit config: XinukConfig): Props = {
-    Props(new GuiActor(worker, workerId, worldSpan, cellToColor))
+    Props(new GridGuiActor(worker, workerId, bounds, cellToColor))
   }
-
 }
 
-private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: PartialFunction[CellState, Color], workerId: WorkerId)
+private[gui] class GuiGrid(bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color], workerId: WorkerId)
                           (implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
 
-  private val ((xOffset, yOffset), (xSize, ySize)) = worldSpan
   private val bgColor = new Color(220, 220, 220)
-  private val cellView = new ParticleCanvas(xOffset, yOffset, xSize, ySize, config.guiCellSize)
+  private val cellView = new ParticleCanvas(bounds.xMin, bounds.yMin, bounds.xSize, bounds.ySize, config.guiCellSize)
   private val chartPanel = new BorderPanel {
     background = bgColor
   }
@@ -113,19 +105,19 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
     val xWindowAdjustment = 24
     val yWindowAdjustment = 70
 
-    val xLocalOffset = xOffset * config.guiCellSize + xPos * xWindowAdjustment
-    val yLocalOffset = yOffset * config.guiCellSize + yPos * yWindowAdjustment
+    val xLocalOffset = bounds.xMin * config.guiCellSize + xPos * xWindowAdjustment
+    val yLocalOffset = bounds.yMin * config.guiCellSize + yPos * yWindowAdjustment
 
-    val width = xSize * config.guiCellSize + xWindowAdjustment
-    val height = ySize * config.guiCellSize + yWindowAdjustment
+    val width = bounds.xSize * config.guiCellSize + xWindowAdjustment
+    val height = bounds.ySize * config.guiCellSize + yWindowAdjustment
 
     val location = new Point(xGlobalOffset + xLocalOffset, yGlobalOffset + yLocalOffset)
     val size = new Dimension(width, height)
     (location, size)
   }
 
-  def setNewValues(iteration: Long, cells: Set[Cell]): Unit = {
-    cellView.set(iteration, cells)
+  def setNewValues(cells: Set[Cell]): Unit = {
+    cellView.set(cells)
   }
 
   private class ParticleCanvas(xOffset: Int, yOffset: Int, xSize: Int, ySize: Int, guiCellSize: Int) extends Label {
@@ -148,7 +140,7 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
 
     icon = new ImageIcon(img)
 
-    def set(iteration: Long, cells: Set[Cell]): Unit = {
+    def set(cells: Set[Cell]): Unit = {
       cells.foreach {
         case Cell(GridCellId(x, y), state) =>
           val startX = (x - xOffset) * guiCellSize
@@ -158,13 +150,6 @@ private[gui] class GuiGrid(worldSpan: ((Int, Int), (Int, Int)), cellToColor: Par
         case _ =>
       }
       this.repaint()
-      if (iteration % config.iterationFinishedLogFrequency == 0) persistFrame(iteration)
-    }
-
-    private def persistFrame(iteration: Long):Boolean = {
-      val file = new File(f"out/img/$iteration%05d.png")
-      file.mkdirs()
-      ImageIO.write(img, "png", file)
     }
   }
 
