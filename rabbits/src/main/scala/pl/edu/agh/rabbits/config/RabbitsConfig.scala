@@ -36,6 +36,7 @@ final case class RabbitsConfig(
 
                                 guiType: GuiType,
                                 guiCellSize: Int,
+                                guiUpdateFrequency: Long,
 
                                 spawnChance: Double,
                                 rabbitSpawnChance: Double,

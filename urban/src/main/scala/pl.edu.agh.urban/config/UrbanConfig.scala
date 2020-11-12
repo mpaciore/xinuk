@@ -26,6 +26,7 @@ final case class UrbanConfig(worldType: WorldType,
 
                              guiType: GuiType,
                              guiCellSize: Int,
+                             guiUpdateFrequency: Long,
 
                              originalWidth: Int,
                              originalHeight: Int,
@@ -54,6 +55,8 @@ final case class UrbanConfig(worldType: WorldType,
                              staticPathsDir: String
                             ) extends XinukConfig {
   implicit def config: UrbanConfig = this
+
+  val random: Random = new Random()
 
   override val worldWidth: Int = originalWidth / zoomOut
 
@@ -96,9 +99,9 @@ final case class UrbanConfig(worldType: WorldType,
     val percent = personBehavior.routine(timeOfDay).departurePercent // percent of population departing each 15 minutes
     (population * percent / 100d) / (900d / timeStep)
   }
-  def randomSegmentDuration(): Double = wanderSegmentDurationMean + Random.nextGaussian() * wanderSegmentDurationStd
+  def randomSegmentDuration(): Double = wanderSegmentDurationMean + random.nextGaussian() * wanderSegmentDurationStd
 
-  def randomSegments(): Long = wanderSegmentsMean + Random.nextLong(wanderSegmentsSpread * 2 + 1) - wanderSegmentsSpread
+  def randomSegments(): Long = wanderSegmentsMean + random.nextLong(wanderSegmentsSpread * 2 + 1) - wanderSegmentsSpread
 }
 
 object UrbanConfig {

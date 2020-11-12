@@ -6,12 +6,9 @@ import pl.edu.agh.urban.config.{Serialization, TargetType, UrbanConfig}
 import pl.edu.agh.urban.model._
 import pl.edu.agh.xinuk.algorithm.{Plan, PlanCreator, Plans}
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.grid.GridCellId
-
-import scala.util.Random
+import pl.edu.agh.xinuk.model.grid.{GridCellId, GridDirection}
 
 final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLogging {
-
   private val noop: (Plans, UrbanMetrics) = (Plans.empty, UrbanMetrics.empty)
 
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
@@ -47,8 +44,8 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     }.getOrElse((Plans.empty, UrbanMetrics.empty))
   }
 
-  private def randomFrom[A](list: Seq[A]): A = {
-    list(Random.nextInt(list.size))
+  private def randomFrom[A](list: Seq[A])(implicit config: UrbanConfig): A = {
+    list(config.random.nextInt(list.size))
   }
 
   private def randomTargetByType(targetType: TargetType)(implicit config: UrbanConfig): Option[(String, TravelMode)] = {
@@ -93,9 +90,9 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     if (entrance.targetTypes.contains(TargetType.Residential)) {
       config.getTimeOfDay(time).map { currentTimeOfDay =>
         val personSpawnProbability = config.getPersonSpawnProbability(currentTimeOfDay, entrance.population)
-        if (Random.nextDouble() <= personSpawnProbability) {
+        if (config.random.nextDouble() <= personSpawnProbability) {
           val targetDistribution = config.personBehavior.routine(currentTimeOfDay).targets
-          var rand = Random.nextDouble()
+          var rand = config.random.nextDouble()
           val targetType = targetDistribution.find { case (_, probability) =>
             rand -= probability / 100d
             rand <= 0
@@ -129,13 +126,12 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     val optimalDirectionValue = 1d
     val suboptimalDirectionsValueFactor = 0.8d
 
-    val directionInitialScoring: Map[Direction, Double] = optimalDirection.withAdjacent
-      .map(direction => direction -> optimalDirectionValue * suboptimalDirectionsValueFactor)
-      .toMap ++ Map(optimalDirection -> optimalDirectionValue)
-
     val dynamicSignalPercentages = signalToPercents(dynamicSignal)
-    val directionScoring = directionInitialScoring.filter { case (direction, _) => allowedDirections.contains(direction) }
-      .map { case (direction, value) => (direction, value - dynamicSignalPercentages.getOrElse(direction, 0d) / 2) }
+    val directionScoring = allowedDirections.map {direction =>
+      val stepsFromOptimal = direction.asInstanceOf[GridDirection].stepsFrom(optimalDirection.asInstanceOf[GridDirection])
+      val initialScore = optimalDirectionValue * math.pow(suboptimalDirectionsValueFactor, stepsFromOptimal)
+      (direction, initialScore - dynamicSignalPercentages.getOrElse(direction, 0d) / 2)
+    }
 
     if (directionScoring.isEmpty) {
       None
@@ -155,7 +151,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
           person.copy(wanderingSegmentTimeRemaining = person.wanderingSegmentTimeRemaining - config.timeStep)
         } else {
           if (person.wanderingSegmentsRemaining > 0) {
-            // change target
+            // change wandering target
             person.copy(
               target = randomFrom(config.targets).id,
               wanderingSegmentTimeRemaining = config.randomSegmentDuration(),
@@ -207,12 +203,6 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     } else {
       noop
     }
-  }
-
-  private def bestDirection(signalMap: SignalMap, neighbourContents: Map[Direction, CellContents], neighbourContentsFilter: CellContents => Boolean): Direction = {
-    signalMap.filter {
-      case (direction, _) => neighbourContents.contains(direction) && neighbourContentsFilter(neighbourContents(direction))
-    }.toSeq.maxBy(_._2)._1
   }
 
   override def finalize(worldShard: WorldShard)(implicit config: UrbanConfig): Unit = {

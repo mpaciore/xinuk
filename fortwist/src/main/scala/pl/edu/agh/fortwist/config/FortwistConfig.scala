@@ -20,6 +20,7 @@ final case class FortwistConfig(
 
                                  guiType: GuiType,
                                  guiCellSize: Int,
+                                 guiUpdateFrequency: Long,
 
                                  foraminiferaSpawnChance: Double,
 

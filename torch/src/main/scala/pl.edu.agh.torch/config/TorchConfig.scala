@@ -19,6 +19,7 @@ final case class TorchConfig(worldType: WorldType,
 
                              guiCellSize: Int,
                              guiType: GuiType,
+                             guiUpdateFrequency: Long,
 
                              spawnChance: Double,
                              personSpawnChance: Double,
