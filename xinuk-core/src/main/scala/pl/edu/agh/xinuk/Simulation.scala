@@ -2,6 +2,7 @@ package pl.edu.agh.xinuk
 
 import java.awt.Color
 import java.io.File
+import java.util.UUID
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
@@ -67,14 +68,15 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
     if (config.isSupervisor) {
       val workerToWorld: Map[WorkerId, WorldShard] = worldCreator.prepareWorld().build()
+      val simulationId: String = UUID.randomUUID().toString
 
       workerToWorld.foreach( { case (workerId, world) =>
         (config.guiType, world) match {
           case (GuiType.None, _) =>
           case (GuiType.Grid, gridWorldShard: GridWorldShard) =>
-            system.actorOf(GridGuiActor.props(workerRegionRef, workerId, gridWorldShard.bounds, cellToColor))
+            system.actorOf(GridGuiActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds, cellToColor))
           case (GuiType.Snapshot, gridWorldShard: GridWorldShard) =>
-            system.actorOf(SnapshotActor.props(workerRegionRef, workerId, gridWorldShard.bounds, cellToColor))
+            system.actorOf(SnapshotActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds, cellToColor))
           case _ => logger.warn("GUI type incompatible with World format.")
         }
         WorkerActor.send(workerRegionRef, workerId, WorkerActor.WorkerInitialized(world))

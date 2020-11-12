@@ -5,30 +5,45 @@ import pl.edu.agh.xinuk.model.Direction
 sealed class GridDirection(private val xShift: Int, private val yShift: Int) extends Direction {
   def of(id: GridCellId): GridCellId = GridCellId(id.x + xShift, id.y + yShift)
 
-  def opposite: GridDirection = GridDirection.opposite(this)
+  override def opposite: GridDirection = GridDirection.opposite(this)
 
-  def adjacent: Seq[GridDirection] = GridDirection.adjacent(this)
+  override def adjacent: Seq[GridDirection] = GridDirection.adjacent(this)
+  
+  def stepsFrom(other: GridDirection): Int = GridDirection.stepsBetween(this, other)
 }
 
 object GridDirection {
+  private val oppositeMap: Map[GridDirection, GridDirection] = Map(
+    Top -> Bottom,
+    TopRight -> BottomLeft,
+    Right -> Left,
+    BottomRight -> TopLeft,
+    Bottom -> Top,
+    BottomLeft -> TopRight,
+    Left -> Right,
+    TopLeft -> BottomRight
+  )
 
-  private def opposite(direction: GridDirection): GridDirection = direction match {
-    case Top => Bottom
-    case TopRight => BottomLeft
-    case Right => Left
-    case BottomRight => TopLeft
-    case Bottom => Top
-    case BottomLeft => TopRight
-    case Left => Right
-    case TopLeft => BottomRight
-    case _ => throw new UnsupportedOperationException("Cannot get GridDirection opposite to non-GridDirection.")
-  }
-
-  private def adjacent(direction: GridDirection): Seq[GridDirection] = {
+  private val adjacentMap: Map[GridDirection, Seq[GridDirection]] = values.map { direction =>
     val idx: Int = values.indexOf(direction)
-    Seq(values((idx - 1 + values.size) % values.size), values((idx + 1) % values.size))
-  }
+    (direction, Seq(values((idx - 1 + values.size) % values.size), values((idx + 1) % values.size)))
+  }.toMap
 
+  private val distanceMap: Map[GridDirection, Map[GridDirection, Int]] = values.map { direction =>
+    val idx = values.indexOf(direction)
+    (direction, values.map { otherDirection =>
+      val otherIdx = values.indexOf(otherDirection)
+      val distance = math.min(math.abs(idx - otherIdx), values.size - math.abs(idx - otherIdx))
+      (otherDirection, distance)
+    }.toMap)
+  }.toMap
+  
+  private def opposite(direction: GridDirection): GridDirection = oppositeMap(direction)
+
+  private def adjacent(direction: GridDirection): Seq[GridDirection] = adjacentMap(direction)
+  
+  private def stepsBetween(direction: GridDirection, other: GridDirection): Int = distanceMap(direction)(other)
+  
   implicit def values: Seq[GridDirection] = Seq(Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft)
 
   case object Top extends GridDirection(-1, 0)
