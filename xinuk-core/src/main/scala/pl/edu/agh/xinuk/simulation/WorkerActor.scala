@@ -114,8 +114,12 @@ class WorkerActor[ConfigType <: XinukConfig](
         remoteCellContentsStash.remove(currentIteration)
 
         logMetrics(currentIteration, iterationMetrics)
-        guiActors.foreach(_ ! GridInfo(iteration, worldShard.localCellIds.map(worldShard.cells(_)), iterationMetrics))
-        if (iteration % config.iterationFinishedLogFrequency == 0) logger.info(s"finished $iteration")
+        if (iteration % config.guiUpdateFrequency == 0) {
+          guiActors.foreach(_ ! GridInfo(iteration, worldShard.localCellIds.map(worldShard.cells(_)), iterationMetrics))
+        }
+        if (iteration % config.iterationFinishedLogFrequency == 0) {
+          logger.info(s"finished $iteration")
+        }
         self ! StartIteration(currentIteration + 1)
       }
   }

@@ -21,6 +21,7 @@ import scala.swing._
 import scala.util.{Random, Try}
 
 class GridGuiActor private(worker: ActorRef,
+                           simulationId: String,
                            workerId: WorkerId,
                            bounds: GridWorldShard.Bounds,
                            cellToColor: PartialFunction[CellState, Color])
@@ -48,9 +49,9 @@ class GridGuiActor private(worker: ActorRef,
 }
 
 object GridGuiActor {
-  def props(worker: ActorRef, workerId: WorkerId, bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color])
+  def props(worker: ActorRef, simulationId: String, workerId: WorkerId, bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color])
            (implicit config: XinukConfig): Props = {
-    Props(new GridGuiActor(worker, workerId, bounds, cellToColor))
+    Props(new GridGuiActor(worker, simulationId, workerId, bounds, cellToColor))
   }
 }
 
