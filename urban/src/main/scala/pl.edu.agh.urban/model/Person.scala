@@ -8,7 +8,7 @@ case class Person(
                    source: String,
                    target: String,
                    travelMode: TravelMode,
-                   wanderingSegmentTimeRemaining: Double = 0d,
+                   wanderingSegmentEndTime: Double = 0d,
                    wanderingSegmentsRemaining: Long = 0L,
                    id: String = UUID.randomUUID().toString
                  ) {
@@ -20,8 +20,8 @@ object Person {
   def travelling(source: String, target: String)(implicit config: UrbanConfig): Person =
     Person(source, target, TravelMode.Travel)
 
-  def wandering(source: String, target: String)(implicit config: UrbanConfig): Person = {
-    Person(source, target, TravelMode.Wander, config.randomSegmentDuration(), config.randomSegments() - 1)
+  def wandering(source: String, target: String, time: Double)(implicit config: UrbanConfig): Person = {
+    Person(source, target, TravelMode.Wander, time + config.randomSegmentDuration(), config.randomSegments() - 1)
   }
 }
 
@@ -35,6 +35,8 @@ sealed trait TravelMode
 object TravelMode {
 
   case object Travel extends TravelMode
+
+  case object Return extends TravelMode
 
   case object Wander extends TravelMode
 

@@ -68,8 +68,8 @@ object UrbanWorldCreator extends WorldCreator[UrbanConfig] {
         target.entrances.zip(split(population, entrancesNumber)).foreach {
           case (entranceCoordinates, entrancePopulation) =>
             val oldCell = worldBuilder(entranceCoordinates.gridId).state.contents.asInstanceOf[UrbanCell]
-            val entrance = Entrance(target.id, target.targetTypes, entrancePopulation, 0)
-            worldBuilder(entranceCoordinates.gridId) = CellState(oldCell.copy(entrance = Some(entrance)))
+            val entrance = Entrance(target.id, target.targetTypes, entrancePopulation)
+            worldBuilder(entranceCoordinates.gridId) = CellState(oldCell.copy(entrances = oldCell.entrances :+ entrance))
         }
     }
   }
