@@ -77,7 +77,7 @@ private class SnapshotSaver(bounds: GridWorldShard.Bounds, simulationId: String,
   }
 
   def snapshot(iteration: Long, cells: Set[Cell]): Unit = {
-    val snapshotFile = new File(snapshotDirectory, f"${workerId.value}%04d_$iteration%05d.png")
+    val snapshotFile = new File(snapshotDirectory, f"${workerId.value}%04d_$iteration%09d.png")
     fillImage(cells)
     ImageIO.write(img, "png", snapshotFile)
   }

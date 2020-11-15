@@ -7,13 +7,13 @@ import pl.edu.agh.xinuk.algorithm.{PlanResolver, Update}
 import pl.edu.agh.xinuk.model.CellContents
 
 final case class FortwistPlanResolver() extends PlanResolver[FortwistConfig] {
-  override def isUpdateValid(contents: CellContents, update: Update)(implicit config: FortwistConfig): Boolean =
+  override def isUpdateValid(iteration: Long, contents: CellContents, update: Update)(implicit config: FortwistConfig): Boolean =
     (contents, update) match {
       case (_: Seabed, _: SeabedUpdate) => true
       case _ => false
     }
 
-  override def applyUpdate(contents: CellContents, update: Update)(implicit config: FortwistConfig): (CellContents, FortwistMetrics) = {
+  override def applyUpdate(iteration: Long, contents: CellContents, update: Update)(implicit config: FortwistConfig): (CellContents, FortwistMetrics) = {
     val newContents: CellContents = (contents, update) match {
       case (Seabed(foraminiferas, algae), SeabedUpdate(foraminiferasToAdd, foraminiferasToRemove, foraminiferaReplacements, algaeDiff)) =>
         val remainingForaminiferas = foraminiferas.filterNot {

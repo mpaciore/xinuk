@@ -12,47 +12,48 @@ import pl.edu.agh.xinuk.model.grid.GridCellId
 import scala.util.Random
 
 
-final case class UrbanConfig(worldType: WorldType,
-                             iterationsNumber: Long,
-                             iterationFinishedLogFrequency: Long,
+final case class UrbanConfig(
+                              worldType: WorldType,
+                              iterationsNumber: Long,
+                              iterationFinishedLogFrequency: Long,
 
-                             signalSuppressionFactor: Double,
-                             signalAttenuationFactor: Double,
-                             signalSpeedRatio: Int,
+                              signalSuppressionFactor: Double,
+                              signalAttenuationFactor: Double,
+                              signalSpeedRatio: Int,
 
-                             workersRoot: Int,
-                             isSupervisor: Boolean,
-                             shardingMod: Int,
+                              workersRoot: Int,
+                              isSupervisor: Boolean,
+                              shardingMod: Int,
 
-                             guiType: GuiType,
-                             guiCellSize: Int,
-                             guiUpdateFrequency: Long,
+                              guiType: GuiType,
+                              guiCellSize: Int,
+                              guiUpdateFrequency: Long,
 
-                             originalWidth: Int,
-                             originalHeight: Int,
-                             originalScale: Double,
-                             zoomOut: Int,
+                              originalWidth: Int,
+                              originalHeight: Int,
+                              originalScale: Double,
+                              zoomOut: Int,
 
-                             personalSpaceDetection: Double,
-                             personSignal: Signal,
-                             targetSignal: Signal,
-                             timeStep: Double,
-                             startTime: Double,
+                              personalSpaceDetection: Double,
+                              personSignal: Signal,
+                              targetSignal: Signal,
+                              timeStep: Double,
+                              startTime: Double,
 
-                             wanderSegmentsMean: Long,
-                             wanderSegmentsSpread: Long,
-                             wanderSegmentDurationMean: Double,
-                             wanderSegmentDurationStd: Double,
+                              wanderSegmentsMean: Long,
+                              wanderSegmentsSpread: Long,
+                              wanderSegmentDurationMean: Double,
+                              wanderSegmentDurationStd: Double,
 
-                             pathCreation: String,
+                              pathCreation: String,
 
-                             urbanDataRootPath: String,
-                             mapImageFilename: String,
-                             tileTypesFilename: String,
-                             targetsFilename: String,
-                             personBehaviorFilename: String,
-                             staticSignalDir: String,
-                             staticPathsDir: String
+                              urbanDataRootPath: String,
+                              mapImageFilename: String,
+                              tileTypesFilename: String,
+                              targetsFilename: String,
+                              personBehaviorFilename: String,
+                              staticSignalDir: String,
+                              staticPathsDir: String
                             ) extends XinukConfig {
   implicit def config: UrbanConfig = this
 
@@ -80,28 +81,41 @@ final case class UrbanConfig(worldType: WorldType,
 
   val colorToTileType: Map[Color, TileType] = tileTypes.map { tileType => (tileType.color, tileType) }.toMap
 
-  val idToTileType: Map[TileTypeId, TileType] = tileTypes.map { tileType => (tileType.id, tileType) }.toMap
-
-  val cellToTargetEntrance: Map[GridCellId, TargetInfo] =
-    targets.flatMap { building => building.entrances.map { entrance => (entrance.gridId, building) } }.toMap
-
   val targetTypeToTargets: Map[TargetType, Seq[TargetInfo]] =
     TargetType.values.map { targetType => (targetType, targets.filter(_.targetTypes.contains(targetType))) }.toMap
 
+  def getTimeState(iteration: Long): TimeState = {
+    // with each full spread range of markers time advances
+    val markerRound: Long = (iteration - 1) / markerSpreadSpeed
+    // time advance step from config
+    val time: Double = config.startTime + markerRound * timeStep
+    // person moves at first iteration and once every marker round
+    val personMovementIteration: Boolean = (iteration - 1) % markerSpreadSpeed == 0
+    // old markers are purged one iteration after person movement step
+    val markerPurgeIteration: Boolean = (iteration - 2) % markerSpreadSpeed == 0
+    TimeState(markerRound, time, personMovementIteration, markerPurgeIteration)
+  }
+
   def getTimeOfDay(time: Double): Option[TimeOfDay] = {
     val currentTime = LocalTime.ofSecondOfDay(time.toLong % 86400L)
-    personBehavior.routine.find {
+    personBehavior.spawnRoutine.find {
       case (_, spawnProfile) => currentTime.isAfter(spawnProfile.beginning) && currentTime.isBefore(spawnProfile.end)
     }.map(_._1)
   }
 
   def getPersonSpawnProbability(timeOfDay: TimeOfDay, population: Long): Double = {
-    val percent = personBehavior.routine(timeOfDay).departurePercent // percent of population departing each 15 minutes
+    val percent = personBehavior.spawnRoutine(timeOfDay).departurePercent // percent of population departing each 15 minutes
     (population * percent / 100d) / (900d / timeStep)
   }
+
   def randomSegmentDuration(): Double = wanderSegmentDurationMean + random.nextGaussian() * wanderSegmentDurationStd
 
   def randomSegments(): Long = wanderSegmentsMean + random.nextLong(wanderSegmentsSpread * 2 + 1) - wanderSegmentsSpread
+
+  def randomVisitTime(targetType: TargetType): Double = {
+    val durationDistribution = personBehavior.visitingRoutine(targetType)
+    durationDistribution.mean + random.nextGaussian() * durationDistribution.std
+  }
 }
 
 object UrbanConfig {
@@ -125,8 +139,8 @@ object UrbanConfig {
     case cellState =>
       cellState.contents match {
         case Obstacle => Color.BLUE
-        case urban: UrbanCell => urban.occupant match {
-          case None => urban.tileType.color
+        case urban: UrbanCell => urban.occupants.size match {
+          case 0 => urban.tileType.color
           case _ => Color.BLACK
         }
         case _ => Color.WHITE
@@ -136,6 +150,8 @@ object UrbanConfig {
   def cellToColor: PartialFunction[CellState, Color] = cellToColorType
 }
 
+case class TimeState(markerRound: Long, time: Double, personMovementIteration: Boolean, markerPurgeIteration: Boolean)
+
 case class Coordinates(x: Int, y: Int) {
   def gridId(implicit config: UrbanConfig): GridCellId = GridCellId(x / config.zoomOut, y / config.zoomOut)
 }
@@ -144,6 +160,8 @@ case class TileType(id: TileTypeId, name: String, color: Color, walkingFactor: D
 
 case class TargetInfo(id: String, targetTypes: Set[TargetType], population: Map[String, Int], center: Coordinates, entrances: Seq[Coordinates])
 
-case class PersonBehavior(routine: Map[TimeOfDay, HumanSpawnProfile])
+case class PersonBehavior(spawnRoutine: Map[TimeOfDay, HumanSpawnProfile], visitingRoutine: Map[TargetType, DurationDistribution])
 
 case class HumanSpawnProfile(beginning: LocalTime, end: LocalTime, departurePercent: Double, returnPercent: Double, targets: Map[TargetType, Double])
+
+case class DurationDistribution(mean: Double, std: Double)
