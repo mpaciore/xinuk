@@ -7,7 +7,7 @@ import pl.edu.agh.xinuk.algorithm.{PlanResolver, Update}
 import pl.edu.agh.xinuk.model.{CellContents, Empty}
 
 final case class RabbitsPlanResolver() extends PlanResolver[RabbitsConfig] {
-  override def isUpdateValid(contents: CellContents, update: Update)(implicit config: RabbitsConfig): Boolean =
+  override def isUpdateValid(iteration: Long, contents: CellContents, update: Update)(implicit config: RabbitsConfig): Boolean =
     (contents, update) match {
       case (_: Lettuce, KeepLettuce) => true
       case (_: Rabbit, _: KeepRabbit) => true
@@ -27,9 +27,7 @@ final case class RabbitsPlanResolver() extends PlanResolver[RabbitsConfig] {
       case _ => false
     }
 
-  override def applyUpdate(contents: CellContents, update: Update)(implicit config: RabbitsConfig): (CellContents, RabbitsMetrics) = {
-
-
+  override def applyUpdate(iteration: Long, contents: CellContents, update: Update)(implicit config: RabbitsConfig): (CellContents, RabbitsMetrics) = {
     val (newContents: CellContents, metrics: RabbitsMetrics) = (contents, update) match {
       case (lettuce: Lettuce, KeepLettuce) =>
         (Lettuce(lettuce.lifespan + 1), RabbitsMetrics.lettuce)

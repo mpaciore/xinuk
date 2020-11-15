@@ -156,13 +156,13 @@ class WorkerActor[ConfigType <: XinukConfig](
   private def validatePlan(plan: TargetedPlan): Boolean = {
     val target = worldShard.cells(plan.action.target)
     val action = plan.action.update
-    planResolver.isUpdateValid(target.state.contents, action)
+    planResolver.isUpdateValid(currentIteration, target.state.contents, action)
   }
 
   private def applyUpdate(stateUpdate: TargetedStateUpdate): Unit = {
     val target = worldShard.cells(stateUpdate.target)
     val action = stateUpdate.update
-    val (result, metrics) = planResolver.applyUpdate(target.state.contents, action)
+    val (result, metrics) = planResolver.applyUpdate(currentIteration, target.state.contents, action)
     target.updateContents(result)
     iterationMetrics += metrics
   }

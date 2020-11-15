@@ -6,16 +6,12 @@ import pl.edu.agh.xinuk.model.{CellContents, Signal}
 
 case class UrbanCell(
                       tileType: TileType,
-                      entrance: Option[Entrance] = None,
-                      occupant: Option[Person] = None,
+                      entrances: Seq[Entrance] = Seq.empty,
+                      occupants: Seq[Person] = Seq.empty,
                       markers: Seq[PersonMarker] = Seq.empty
                     ) extends CellContents {
-  override def generateSignal(iteration: Long)(implicit config: XinukConfig): Signal = {
-    occupant match {
-      case Some(_) => config.asInstanceOf[UrbanConfig].personSignal
-      case None => Signal.zero
-    }
-  }
+  override def generateSignal(iteration: Long)(implicit config: XinukConfig): Signal =
+    config.asInstanceOf[UrbanConfig].personSignal * occupants.size
 
   override def signalFactor(iteration: Long)(implicit config: XinukConfig): Double = tileType.walkingFactor
 

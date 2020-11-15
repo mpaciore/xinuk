@@ -7,7 +7,7 @@ import pl.edu.agh.xinuk.algorithm.{PlanResolver, Update}
 import pl.edu.agh.xinuk.model.{CellContents, Empty}
 
 final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
-  override def isUpdateValid(contents: CellContents, update: Update)(implicit config: TorchConfig): Boolean =
+  override def isUpdateValid(iteration: Long, contents: CellContents, update: Update)(implicit config: TorchConfig): Boolean =
     (contents, update) match {
       case (_: Person, RemovePerson) => true
 
@@ -22,8 +22,7 @@ final case class TorchPlanResolver() extends PlanResolver[TorchConfig] {
       case _ => false
     }
 
-  override def applyUpdate(contents: CellContents, update: Update)(implicit config: TorchConfig): (CellContents, TorchMetrics) = {
-
+  override def applyUpdate(iteration: Long, contents: CellContents, update: Update)(implicit config: TorchConfig): (CellContents, TorchMetrics) = {
     val (newContents: CellContents, metrics: TorchMetrics) = (contents, update) match {
       case (_: Person, RemovePerson) =>
         (Empty, TorchMetrics.empty)
