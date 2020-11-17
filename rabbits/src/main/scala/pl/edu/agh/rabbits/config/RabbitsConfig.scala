@@ -30,7 +30,8 @@ final case class RabbitsConfig(
                                 signalAttenuationFactor: Double,
                                 signalSpeedRatio: Int,
 
-                                workersRoot: Int,
+                                workersX: Int,
+                                workersY: Int,
                                 isSupervisor: Boolean,
                                 shardingMod: Int,
 
