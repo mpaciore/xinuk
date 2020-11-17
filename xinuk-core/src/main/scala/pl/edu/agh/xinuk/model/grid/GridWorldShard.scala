@@ -141,8 +141,8 @@ case class GridWorldBuilder()(implicit config: XinukConfig) extends WorldBuilder
   }
 
   private def divide(): Map[WorkerId, (Set[CellId], Set[CellId])] = {
-    val xWorkerCount = config.workersRoot
-    val yWorkerCount = config.workersRoot
+    val xWorkerCount = config.workersX
+    val yWorkerCount = config.workersY
 
     val xSizes = split(xSize, xWorkerCount)
     val ySizes = split(ySize, yWorkerCount)

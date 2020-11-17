@@ -97,8 +97,8 @@ private[gui] class GuiGrid(bounds: GridWorldShard.Bounds, cellToColor: PartialFu
   }
 
   private def alignFrame(): (Point, Dimension) = {
-    val xPos = (workerId.value - 1) / config.workersRoot
-    val yPos = (workerId.value - 1) % config.workersRoot
+    val xPos = (workerId.value - 1) / config.workersY
+    val yPos = (workerId.value - 1) % config.workersY
 
     val xGlobalOffset = 100
     val yGlobalOffset = 0
