@@ -14,7 +14,8 @@ trait XinukConfig {
   def signalAttenuationFactor: Double
   def signalSpeedRatio: Int
 
-  def workersRoot: Int
+  def workersX: Int
+  def workersY: Int
   def isSupervisor: Boolean
   def shardingMod: Int
 
