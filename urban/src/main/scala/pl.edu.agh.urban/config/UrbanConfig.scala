@@ -36,6 +36,7 @@ final case class UrbanConfig(
                               zoomOut: Int,
 
                               personalSpaceDetection: Double,
+                              closeViolationThreshold: Double,
                               personSignal: Signal,
                               targetSignal: Signal,
                               timeStep: Double,
@@ -157,12 +158,26 @@ case class Coordinates(x: Int, y: Int) {
   def gridId(implicit config: UrbanConfig): GridCellId = GridCellId(x / config.zoomOut, y / config.zoomOut)
 }
 
-case class TileType(id: TileTypeId, name: String, color: Color, walkingFactor: Double)
+case class TileType(id: TileTypeId,
+                    name: String,
+                    color: Color,
+                    walkingFactor: Double)
 
-case class TargetInfo(id: String, targetTypes: Set[TargetType], population: Map[String, Int], center: Coordinates, entrances: Seq[Coordinates])
+case class TargetInfo(id: String,
+                      targetTypes: Set[TargetType],
+                      population: Map[String, Int],
+                      center: Coordinates,
+                      entrances: Seq[Coordinates])
 
-case class PersonBehavior(spawnRoutine: Map[TimeOfDay, HumanSpawnProfile], visitingRoutine: Map[TargetType, DurationDistribution])
+case class PersonBehavior(spawnRoutine: Map[TimeOfDay, HumanSpawnProfile],
+                          visitingRoutine: Map[TargetType, DurationDistribution],
+                          restrictionFactors: Map[TargetType, Double])
 
-case class HumanSpawnProfile(beginning: LocalTime, end: LocalTime, departurePercent: Double, returnPercent: Double, targets: Map[TargetType, Double])
+case class HumanSpawnProfile(beginning: LocalTime,
+                             end: LocalTime,
+                             departurePercent: Double,
+                             returnPercent: Double,
+                             targets: Map[TargetType, Double])
 
-case class DurationDistribution(mean: Double, std: Double)
+case class DurationDistribution(mean: Double,
+                                std: Double)

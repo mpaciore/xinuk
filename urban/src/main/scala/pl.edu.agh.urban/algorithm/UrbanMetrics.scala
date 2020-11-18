@@ -10,31 +10,41 @@ final case class UrbanMetrics(
                                wanderEnds: Long,
                                returnBeginnings: Long,
                                returnEnds: Long,
-                               socialDistanceViolationCount: Long,
-                               socialDistanceViolationLocations: Seq[GridCellId]
+                               closeViolationCount: Long,
+                               farViolationCount: Long,
+                               closeViolationLocations: Seq[GridCellId],
+                               farViolationLocations: Seq[GridCellId]
                              ) extends Metrics {
+
+  private def idToString(id: GridCellId): String = s"(${id.x},${id.y})"
+
   override def log: String = {
-    s"$travelBeginnings;$travelEnds;$wanderBeginnings;$wanderEnds;$returnBeginnings;$returnEnds;$socialDistanceViolationCount;$socialDistanceViolationLocations"
+    val closeViolationLocationsStringified = closeViolationLocations.map(idToString)
+    val farViolationLocationsStringified = farViolationLocations.map(idToString)
+    s"$travelBeginnings;$travelEnds;$wanderBeginnings;$wanderEnds;$returnBeginnings;$returnEnds;$closeViolationCount;$farViolationCount;$closeViolationLocationsStringified;$farViolationLocationsStringified"
   }
 
   override def series: Vector[(String, Double)] = Vector(
     "People entering area" -> (travelBeginnings + wanderBeginnings + returnBeginnings).toDouble,
     "People exiting area" -> (travelEnds + wanderEnds + returnEnds).toDouble,
-    "Social distance violations" -> socialDistanceViolationCount.toDouble
+    "Social distance close violations" -> closeViolationCount.toDouble,
+    "Social distance far violations" -> farViolationCount.toDouble
   )
 
   override def +(other: Metrics): UrbanMetrics = other match {
     case UrbanMetrics.Empty => this
     case UrbanMetrics(otherTravelBeginnings, otherTravelEnds, otherWanderBeginnings, otherWanderEnds, otherReturnBeginnings, otherReturnEnds,
-    otherSocialDistanceViolationCount, otherSocialDistanceViolationLocations) =>
+    otherCloseViolationCount, otherFarViolationCount, otherCloseViolationLocations, otherFarViolationLocations) =>
       UrbanMetrics(travelBeginnings + otherTravelBeginnings,
         travelEnds + otherTravelEnds,
         wanderBeginnings + otherWanderBeginnings,
         wanderEnds + otherWanderEnds,
         returnBeginnings + otherReturnBeginnings,
         returnEnds + otherReturnEnds,
-        socialDistanceViolationCount + otherSocialDistanceViolationCount,
-        socialDistanceViolationLocations ++ otherSocialDistanceViolationLocations)
+        closeViolationCount + otherCloseViolationCount,
+        farViolationCount + otherFarViolationCount,
+        closeViolationLocations ++ otherCloseViolationLocations,
+        farViolationLocations ++ otherFarViolationLocations)
     case _ => throw new UnsupportedOperationException(s"Cannot add non-UrbanMetrics to UrbanMetrics")
   }
 }
@@ -47,17 +57,19 @@ object UrbanMetrics {
     "wanderEnds",
     "returnBeginnings",
     "returnEnds",
-    "socialDistanceViolationCount",
-    "socialDistanceViolationLocations"
+    "closeViolationCount",
+    "farViolationCount",
+    "closeViolationLocations",
+    "farViolationLocations"
   )
 
-  private val Empty = UrbanMetrics(0, 0, 0, 0, 0, 0, 0, Seq.empty)
-  private val TravelBeginning = UrbanMetrics(1, 0, 0, 0, 0, 0, 0, Seq.empty)
-  private val TravelEnd = UrbanMetrics(0, 1, 0, 0, 0, 0, 0, Seq.empty)
-  private val WanderBeginning = UrbanMetrics(0, 0, 1, 0, 0, 0, 0, Seq.empty)
-  private val WanderEnd = UrbanMetrics(0, 0, 0, 1, 0, 0, 0, Seq.empty)
-  private val ReturnBeginning = UrbanMetrics(0, 0, 0, 0, 1, 0, 0, Seq.empty)
-  private val ReturnEnd = UrbanMetrics(0, 0, 0, 0, 0, 1, 0, Seq.empty)
+  private val Empty = UrbanMetrics(0, 0, 0, 0, 0, 0, 0, 0, Seq.empty, Seq.empty)
+  private val TravelBeginning = UrbanMetrics(1, 0, 0, 0, 0, 0, 0, 0, Seq.empty, Seq.empty)
+  private val TravelEnd = UrbanMetrics(0, 1, 0, 0, 0, 0, 0, 0, Seq.empty, Seq.empty)
+  private val WanderBeginning = UrbanMetrics(0, 0, 1, 0, 0, 0, 0, 0, Seq.empty, Seq.empty)
+  private val WanderEnd = UrbanMetrics(0, 0, 0, 1, 0, 0, 0, 0, Seq.empty, Seq.empty)
+  private val ReturnBeginning = UrbanMetrics(0, 0, 0, 0, 1, 0, 0, 0, Seq.empty, Seq.empty)
+  private val ReturnEnd = UrbanMetrics(0, 0, 0, 0, 0, 1, 0, 0, Seq.empty, Seq.empty)
 
   def empty: UrbanMetrics = Empty
 
@@ -73,5 +85,7 @@ object UrbanMetrics {
 
   def returnEnd: UrbanMetrics = ReturnEnd
 
-  def violation(location: GridCellId): UrbanMetrics = UrbanMetrics(0, 0, 0, 0, 0, 0, 1, Seq(location))
+  def closeViolation(location: GridCellId): UrbanMetrics = UrbanMetrics(0, 0, 0, 0, 0, 0, 1, 0, Seq(location), Seq.empty)
+
+  def farViolation(location: GridCellId): UrbanMetrics = UrbanMetrics(0, 0, 0, 0, 0, 0, 0, 1, Seq.empty, Seq(location))
 }
