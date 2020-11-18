@@ -12,7 +12,7 @@ trait XinukConfig {
 
   def signalSuppressionFactor: Double
   def signalAttenuationFactor: Double
-  def signalSpeedRatio: Int
+  def signalDisabled: Boolean
 
   def workersX: Int
   def workersY: Int

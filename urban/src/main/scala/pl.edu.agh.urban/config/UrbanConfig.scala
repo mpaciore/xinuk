@@ -19,7 +19,7 @@ final case class UrbanConfig(
 
                               signalSuppressionFactor: Double,
                               signalAttenuationFactor: Double,
-                              signalSpeedRatio: Int,
+                              signalDisabled: Boolean,
 
                               workersX: Int,
                               workersY: Int,
