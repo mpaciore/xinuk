@@ -12,7 +12,7 @@ final case class FortwistConfig(
 
                                  signalSuppressionFactor: Double,
                                  signalAttenuationFactor: Double,
-                                 signalSpeedRatio: Int,
+                                 signalDisabled: Boolean,
 
                                  workersX: Int,
                                  workersY: Int,
