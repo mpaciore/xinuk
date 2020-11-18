@@ -89,7 +89,7 @@ class WorkerActor[ConfigType <: XinukConfig](
         consequences.foreach(applyUpdate)
         consequencesStash.remove(currentIteration)
 
-        val signalUpdates = calculateSignalUpdates()
+        val signalUpdates = if (config.signalDisabled) Map.empty[CellId, SignalMap] else calculateSignalUpdates()
         distributeSignal(currentIteration, signalUpdates)
       }
 

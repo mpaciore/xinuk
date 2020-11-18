@@ -11,7 +11,7 @@ final case class TorchConfig(worldType: WorldType,
 
                              signalSuppressionFactor: Double,
                              signalAttenuationFactor: Double,
-                             signalSpeedRatio: Int,
+                             signalDisabled: Boolean,
 
                              workersX: Int,
                              workersY: Int,
