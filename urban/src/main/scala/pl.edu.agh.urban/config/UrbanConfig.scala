@@ -35,12 +35,19 @@ final case class UrbanConfig(
                               originalScale: Double,
                               zoomOut: Int,
 
-                              personalSpaceDetection: Double,
-                              closeViolationThreshold: Double,
-                              personSignal: Signal,
-                              targetSignal: Signal,
                               timeStep: Double,
                               startTime: Double,
+
+                              personalSpaceDetection: Double,
+                              closeViolationThreshold: Double,
+                              markerMaxDistance: Double,
+                              markerMaxAge: Int,
+                              markerSpreadSpeed: Int,
+                              avoidMarkers: Boolean,
+                              personMemorySize: Int,
+
+                              personSignal: Signal,
+                              targetSignal: Signal,
 
                               wanderSegmentsMean: Long,
                               wanderSegmentsSpread: Long,
@@ -66,10 +73,6 @@ final case class UrbanConfig(
   override val worldHeight: Int = originalHeight / zoomOut
 
   val scale: Double = originalScale * zoomOut
-
-  val markerDetectionDistance: Int = (personalSpaceDetection / scale).ceil.toInt
-
-  val markerSpreadSpeed: Int = markerDetectionDistance
 
   val mapImage: BufferedImage = Serialization.loadMapImage()
 

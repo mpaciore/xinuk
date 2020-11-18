@@ -8,11 +8,22 @@ sealed class GridDirection(private val xShift: Int, private val yShift: Int) ext
   override def opposite: GridDirection = GridDirection.opposite(this)
 
   override def adjacent: Seq[GridDirection] = GridDirection.adjacent(this)
-  
+
+  def isDiagonal: Boolean = GridDirection.isDiagonal(this)
+
   def stepsFrom(other: GridDirection): Int = GridDirection.stepsBetween(this, other)
+
+  def clockwise: GridDirection = GridDirection.clockwise(this)
+
+  def counterClockwise: GridDirection = GridDirection.counterClockwise(this)
 }
 
 object GridDirection {
+
+  private val valuesSeq: Seq[GridDirection] = Seq(Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft)
+
+  implicit def values: Seq[GridDirection] = valuesSeq
+
   private val oppositeMap: Map[GridDirection, GridDirection] = Map(
     Top -> Bottom,
     TopRight -> BottomLeft,
@@ -25,8 +36,7 @@ object GridDirection {
   )
 
   private val adjacentMap: Map[GridDirection, Seq[GridDirection]] = values.map { direction =>
-    val idx: Int = values.indexOf(direction)
-    (direction, Seq(values((idx - 1 + values.size) % values.size), values((idx + 1) % values.size)))
+    (direction, Seq(clockwise(direction), counterClockwise(direction)))
   }.toMap
 
   private val distanceMap: Map[GridDirection, Map[GridDirection, Int]] = values.map { direction =>
@@ -37,14 +47,26 @@ object GridDirection {
       (otherDirection, distance)
     }.toMap)
   }.toMap
-  
+
+  private val diagonals: Set[GridDirection] = Set(TopRight, BottomRight, BottomLeft, TopLeft)
+
   private def opposite(direction: GridDirection): GridDirection = oppositeMap(direction)
 
   private def adjacent(direction: GridDirection): Seq[GridDirection] = adjacentMap(direction)
-  
+
+  private def isDiagonal(direction: GridDirection): Boolean = diagonals.contains(direction)
+
   private def stepsBetween(direction: GridDirection, other: GridDirection): Int = distanceMap(direction)(other)
-  
-  implicit def values: Seq[GridDirection] = Seq(Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft)
+
+  private def clockwise(direction: GridDirection): GridDirection = {
+    val idx: Int = values.indexOf(direction)
+    values((idx + 1) % values.size)
+  }
+
+  private def counterClockwise(direction: GridDirection): GridDirection = {
+    val idx: Int = values.indexOf(direction)
+    values((idx - 1 + values.size) % values.size)
+  }
 
   case object Top extends GridDirection(-1, 0)
 
@@ -61,4 +83,5 @@ object GridDirection {
   case object Left extends GridDirection(0, -1)
 
   case object TopLeft extends GridDirection(-1, -1)
+
 }
