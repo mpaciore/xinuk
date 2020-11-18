@@ -49,7 +49,8 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
         } :+ newMarker
         (cell.copy(markers = newMarkers), UrbanMetrics.empty)
       case (cell: UrbanCell, PurgeMarkers(round)) =>
-        val newMarkers = cell.markers.filterNot(_.round < round)
+        // remove markers older than this and previous round
+        val newMarkers = cell.markers.filterNot(_.round < round - 1)
         (cell.copy(markers = newMarkers), UrbanMetrics.empty)
 
       case (cell: UrbanCell, CreatePerson(person, round)) =>
