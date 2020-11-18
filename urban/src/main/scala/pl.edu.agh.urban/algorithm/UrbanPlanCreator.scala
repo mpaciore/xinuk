@@ -89,29 +89,35 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
         val personSpawnProbability = config.getPersonSpawnProbability(currentTimeOfDay, entrance.population)
         if (config.random.nextDouble() <= personSpawnProbability) {
           val targetDistribution = config.personBehavior.spawnRoutine(currentTimeOfDay).targets
-          var rand = config.random.nextDouble()
+          var targetRand = config.random.nextDouble()
           val targetType = targetDistribution.find { case (_, probability) =>
-            rand -= probability / 100d
-            rand <= 0
+            targetRand -= probability / 100d
+            targetRand <= 0
           }.map(_._1).get
 
-          chooseTarget(cellId, targetType).map { case (target, travelMode) =>
-            val person = travelMode match {
-              case TravelMode.Travel =>
-                Person.travelling(entrance.targetId, target)
-              case TravelMode.Wander =>
-                Person.wandering(entrance.targetId, target, time)
-              case _ =>
-                throw new RuntimeException("Attempted to generate returning person")
-            }
-
-            (Plans(None -> Plan(CreatePerson(person, markerRound))), UrbanMetrics.empty)
-          }.getOrElse(noop)
+          if (config.random.nextDouble() < config.personBehavior.restrictionFactors(targetType)) {
+            chooseTarget(cellId, targetType).map { case (target, travelMode) =>
+              val person = travelMode match {
+                case TravelMode.Travel =>
+                  Person.travelling(entrance.targetId, target)
+                case TravelMode.Wander =>
+                  Person.wandering(entrance.targetId, target, time)
+                case _ =>
+                  throw new RuntimeException("Attempted to generate returning person")
+              }
+              (Plans(None -> Plan(CreatePerson(person, markerRound))), UrbanMetrics.empty)
+            }.getOrElse(noop)
+          } else {
+            // spawning restriction triggered
+            noop
+          }
         } else {
+          // random spawning not triggered
           noop
         }
-      }.getOrElse(noop)
+      }.getOrElse(noop) // time of day is not spawning interval
     } else {
+      // entrance is not residential type and does not have spawning capabilities
       noop
     }
 
@@ -142,7 +148,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     val directionScoring = allowedDirections.map {direction =>
       val stepsFromOptimal = direction.asInstanceOf[GridDirection].stepsFrom(optimalDirection.asInstanceOf[GridDirection])
       val initialScore = optimalDirectionValue * math.pow(suboptimalDirectionsValueFactor, stepsFromOptimal)
-      (direction, initialScore - dynamicSignalPercentages.getOrElse(direction, 0d) / 2)
+      (direction, initialScore - dynamicSignalPercentages.getOrElse(direction, 0d))
     }
 
     if (directionScoring.isEmpty) {
@@ -197,14 +203,19 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     (plans, metrics)
   }
 
-  private def checkAndPurgeMarkers(cellId: GridCellId, contents: UrbanCell, markerRound: Long): (Plans, UrbanMetrics) = {
+  private def checkAndPurgeMarkers(cellId: GridCellId, contents: UrbanCell, markerRound: Long)
+                                  (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
     val plans = Plans(None -> Plan(PurgeMarkers(markerRound)))
     val metrics = contents.occupants.map {
-      person => if (contents.markers.exists(_.personId != person.id)) {
-        UrbanMetrics.violation(cellId)
-      } else {
-        UrbanMetrics.empty
-      }
+      person =>
+        val violatedMarkers = contents.markers.filter(_.personId != person.id)
+        if (violatedMarkers.isEmpty){
+          UrbanMetrics.empty
+        } else if (violatedMarkers.exists(_.distance <= config.closeViolationThreshold)) {
+          UrbanMetrics.closeViolation(cellId)
+        } else {
+          UrbanMetrics.farViolation(cellId)
+        }
     }.reduceOption(_ + _).getOrElse(UrbanMetrics.empty)
 
     (plans, metrics)
