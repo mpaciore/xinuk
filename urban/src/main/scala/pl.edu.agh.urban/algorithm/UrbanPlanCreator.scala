@@ -30,7 +30,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
       allMoves = allMoves :+ checkAndPurgeMarkers(cellId, contents, timeState.markerRound)
     }
     if (timeState.personMovementIteration) {
-      allMoves = allMoves ++ contents.occupants.map(person => handlePerson(cellId, person, timeState.time, timeState.markerRound, signalMap, neighbourContents))
+      allMoves = allMoves ++ contents.occupants.map(person => handlePerson(cellId, person, timeState.time, timeState.markerRound, contents.markers, neighbourContents))
       allMoves = allMoves ++ contents.entrances.map(entrance => handleEntrance(cellId, entrance, timeState.time, timeState.markerRound))
     }
     allMoves = allMoves ++ contents.markers.map(marker => handleMarker(marker, timeState.markerRound, neighbourContents))
@@ -140,25 +140,54 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
     signalMap.map { case (d, s) => (d, if (signalTotal > 0) s.value / signalTotal else 0d) }
   }
 
-  private def chooseDirection(optimalDirection: Direction, dynamicSignal: SignalMap, allowedDirections: Set[Direction]): Option[Direction] = {
-    val optimalDirectionValue = 1d
-    val suboptimalDirectionsValueFactor = 0.8d
+  private val weightedDirections: Map[GridDirection, Map[GridDirection, Double]] = {
+    val step = 0.15
+    val clockwiseBias = 0.01
 
-    val dynamicSignalPercentages = signalToPercents(dynamicSignal)
-    val directionScoring = allowedDirections.map {direction =>
-      val stepsFromOptimal = direction.asInstanceOf[GridDirection].stepsFrom(optimalDirection.asInstanceOf[GridDirection])
-      val initialScore = optimalDirectionValue * math.pow(suboptimalDirectionsValueFactor, stepsFromOptimal)
-      (direction, initialScore - dynamicSignalPercentages.getOrElse(direction, 0d))
-    }
+    GridDirection.values.map { direction =>
+      direction -> Map(direction -> 1d, direction.clockwise -> (1d - step), direction.counterClockwise -> (1d - step - clockwiseBias))
+    }.toMap
+  }
 
-    if (directionScoring.isEmpty) {
+  private def directionsWeighted(startingDirection: GridDirection): Map[GridDirection, Double] = {
+    weightedDirections(startingDirection)
+  }
+
+  private def chooseDirection(optimalDirection: Direction, personId: String, markers: Seq[PersonMarker], allowedDirections: Set[Direction])
+                             (implicit config: UrbanConfig): Option[Direction] = {
+    val markerDistancePenalty: PartialFunction[Double, Double] = { case distance => 0.6 - distance * 0.1 }
+
+    val weighted = directionsWeighted(optimalDirection.asInstanceOf[GridDirection])
+      .filter { case (d, _) => allowedDirections.contains(d) }
+
+    if (weighted.isEmpty) {
       None
+    } else if (!config.avoidMarkers) {
+      // best direction
+      Some(weighted.maxBy(_._2)._1)
     } else {
-      Some(directionScoring.maxBy(_._2)._1)
+      val markerSourceDirections = markers
+        .filterNot(_.personId == personId)
+        .flatMap(marker => marker.sourceDirections.map(direction => (direction, markerDistancePenalty(marker.distance))))
+        .filter { case (direction, _) => allowedDirections.contains(direction) }
+        .toMap
+
+      val finalScoring = weighted.keySet.map(d => d -> (weighted.getOrElse(d, 0d) - markerSourceDirections.getOrElse(d, 0d)))
+      Some(finalScoring.maxBy(_._2)._1)
     }
   }
 
-  private def handlePerson(cellId: GridCellId, person: Person, time: Double, markerRound: Long, signalMap: SignalMap, neighbourContents: Map[Direction, CellContents])
+  private def movePlans(cellId: CellId, direction: Direction, person: Person, markerRound: Long)
+                       (implicit config: UrbanConfig): Plans = {
+    Plans(Some(direction) -> Plan(
+      AddPerson(person.withAddedDecision(cellId, direction), markerRound),
+      RemovePerson(person.id),
+      KeepPerson(person, markerRound)
+    ))
+  }
+
+  private def handlePerson(cellId: GridCellId, person: Person, time: Double, markerRound: Long, markers: Seq[PersonMarker],
+                           neighbourContents: Map[Direction, CellContents])
                           (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
     val (updatedPerson, metrics) = person.travelMode match {
       case TravelMode.Wander =>
@@ -182,21 +211,27 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
         (person, UrbanMetrics.empty)
     }
 
-    val allowedDirections = neighbourContents
-      .filter(_._2.asInstanceOf[UrbanCell].isWalkable)
-      .keySet
-    val staticDirection = config.staticPaths(updatedPerson.target).get(cellId)
+    val historicalDirections = person.decisionHistory.filter(_._1 == cellId).map(_._2)
+    val allowedDirections = neighbourContents.filter(_._2.asInstanceOf[UrbanCell].isWalkable).keySet // remove directions to unwalkable cells
+    val preferredDirections = allowedDirections.filterNot(historicalDirections.contains) // remove previously taken decisions
+    val staticDirectionOpt = config.staticPaths(updatedPerson.target).get(cellId)
 
-    val plans = staticDirection.flatMap { staticDirection =>
-      chooseDirection(staticDirection, signalMap, allowedDirections)
-    }.map { chosenDirection =>
-      Plans(Some(chosenDirection) -> Plan(
-        AddPerson(updatedPerson, markerRound),
-        RemovePerson(updatedPerson.id),
-        KeepPerson(updatedPerson, markerRound)
-      ))
+    val plans = staticDirectionOpt.map { staticDirection =>
+      val chosenDirectionOpt = chooseDirection(staticDirection, updatedPerson.id, markers, preferredDirections)
+      chosenDirectionOpt.map { chosenDirection =>
+        movePlans(cellId, chosenDirection, updatedPerson, markerRound)
+      }.getOrElse {
+        val altChosenDirectionOpt = chooseDirection(staticDirection, updatedPerson.id, markers, allowedDirections)
+        altChosenDirectionOpt.map { chosenDirection =>
+          logger.warn(s"Forced to repeat historic move from $cellId to ${updatedPerson.target}: $chosenDirection")
+          movePlans(cellId, chosenDirection, updatedPerson, markerRound)
+        }.getOrElse {
+          logger.warn(s"Could not choose direction from $cellId to ${updatedPerson.target}")
+          Plans(None -> Plan(KeepPerson(updatedPerson, markerRound)))
+        }
+      }
     }.getOrElse {
-      logger.warn(s"No direction available from $cellId to ${updatedPerson.target}")
+      logger.warn(s"No static direction available from $cellId to ${updatedPerson.target}")
       Plans(None -> Plan(KeepPerson(updatedPerson, markerRound)))
     }
 
@@ -213,8 +248,10 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
           UrbanMetrics.empty
         } else if (violatedMarkers.exists(_.distance <= config.closeViolationThreshold)) {
           UrbanMetrics.closeViolation(cellId)
-        } else {
+        } else  if (violatedMarkers.exists(_.distance <= config.personalSpaceDetection)) {
           UrbanMetrics.farViolation(cellId)
+        } else {
+          UrbanMetrics.empty
         }
     }.reduceOption(_ + _).getOrElse(UrbanMetrics.empty)
 
@@ -224,8 +261,15 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
   private def handleMarker(marker: PersonMarker, markerRound: Long, neighbourContents: Map[Direction, CellContents])
                           (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
     // move only markers that are not at max distance and no older than previous round
-    if (marker.round >= markerRound - 1 && marker.distance < config.markerDetectionDistance) {
-      val spreadPlans = neighbourContents.keys.map(Some(_) -> Plan(AddMarker(marker.spread()))).toSeq
+    if (marker.round >= markerRound - config.markerMaxAge) {
+      val spreadPlans = neighbourContents.keys.flatMap { direction =>
+        val spread = marker.spread(direction)
+        if (spread.distance <= config.markerMaxDistance) {
+          Some(Some(direction) -> Plan(AddMarker(spread)))
+        } else {
+          None
+        }
+      }.toSeq
       (Plans(spreadPlans), UrbanMetrics.empty)
     } else {
       noop

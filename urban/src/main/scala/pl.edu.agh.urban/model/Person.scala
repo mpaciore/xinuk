@@ -3,6 +3,8 @@ package pl.edu.agh.urban.model
 import java.util.UUID
 
 import pl.edu.agh.urban.config.UrbanConfig
+import pl.edu.agh.xinuk.model.{CellId, Direction}
+import pl.edu.agh.xinuk.model.grid.GridDirection
 
 case class Person(
                    source: String,
@@ -10,10 +12,16 @@ case class Person(
                    travelMode: TravelMode,
                    wanderingSegmentEndTime: Double = 0d,
                    wanderingSegmentsRemaining: Long = 0L,
+                   decisionHistory: Seq[(CellId, Direction)] = Seq.empty,
                    id: String = UUID.randomUUID().toString
                  ) {
   def createPersonMarker(round: Long)(implicit config: UrbanConfig): PersonMarker =
     PersonMarker(id, round)
+
+  def withAddedDecision(cellId: CellId, direction: Direction)(implicit config: UrbanConfig): Person = {
+    val shrunkHistory = decisionHistory.drop(decisionHistory.size + 1 - config.personMemorySize)
+    copy(decisionHistory = shrunkHistory :+ (cellId, direction))
+  }
 }
 
 object Person {
@@ -25,9 +33,12 @@ object Person {
   }
 }
 
-case class PersonMarker(personId: String, round: Long, distance: Int = 0) {
-  def spread(): PersonMarker =
-    copy(distance = distance + 1)
+case class PersonMarker(personId: String, round: Long, distance: Double = 0d, sourceDirections: Set[Direction] = Set.empty) {
+  def spread(spreadDirection: Direction)(implicit config: UrbanConfig): PersonMarker = {
+    val opposite = spreadDirection.opposite
+    val distanceAdded = config.scale * (if (spreadDirection.asInstanceOf[GridDirection].isDiagonal) math.sqrt(2d) else 1d)
+    copy(distance = distance + distanceAdded, sourceDirections = Set(opposite))
+  }
 }
 
 sealed trait TravelMode

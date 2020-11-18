@@ -12,8 +12,8 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
   override def isUpdateValid(iteration: Long, contents: CellContents, update: Update)
                             (implicit config: UrbanConfig): Boolean = {
     (contents, update) match {
-      case (UrbanCell(_, _, _, markers), AddMarker(newMarker)) =>
-        canAddMarker(markers, newMarker)
+      case (cell: UrbanCell, _: AddMarker) =>
+        cell.isWalkable
       case (_: UrbanCell, _: PurgeMarkers) =>
         true
 
@@ -36,21 +36,13 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
     }
   }
 
-  private def canAddMarker(markers: Seq[PersonMarker], newMarker: PersonMarker): Boolean = !markers.exists {
-    marker => marker.personId == newMarker.personId && marker.round == newMarker.round && marker.distance <= newMarker.distance
-  }
-
   override def applyUpdate(iteration: Long, contents: CellContents, update: Update)
                           (implicit config: UrbanConfig): (CellContents, UrbanMetrics) = {
     (contents, update) match {
       case (cell: UrbanCell, AddMarker(newMarker)) =>
-        val newMarkers = cell.markers.filterNot {
-          marker => marker.personId == newMarker.personId && marker.round == newMarker.round && marker.distance > newMarker.distance
-        } :+ newMarker
-        (cell.copy(markers = newMarkers), UrbanMetrics.empty)
+        (cell.copy(markers = addMarker(cell.markers, newMarker)), UrbanMetrics.empty)
       case (cell: UrbanCell, PurgeMarkers(round)) =>
-        // remove markers older than this and previous round
-        val newMarkers = cell.markers.filterNot(_.round < round - 1)
+        val newMarkers = cell.markers.filterNot(_.round < round - config.markerMaxAge)
         (cell.copy(markers = newMarkers), UrbanMetrics.empty)
 
       case (cell: UrbanCell, CreatePerson(person, round)) =>
@@ -68,7 +60,7 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
         handleIncomingPerson(iteration, cell, person, round)
       case (cell: UrbanCell, KeepPerson(personToKeep, round)) =>
         val newOccupants = cell.occupants.filterNot(_.id == personToKeep.id) :+ personToKeep
-        val newMarkers = cell.markers :+ personToKeep.createPersonMarker(round)
+        val newMarkers = addMarker(cell.markers, personToKeep.createPersonMarker(round))
         (cell.copy(occupants = newOccupants, markers = newMarkers), UrbanMetrics.empty)
       case (cell: UrbanCell, RemovePerson(personId)) =>
         val newOccupants = cell.occupants.filterNot(_.id == personId)
@@ -82,6 +74,28 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
 
       case _ => throw new IllegalArgumentException(s"Illegal update applied: contents = $contents, update = $update")
     }
+  }
+
+  private def addMarker(oldMarkers: Seq[PersonMarker], newMarker: PersonMarker): Seq[PersonMarker] = {
+    oldMarkers.filterNot(_.personId == newMarker.personId) :+
+      oldMarkers.find(_.personId == newMarker.personId).map { existingMarker =>
+        // markers are for the same person - get newer
+        if (newMarker.round > existingMarker.round) {
+          newMarker
+        } else if (newMarker.round < existingMarker.round) {
+          existingMarker
+        } else {
+          // markers are of the same age - get closer
+          if (newMarker.distance < existingMarker.distance) {
+            newMarker
+          } else if (newMarker.distance > existingMarker.distance) {
+            existingMarker
+          } else {
+            // markers are of the same distance to the source - merge directions info
+            existingMarker.copy(sourceDirections = existingMarker.sourceDirections ++ newMarker.sourceDirections)
+          }
+        }
+      }.getOrElse(newMarker)
   }
 
   private def handleIncomingPerson(iteration: Long, cell: UrbanCell, person: Person, markerRound: Long)
@@ -112,7 +126,7 @@ final case class UrbanPlanResolver() extends PlanResolver[UrbanConfig] {
   private def putPerson(cell: UrbanCell, person: Person, markerRound: Long)
                        (implicit config: UrbanConfig): CellContents = {
     val newOccupants = cell.occupants :+ person
-    val newMarkers = cell.markers :+ person.createPersonMarker(markerRound)
+    val newMarkers = addMarker(cell.markers, person.createPersonMarker(markerRound))
     cell.copy(occupants = newOccupants, markers = newMarkers)
   }
 
