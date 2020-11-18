@@ -223,7 +223,8 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
 
   private def handleMarker(marker: PersonMarker, markerRound: Long, neighbourContents: Map[Direction, CellContents])
                           (implicit config: UrbanConfig): (Plans, UrbanMetrics) = {
-    if (marker.round >= markerRound && marker.distance < config.markerDetectionDistance) {
+    // move only markers that are not at max distance and no older than previous round
+    if (marker.round >= markerRound - 1 && marker.distance < config.markerDetectionDistance) {
       val spreadPlans = neighbourContents.keys.map(Some(_) -> Plan(AddMarker(marker.spread()))).toSeq
       (Plans(spreadPlans), UrbanMetrics.empty)
     } else {
