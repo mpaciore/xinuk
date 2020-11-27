@@ -25,6 +25,7 @@ final case class RabbitsConfig(
                                 worldHeight: Int,
                                 iterationsNumber: Long,
                                 iterationFinishedLogFrequency: Long,
+                                skipEmptyLogs: Boolean,
 
                                 signalSuppressionFactor: Double,
                                 signalAttenuationFactor: Double,
