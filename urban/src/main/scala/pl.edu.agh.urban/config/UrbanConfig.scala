@@ -16,6 +16,7 @@ final case class UrbanConfig(
                               worldType: WorldType,
                               iterationsNumber: Long,
                               iterationFinishedLogFrequency: Long,
+                              skipEmptyLogs: Boolean,
 
                               signalSuppressionFactor: Double,
                               signalAttenuationFactor: Double,

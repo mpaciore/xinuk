@@ -9,6 +9,7 @@ trait XinukConfig {
   def worldHeight: Int
   def iterationsNumber: Long
   def iterationFinishedLogFrequency: Long
+  def skipEmptyLogs: Boolean
 
   def signalSuppressionFactor: Double
   def signalAttenuationFactor: Double
