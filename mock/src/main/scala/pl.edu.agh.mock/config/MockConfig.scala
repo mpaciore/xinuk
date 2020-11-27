@@ -8,6 +8,7 @@ final case class MockConfig(worldType: WorldType,
                             worldHeight: Int,
                             iterationsNumber: Long,
                             iterationFinishedLogFrequency: Long,
+                            skipEmptyLogs: Boolean,
 
                             signalSuppressionFactor: Double,
                             signalAttenuationFactor: Double,

@@ -123,7 +123,7 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
 
     val returningPlans = entrance.visitors.map {
       case Visitor(person, returnTime) if time >= returnTime =>
-        val returningPerson = person.copy(target = person.source, travelMode = TravelMode.Return)
+        val returningPerson = person.returning()
         (Plans(None -> Plan(CreatePerson(returningPerson, markerRound), RemoveVisitor(entrance.targetId, person.id))), UrbanMetrics.empty)
       case _ =>
         noop
@@ -197,14 +197,10 @@ final case class UrbanPlanCreator() extends PlanCreator[UrbanConfig] with LazyLo
         } else {
           if (person.wanderingSegmentsRemaining > 0) {
             // change wandering target
-            (person.copy(
-              target = randomFrom(config.targets).id,
-              wanderingSegmentEndTime = time + config.randomSegmentDuration(),
-              wanderingSegmentsRemaining = person.wanderingSegmentsRemaining - 1
-            ), UrbanMetrics.empty)
+            (person.withNewWanderTarget(randomFrom(config.targets).id, time), UrbanMetrics.empty)
           } else {
             // return to source
-            (person.copy(target = person.source, travelMode = TravelMode.Return), UrbanMetrics.wanderEnd + UrbanMetrics.returnBeginning)
+            (person.returning(), UrbanMetrics.wanderEnd + UrbanMetrics.returnBeginning)
           }
         }
       case _ =>

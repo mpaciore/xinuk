@@ -113,7 +113,9 @@ class WorkerActor[ConfigType <: XinukConfig](
         })
         remoteCellContentsStash.remove(currentIteration)
 
-        logMetrics(currentIteration, iterationMetrics)
+        if (!config.skipEmptyLogs || iterationMetrics != emptyMetrics) {
+          logMetrics(currentIteration, iterationMetrics)
+        }
         if (iteration % config.guiUpdateFrequency == 0) {
           guiActors.foreach(_ ! GridInfo(iteration, worldShard.localCellIds.map(worldShard.cells(_)), iterationMetrics))
         }
@@ -134,12 +136,8 @@ class WorkerActor[ConfigType <: XinukConfig](
         val actionTarget = worldShard.cellNeighbours(cell.id)(direction)
         val consequenceTarget = cell.id
         val alternativeTarget = cell.id
-        plans.map {
-          _.toTargeted(actionTarget, consequenceTarget, alternativeTarget)
-        }
-    }.toSeq ++ plans.localPlans.map {
-      _.toTargeted(cell.id, cell.id, cell.id)
-    }
+        plans.map(_.toTargeted(actionTarget, consequenceTarget, alternativeTarget))
+    }.toSeq ++ plans.localPlans.map(_.toTargeted(cell.id, cell.id, cell.id))
   }
 
   private def processPlans(plans: Seq[TargetedPlan]): (Seq[TargetedPlan], Seq[TargetedPlan]) = {

@@ -3,8 +3,8 @@ package pl.edu.agh.urban.model
 import java.util.UUID
 
 import pl.edu.agh.urban.config.UrbanConfig
-import pl.edu.agh.xinuk.model.{CellId, Direction}
 import pl.edu.agh.xinuk.model.grid.GridDirection
+import pl.edu.agh.xinuk.model.{CellId, Direction}
 
 case class Person(
                    source: String,
@@ -21,6 +21,26 @@ case class Person(
   def withAddedDecision(cellId: CellId, direction: Direction)(implicit config: UrbanConfig): Person = {
     val shrunkHistory = decisionHistory.drop(decisionHistory.size + 1 - config.personMemorySize)
     copy(decisionHistory = shrunkHistory :+ (cellId, direction))
+  }
+
+  def withNewWanderTarget(target: String, time: Double)(implicit config: UrbanConfig): Person = {
+    copy(
+      target = target,
+      travelMode = TravelMode.Wander,
+      wanderingSegmentEndTime = time + config.randomSegmentDuration(),
+      wanderingSegmentsRemaining = wanderingSegmentsRemaining - 1,
+      decisionHistory = Seq.empty
+    )
+  }
+
+  def returning(): Person = {
+    copy(
+      target = source,
+      travelMode = TravelMode.Return,
+      wanderingSegmentEndTime = 0,
+      wanderingSegmentsRemaining = 0,
+      decisionHistory = Seq.empty
+    )
   }
 }
 

@@ -9,6 +9,7 @@ final case class FortwistConfig(
                                  worldHeight: Int,
                                  iterationsNumber: Long,
                                  iterationFinishedLogFrequency: Long,
+                                 skipEmptyLogs: Boolean,
 
                                  signalSuppressionFactor: Double,
                                  signalAttenuationFactor: Double,
