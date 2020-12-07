@@ -21,6 +21,7 @@ final case class MockConfig(worldType: WorldType,
 
                             guiType: GuiType,
                             guiCellSize: Int,
+                            guiStartIteration: Long,
                             guiUpdateFrequency: Long,
 
                             mockInitialSignal: Signal

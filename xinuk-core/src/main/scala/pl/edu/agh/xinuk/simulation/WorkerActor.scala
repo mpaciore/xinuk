@@ -116,7 +116,7 @@ class WorkerActor[ConfigType <: XinukConfig](
         if (!config.skipEmptyLogs || iterationMetrics != emptyMetrics) {
           logMetrics(currentIteration, iterationMetrics)
         }
-        if (iteration % config.guiUpdateFrequency == 0) {
+        if (iteration >= config.guiStartIteration && (iteration - config.guiStartIteration) % config.guiUpdateFrequency == 0) {
           guiActors.foreach(_ ! GridInfo(iteration, worldShard.localCellIds.map(worldShard.cells(_)), iterationMetrics))
         }
         if (iteration % config.iterationFinishedLogFrequency == 0) {
