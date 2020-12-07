@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Urban parallel supervisor" type="Application" factoryName="Application" folderName="urban" singleton="false">
+    <option name="MAIN_CLASS_NAME" value="pl.edu.agh.urban.UrbanMain" />
+    <module name="urban" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/urban_tests -Dclustering.port=2551 -Dclustering.supervisor.port=2551 -Durban.config.isSupervisor=true -Dclustering.min-nr-of-members=2" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

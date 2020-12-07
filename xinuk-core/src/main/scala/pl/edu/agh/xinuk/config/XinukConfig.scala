@@ -22,6 +22,7 @@ trait XinukConfig {
 
   def guiType: GuiType
   def guiCellSize: Int
+  def guiStartIteration: Long
   def guiUpdateFrequency: Long
 }
 

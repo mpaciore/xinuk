@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Urban parallel" type="CompoundRunConfigurationType">
+    <toRun name="Urban parallel worker" type="Application" />
+    <toRun name="Urban parallel supervisor" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

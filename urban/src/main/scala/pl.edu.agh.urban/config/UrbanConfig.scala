@@ -29,6 +29,7 @@ final case class UrbanConfig(
 
                               guiType: GuiType,
                               guiCellSize: Int,
+                              guiStartIteration: Long,
                               guiUpdateFrequency: Long,
 
                               originalWidth: Int,

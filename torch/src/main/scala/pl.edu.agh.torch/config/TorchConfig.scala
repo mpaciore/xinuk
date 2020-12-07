@@ -21,6 +21,7 @@ final case class TorchConfig(worldType: WorldType,
 
                              guiCellSize: Int,
                              guiType: GuiType,
+                             guiStartIteration: Long,
                              guiUpdateFrequency: Long,
 
                              spawnChance: Double,
