@@ -10,6 +10,8 @@ import scala.util.Random
 
 final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
 
+  private val random = new Random(System.nanoTime())
+
   override def createPlans(iteration: Long, cellId: CellId, cellState: CellState, neighbourContents: Map[Direction, CellContents])
                           (implicit config: RabbitsConfig): (Plans, RabbitsMetrics) = {
     cellState.contents match {
@@ -30,7 +32,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
         case _ => false
       }.keys.toSeq
       if (availableDirections.nonEmpty) {
-        val direction: Direction = availableDirections(Random.nextInt(availableDirections.size))
+        val direction: Direction = availableDirections(random.nextInt(availableDirections.size))
         val spreadLettucePlan = Plan(CreateLettuce)
         Seq(Some(direction) -> spreadLettucePlan)
       } else {
@@ -58,7 +60,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
 
       if (availableDirections.nonEmpty) {
         if (rabbit.energy > config.rabbitReproductionThreshold) {
-          val direction: Direction = availableDirections(Random.nextInt(availableDirections.size))
+          val direction: Direction = availableDirections(random.nextInt(availableDirections.size))
           Plans(Some(direction) -> Plan(
             CreateRabbit,
             KeepRabbit(Rabbit(rabbit.energy - config.rabbitReproductionCost, rabbit.lifespan + 1)),

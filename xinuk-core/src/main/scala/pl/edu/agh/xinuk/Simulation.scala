@@ -58,7 +58,7 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
 
   private val workerRegionRef: ActorRef = ClusterSharding(system).start(
     typeName = WorkerActor.Name,
-    entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreatorFactory(), planResolverFactory(), emptyMetrics, signalPropagation),
+    entityProps = WorkerActor.props[ConfigType](workerRegionRef, planCreatorFactory(), planResolverFactory(), emptyMetrics, signalPropagation, cellToColor),
     settings = ClusterShardingSettings(system),
     extractShardId = WorkerActor.extractShardId,
     extractEntityId = WorkerActor.extractEntityId
@@ -74,9 +74,9 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
         (config.guiType, world) match {
           case (GuiType.None, _) =>
           case (GuiType.Grid, gridWorldShard: GridWorldShard) =>
-            system.actorOf(GridGuiActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds, cellToColor))
+            system.actorOf(GridGuiActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds))
           case (GuiType.Snapshot, gridWorldShard: GridWorldShard) =>
-            system.actorOf(SnapshotActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds, cellToColor))
+            system.actorOf(SnapshotActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds))
           case _ => logger.warn("GUI type incompatible with World format.")
         }
         WorkerActor.send(workerRegionRef, workerId, WorkerActor.WorkerInitialized(world))
