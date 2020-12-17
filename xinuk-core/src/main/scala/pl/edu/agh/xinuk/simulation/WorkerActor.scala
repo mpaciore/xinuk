@@ -7,6 +7,7 @@ import pl.edu.agh.xinuk.algorithm._
 import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
 
+import java.awt.Color
 import scala.collection.mutable
 import scala.util.Random
 
@@ -15,7 +16,8 @@ class WorkerActor[ConfigType <: XinukConfig](
   planCreator: PlanCreator[ConfigType],
   planResolver: PlanResolver[ConfigType],
   emptyMetrics: => Metrics,
-  signalPropagation: SignalPropagation
+  signalPropagation: SignalPropagation,
+  cellToColor: PartialFunction[CellState, Color]
 )(implicit config: ConfigType) extends Actor with Stash {
 
   import pl.edu.agh.xinuk.simulation.WorkerActor._
@@ -117,7 +119,8 @@ class WorkerActor[ConfigType <: XinukConfig](
           logMetrics(currentIteration, iterationMetrics)
         }
         if (iteration >= config.guiStartIteration && (iteration - config.guiStartIteration) % config.guiUpdateFrequency == 0) {
-          guiActors.foreach(_ ! GridInfo(iteration, worldShard.localCellIds.map(worldShard.cells(_)), iterationMetrics))
+          val cellColors = cellsToColors(worldShard.localCellIds.map(worldShard.cells(_)))
+          guiActors.foreach(_ ! GridInfo(iteration, cellColors, iterationMetrics))
         }
         if (iteration % config.iterationFinishedLogFrequency == 0) {
           logger.info(s"finished $iteration")
@@ -217,6 +220,22 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   }
 
+  private def defaultColor: CellState => Color =
+    state => state.contents match {
+      case Obstacle => Color.BLACK
+      case Empty => Color.WHITE
+      case other =>
+        val random = new Random(other.getClass.hashCode())
+        val hue = random.nextFloat()
+        val saturation = 1.0f
+        val luminance = 0.6f
+        Color.getHSBColor(hue, saturation, luminance)
+    }
+
+  private def cellsToColors(cells: Set[Cell]): Map[CellId, Color] = cells.map {
+    cell => cell.id -> cellToColor.applyOrElse(cell.state, defaultColor)
+  }.toMap
+
   private def logMetrics(iteration: Long, metrics: Metrics): Unit = {
     logger.info(WorkerActor.MetricsMarker, "{};{}", iteration.toString, metrics: Any)
   }
@@ -242,8 +261,9 @@ object WorkerActor {
                                        planCreator: PlanCreator[ConfigType],
                                        planResolver: PlanResolver[ConfigType],
                                        emptyMetrics: => Metrics,
-                                       signalPropagation: SignalPropagation)(implicit config: ConfigType): Props = {
-    Props(new WorkerActor(regionRef, planCreator, planResolver, emptyMetrics, signalPropagation))
+                                       signalPropagation: SignalPropagation,
+                                       cellToColor: PartialFunction[CellState, Color])(implicit config: ConfigType): Props = {
+    Props(new WorkerActor(regionRef, planCreator, planResolver, emptyMetrics, signalPropagation, cellToColor))
   }
 
   def send(ref: ActorRef, id: WorkerId, msg: Any): Unit = ref ! MsgWrapper(id, msg)
@@ -261,7 +281,7 @@ object WorkerActor {
 
   final case class SubscribeGridInfo()
 
-  final case class GridInfo (iteration: Long, cells: Set[Cell], metrics: Metrics)
+  final case class GridInfo (iteration: Long, cellColors: Map[CellId, Color], metrics: Metrics)
 
   final case class WorkerInitialized(world: WorldShard)
 
