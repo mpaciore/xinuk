@@ -23,13 +23,12 @@ import scala.util.{Random, Try}
 class GridGuiActor private(worker: ActorRef,
                            simulationId: String,
                            workerId: WorkerId,
-                           bounds: GridWorldShard.Bounds,
-                           cellToColor: PartialFunction[CellState, Color])
+                           bounds: GridWorldShard.Bounds)
                           (implicit config: XinukConfig) extends Actor with ActorLogging {
 
   override def receive: Receive = started
 
-  private lazy val gui: GuiGrid = new GuiGrid(bounds, cellToColor, workerId)
+  private lazy val gui: GuiGrid = new GuiGrid(bounds, workerId)
 
   override def preStart(): Unit = {
     worker ! MsgWrapper(workerId, SubscribeGridInfo())
@@ -42,20 +41,20 @@ class GridGuiActor private(worker: ActorRef,
   }
 
   def started: Receive = {
-    case GridInfo(iteration, cells, metrics) =>
-      gui.setNewValues(cells)
+    case GridInfo(iteration, cellColors, metrics) =>
+      gui.setNewValues(cellColors)
       gui.updatePlot(iteration, metrics)
   }
 }
 
 object GridGuiActor {
-  def props(worker: ActorRef, simulationId: String, workerId: WorkerId, bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color])
+  def props(worker: ActorRef, simulationId: String, workerId: WorkerId, bounds: GridWorldShard.Bounds)
            (implicit config: XinukConfig): Props = {
-    Props(new GridGuiActor(worker, simulationId, workerId, bounds, cellToColor))
+    Props(new GridGuiActor(worker, simulationId, workerId, bounds))
   }
 }
 
-private[gui] class GuiGrid(bounds: GridWorldShard.Bounds, cellToColor: PartialFunction[CellState, Color], workerId: WorkerId)
+private[gui] class GuiGrid(bounds: GridWorldShard.Bounds, workerId: WorkerId)
                           (implicit config: XinukConfig) extends SimpleSwingApplication {
 
   Try(UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName))
@@ -117,36 +116,20 @@ private[gui] class GuiGrid(bounds: GridWorldShard.Bounds, cellToColor: PartialFu
     (location, size)
   }
 
-  def setNewValues(cells: Set[Cell]): Unit = {
-    cellView.set(cells)
+  def setNewValues(cellColors: Map[CellId, Color]): Unit = {
+    cellView.set(cellColors)
   }
 
   private class ParticleCanvas(xOffset: Int, yOffset: Int, xSize: Int, ySize: Int, guiCellSize: Int) extends Label {
-
-    private val obstacleColor = new swing.Color(0, 0, 0)
-    private val emptyColor = new swing.Color(255, 255, 255)
     private val img = new BufferedImage(xSize * guiCellSize, ySize * guiCellSize, BufferedImage.TYPE_INT_ARGB)
-
-    private def defaultColor: CellState => Color =
-      state => state.contents match {
-        case Obstacle => obstacleColor
-        case Empty => emptyColor
-        case other =>
-          val random = new Random(other.getClass.hashCode())
-          val hue = random.nextFloat()
-          val saturation = 1.0f
-          val luminance = 0.6f
-          Color.getHSBColor(hue, saturation, luminance)
-      }
 
     icon = new ImageIcon(img)
 
-    def set(cells: Set[Cell]): Unit = {
-      cells.foreach {
-        case Cell(GridCellId(x, y), state) =>
+    def set(cellColors: Map[CellId, Color]): Unit = {
+      cellColors.foreach {
+        case (GridCellId(x, y), color) =>
           val startX = (x - xOffset) * guiCellSize
           val startY = (y - yOffset) * guiCellSize
-          val color: Color = cellToColor.applyOrElse(state, defaultColor)
           img.setRGB(startX, startY, guiCellSize, guiCellSize, Array.fill(guiCellSize * guiCellSize)(color.getRGB), 0, guiCellSize)
         case _ =>
       }
