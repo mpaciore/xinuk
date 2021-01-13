@@ -2,7 +2,7 @@
   <configuration default="false" name="Fortwist tests" type="Application" factoryName="Application" folderName="fortwist">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.fortwist.FortwistMain" />
     <module name="fortwist" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/fortwist_tests -XX:+UnlockCommercialFeatures" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/fortwist_tests" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
