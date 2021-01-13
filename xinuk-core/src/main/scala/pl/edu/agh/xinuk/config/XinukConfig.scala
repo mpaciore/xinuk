@@ -43,4 +43,8 @@ object GuiType extends AbstractNamedEnumCompanion[GuiType] {
   case object Snapshot extends GuiType {
     override def name: String = "snapshot"
   }
+
+  case object SplitSnapshot extends GuiType {
+    override def name: String = "splitSnapshot"
+  }
 }
