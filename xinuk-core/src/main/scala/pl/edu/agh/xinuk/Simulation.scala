@@ -3,7 +3,6 @@ package pl.edu.agh.xinuk
 import java.awt.Color
 import java.io.File
 import java.util.UUID
-
 import akka.actor.{ActorRef, ActorSystem}
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
@@ -11,9 +10,9 @@ import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.readers.ValueReader
 import pl.edu.agh.xinuk.algorithm.{Metrics, PlanCreator, PlanResolver, WorldCreator}
 import pl.edu.agh.xinuk.config.{GuiType, XinukConfig}
-import pl.edu.agh.xinuk.gui.{GridGuiActor, SnapshotActor}
+import pl.edu.agh.xinuk.gui.{GridGuiActor, SnapshotActor, SplitSnapshotActor}
 import pl.edu.agh.xinuk.model._
-import pl.edu.agh.xinuk.model.grid.GridWorldShard
+import pl.edu.agh.xinuk.model.grid.{GridWorldShard, GridWorldType}
 import pl.edu.agh.xinuk.simulation.WorkerActor
 
 import scala.util.{Failure, Success, Try}
@@ -71,16 +70,23 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
       val simulationId: String = UUID.randomUUID().toString
 
       workerToWorld.foreach( { case (workerId, world) =>
-        (config.guiType, world) match {
-          case (GuiType.None, _) =>
-          case (GuiType.Grid, gridWorldShard: GridWorldShard) =>
-            system.actorOf(GridGuiActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds))
-          case (GuiType.Snapshot, gridWorldShard: GridWorldShard) =>
-            system.actorOf(SnapshotActor.props(workerRegionRef, simulationId, workerId, gridWorldShard.bounds))
-          case _ => logger.warn("GUI type incompatible with World format.")
-        }
         WorkerActor.send(workerRegionRef, workerId, WorkerActor.WorkerInitialized(world))
       })
+
+      (config.guiType, config.worldType) match {
+        case (GuiType.None, _) =>
+        case (GuiType.Grid, GridWorldType) =>
+          workerToWorld.foreach( { case (workerId, world) =>
+            system.actorOf(GridGuiActor.props(workerRegionRef, simulationId, workerId, world.asInstanceOf[GridWorldShard].bounds))
+          })
+        case (GuiType.SplitSnapshot, GridWorldType) =>
+          workerToWorld.foreach( { case (workerId, world) =>
+            system.actorOf(SplitSnapshotActor.props(workerRegionRef, simulationId, workerId, world.asInstanceOf[GridWorldShard].bounds))
+          })
+        case (GuiType.Snapshot, GridWorldType) =>
+          system.actorOf(SnapshotActor.props(workerRegionRef, simulationId, workerToWorld.keySet))
+        case _ => logger.warn("GUI type not recognized or incompatible with World format.")
+      }
     }
   }
 
