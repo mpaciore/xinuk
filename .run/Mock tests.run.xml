@@ -2,7 +2,7 @@
   <configuration default="false" name="Mock tests" type="Application" factoryName="Application" folderName="mock">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.mock.MockMain" />
     <module name="mock" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/mock_tests -XX:+UnlockCommercialFeatures" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/mock_tests" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
