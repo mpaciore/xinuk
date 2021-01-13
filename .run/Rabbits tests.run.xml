@@ -2,7 +2,7 @@
   <configuration default="false" name="Rabbits tests" type="Application" factoryName="Application" folderName="rabbits">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.rabbits.RabbitsMain" />
     <module name="rabbits" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/rabbits_tests -XX:+UnlockCommercialFeatures" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/rabbits_tests" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -2,7 +2,7 @@
   <configuration default="false" name="Urban tests" type="Application" factoryName="Application" folderName="urban">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.urban.UrbanMain" />
     <module name="urban" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/urban_tests -XX:+UnlockCommercialFeatures -Xmx10g" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/urban_tests -Xmx10g" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

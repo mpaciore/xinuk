@@ -2,7 +2,7 @@
   <configuration default="false" name="Torch tests" type="Application" factoryName="Application" folderName="torch">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.torch.TorchMain" />
     <module name="torch" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/torch_tests -XX:+UnlockCommercialFeatures" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/torch_tests" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
