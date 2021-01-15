@@ -29,6 +29,7 @@ trait WorldShard {
   def calculateSignalUpdates(iteration: Long, signalPropagation: SignalPropagation)(implicit config: XinukConfig): Map[CellId, SignalMap] = {
     cells.keys.map { cellId =>
       val neighbourStates = cellNeighbours(cellId)
+        .filter { case (_, id) => localCellIds.contains(id) }
         .map { case (direction, neighbourId) => (direction, cells(neighbourId).state) }
       (cellId, signalPropagation.calculateUpdate(iteration, neighbourStates))
     }
