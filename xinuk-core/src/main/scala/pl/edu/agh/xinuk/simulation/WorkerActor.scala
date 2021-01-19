@@ -8,6 +8,7 @@ import pl.edu.agh.xinuk.config.XinukConfig
 import pl.edu.agh.xinuk.model._
 
 import java.awt.Color
+import java.security.SecureRandom
 import scala.collection.mutable
 import scala.util.Random
 
@@ -28,6 +29,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   val signalUpdatesStash: mutable.Map[Long, Seq[Seq[(CellId, SignalMap)]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
   val remoteCellContentsStash: mutable.Map[Long, Seq[Seq[(CellId, CellContents)]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
 
+  val random: Random = new SecureRandom
   var logger: Logger = _
   var id: WorkerId = _
   var worldShard: WorldShard = _
@@ -247,7 +249,7 @@ class WorkerActor[ConfigType <: XinukConfig](
   }
 
   private def shuffleUngroup[*, V](groups: Map[*, Seq[V]]): Seq[V] = {
-    Random.shuffle(groups.keys.toList).flatMap(k => Random.shuffle(groups(k)))
+    random.shuffle(groups.keys.toSeq).flatMap(k => random.shuffle(groups(k)))
   }
 }
 
