@@ -28,7 +28,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
         case _ => false
       }.keys.toSeq
       if (availableDirections.nonEmpty) {
-        val direction: Direction = availableDirections(config.random.nextInt(availableDirections.size))
+        val direction: Direction = randomDirection(availableDirections)
         val spreadLettucePlan = Plan(CreateLettuce)
         Seq(Some(direction) -> spreadLettucePlan)
       } else {
@@ -44,7 +44,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
   private def rabbitPlanning(rabbit: Rabbit, signalMap: SignalMap, neighbourContents: Map[Direction, CellContents])
                             (implicit config: RabbitsConfig): (Plans, RabbitsMetrics) = {
     val plans = if (rabbit.energy < config.rabbitLifeActivityCost) {
-      Plans(None ->Plan(KillRabbit))
+      Plans(None -> Plan(KillRabbit))
     } else {
       val availableDirections = neighbourContents.filter {
         case (_, Empty) => true
@@ -56,7 +56,7 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
 
       if (availableDirections.nonEmpty) {
         if (rabbit.energy > config.rabbitReproductionThreshold) {
-          val direction: Direction = availableDirections(config.random.nextInt(availableDirections.size))
+          val direction: Direction = randomDirection(availableDirections)
           Plans(Some(direction) -> Plan(
             CreateRabbit,
             KeepRabbit(Rabbit(rabbit.energy - config.rabbitReproductionCost, rabbit.lifespan + 1)),
@@ -77,5 +77,9 @@ final case class RabbitsPlanCreator() extends PlanCreator[RabbitsConfig] {
     }
 
     (plans, RabbitsMetrics.empty)
+  }
+
+  private def randomDirection(directions: Seq[Direction])(implicit config: RabbitsConfig): Direction = {
+    directions(config.random.nextInt(directions.size))
   }
 }
