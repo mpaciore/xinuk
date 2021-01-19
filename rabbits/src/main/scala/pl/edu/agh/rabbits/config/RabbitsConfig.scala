@@ -58,5 +58,5 @@ final case class RabbitsConfig(
                                 lettuceEnergeticCapacity: Double,
                                 lettuceReproductionFrequency: Int,
                               ) extends XinukConfig {
-  val random: Random = new SecureRandom()
+  val random: Random = new SecureRandom
 }

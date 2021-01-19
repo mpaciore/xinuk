@@ -20,6 +20,8 @@ sealed class GridDirection(private val xShift: Int, private val yShift: Int) ext
 
 object GridDirection {
 
+  implicit val ordering: Ordering[GridDirection] = Ordering.by(values.indexOf(_))
+
   private val valuesSeq: Seq[GridDirection] = Seq(Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft)
 
   implicit def values: Seq[GridDirection] = valuesSeq
