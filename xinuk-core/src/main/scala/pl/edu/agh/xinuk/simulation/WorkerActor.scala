@@ -25,7 +25,7 @@ class WorkerActor[ConfigType <: XinukConfig](
 
   val guiActors: mutable.Set[ActorRef] = mutable.Set.empty
   val plansStash: mutable.Map[Long, Seq[Seq[TargetedPlan]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
-  val consequencesStash: mutable.Map[Long, Seq[Seq[TargetedStateUpdate]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
+  val consequencesStash: mutable.Map[Long, Seq[Seq[TargetedUpdate]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
   val signalUpdatesStash: mutable.Map[Long, Seq[Seq[(CellId, SignalMap)]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
   val remoteCellContentsStash: mutable.Map[Long, Seq[Seq[(CellId, CellContents)]]] = mutable.Map.empty.withDefaultValue(Seq.empty)
 
@@ -89,7 +89,7 @@ class WorkerActor[ConfigType <: XinukConfig](
     case RemoteConsequences(iteration, remoteConsequences) =>
       consequencesStash(iteration) :+= remoteConsequences
       if (consequencesStash(currentIteration).size == worldShard.incomingWorkerNeighbours.size) {
-        val consequences: Seq[TargetedStateUpdate] = flatGroup(consequencesStash(currentIteration))(_.target).flatMap(_._2).toSeq
+        val consequences: Seq[TargetedUpdate] = flatGroup(consequencesStash(currentIteration))(_.target).flatMap(_._2).toSeq
         consequences.foreach(applyUpdate)
         consequencesStash.remove(currentIteration)
 
@@ -138,11 +138,12 @@ class WorkerActor[ConfigType <: XinukConfig](
     iterationMetrics += metrics
     plans.outwardsPlans.flatMap {
       case (direction, plans) =>
+        val planSource = cell.id
         val actionTarget = worldShard.cellNeighbours(cell.id)(direction)
         val consequenceTarget = cell.id
         val alternativeTarget = cell.id
-        plans.map(_.toTargeted(actionTarget, consequenceTarget, alternativeTarget))
-    }.toSeq ++ plans.localPlans.map(_.toTargeted(cell.id, cell.id, cell.id))
+        plans.map(_.toTargeted(planSource, actionTarget, consequenceTarget, alternativeTarget))
+    }.toSeq ++ plans.localPlans.map(_.toTargeted(cell.id, cell.id, cell.id, cell.id))
   }
 
   private def processPlans(plans: Seq[TargetedPlan]): (Seq[TargetedPlan], Seq[TargetedPlan]) = {
@@ -162,7 +163,7 @@ class WorkerActor[ConfigType <: XinukConfig](
     planResolver.isUpdateValid(currentIteration, target.state.contents, action)
   }
 
-  private def applyUpdate(stateUpdate: TargetedStateUpdate): Unit = {
+  private def applyUpdate(stateUpdate: TargetedUpdate): Unit = {
     val target = worldShard.cells(stateUpdate.target)
     val action = stateUpdate.update
     val (result, metrics) = planResolver.applyUpdate(currentIteration, target.state.contents, action)
@@ -201,7 +202,7 @@ class WorkerActor[ConfigType <: XinukConfig](
     items.groupBy { item => worldShard.cellToWorker(idExtractor(item)) }
   }
 
-  private def distributeConsequences(iteration: Long, consequencesToDistribute: Seq[TargetedStateUpdate]): Unit = {
+  private def distributeConsequences(iteration: Long, consequencesToDistribute: Seq[TargetedUpdate]): Unit = {
     val grouped = groupByWorker(consequencesToDistribute) { update => update.target }
     distribute(
       worldShard.outgoingWorkerNeighbours, grouped)(
@@ -291,7 +292,7 @@ object WorkerActor {
 
   final case class RemotePlans private(iteration: Long, plans: Seq[TargetedPlan])
 
-  final case class RemoteConsequences private(iteration: Long, consequences: Seq[TargetedStateUpdate])
+  final case class RemoteConsequences private(iteration: Long, consequences: Seq[TargetedUpdate])
 
   final case class RemoteSignal private(iteration: Long, signalUpdates: Seq[(CellId, SignalMap)])
 

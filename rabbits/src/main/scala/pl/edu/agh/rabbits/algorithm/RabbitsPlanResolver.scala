@@ -15,6 +15,7 @@ final case class RabbitsPlanResolver() extends PlanResolver[RabbitsConfig] {
       case (_: Rabbit, KillRabbit) => true
 
       case (_: Rabbit, RemoveRabbit) => true
+
       case (_: Lettuce, _: AddRabbit) => true
       case (Empty, _: AddRabbit) => true
 
@@ -39,6 +40,7 @@ final case class RabbitsPlanResolver() extends PlanResolver[RabbitsConfig] {
 
       case (_: Rabbit, RemoveRabbit) =>
         (Empty, RabbitsMetrics.empty)
+
       case (lettuce: Lettuce, AddRabbit(Rabbit(energy, lifespan))) =>
         val newRabbit = Rabbit(energy + config.lettuceEnergeticCapacity, lifespan)
         (newRabbit, RabbitsMetrics.rabbit(newRabbit) + RabbitsMetrics.lettuceConsumed(lettuce))
@@ -47,15 +49,14 @@ final case class RabbitsPlanResolver() extends PlanResolver[RabbitsConfig] {
 
       case (lettuce: Lettuce, CreateRabbit) =>
         val newRabbit = Rabbit(config.rabbitStartEnergy + config.lettuceEnergeticCapacity, 0)
-        (newRabbit, RabbitsMetrics.rabbit(newRabbit) + RabbitsMetrics.lettuceConsumed(lettuce) + RabbitsMetrics.rabbitReproduction)
+        (newRabbit, RabbitsMetrics.rabbit(newRabbit) + RabbitsMetrics.rabbitReproduction + RabbitsMetrics.lettuceConsumed(lettuce))
       case (Empty, CreateRabbit) =>
         val newRabbit = Rabbit(config.rabbitStartEnergy, 0)
         (newRabbit, RabbitsMetrics.rabbit(newRabbit) + RabbitsMetrics.rabbitReproduction)
 
       case (Rabbit(energy, lifespan), CreateLettuce) =>
-        val newLettuce = Lettuce(0)
         val newRabbit = Rabbit(energy + config.lettuceEnergeticCapacity, lifespan)
-        (newRabbit, RabbitsMetrics.rabbit(newRabbit) + RabbitsMetrics.lettuceConsumed(newLettuce))
+        (newRabbit, RabbitsMetrics.rabbitAddedEnergy(config.lettuceEnergeticCapacity) + RabbitsMetrics.lettuceConsumed(Lettuce(0)))
       case (Empty, CreateLettuce) =>
         (Lettuce(0), RabbitsMetrics.lettuce)
 
