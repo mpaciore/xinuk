@@ -1,6 +1,5 @@
 package pl.edu.agh.rabbits.algorithm
 
-import pl.edu.agh.rabbits.algorithm.RabbitsMetrics.lettuce
 import pl.edu.agh.rabbits.model.{Lettuce, Rabbit}
 import pl.edu.agh.xinuk.algorithm.Metrics
 
@@ -59,6 +58,7 @@ object RabbitsMetrics {
 
   def empty: RabbitsMetrics = Empty
   def rabbit(rabbit: Rabbit): RabbitsMetrics = RabbitsMetrics(1, 0, 0, rabbit.energy, 0, 0, 0, 0)
+  def rabbitAddedEnergy(energy: Double): RabbitsMetrics = RabbitsMetrics(0, 0, 0, energy, 0, 0, 0, 0)
   def lettuce: RabbitsMetrics = Lettuce
   def rabbitDeath(rabbit: Rabbit): RabbitsMetrics = RabbitsMetrics(0, 0, 1, 0, 0, 0, rabbit.lifespan, 0)
   def rabbitReproduction: RabbitsMetrics = RabbitReproduction

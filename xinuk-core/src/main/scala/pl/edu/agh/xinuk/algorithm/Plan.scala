@@ -5,16 +5,16 @@ import pl.edu.agh.xinuk.model.{CellId, Direction}
 trait Update
 
 /*
- * action:      StateUpdate to be validated against current state of target cell and applied to it or rejected
- * consequence: StateUpdate to be applied to the source cell if action is applied
- * alternative: StateUpdate to be applied to the source cell if action is rejected
+ * action:      Update to be validated against current state of target cell and applied to it or rejected
+ * consequence: optional Update to be applied to the source cell if action is applied
+ * alternative: optional Update to be applied to the source cell if action is rejected
  */
 final case class Plan(action: Update, consequence: Option[Update], alternative: Option[Update]) {
-  def toTargeted(actionTarget: CellId, consequenceTarget: CellId, alternativeTarget: CellId): TargetedPlan =
+  def toTargeted(planSource: CellId, actionTarget: CellId, consequenceTarget: CellId, alternativeTarget: CellId): TargetedPlan =
     TargetedPlan(
-      TargetedStateUpdate(actionTarget, action),
-      consequence.map(TargetedStateUpdate(consequenceTarget, _)),
-      alternative.map(TargetedStateUpdate(alternativeTarget, _))
+      TargetedUpdate(actionTarget, planSource, action),
+      consequence.map(TargetedUpdate(consequenceTarget, planSource, _)),
+      alternative.map(TargetedUpdate(alternativeTarget, planSource, _))
     )
 }
 
@@ -60,6 +60,6 @@ object Plans {
   def apply(plan: (Option[Direction], Plan)): Plans = new Plans(Seq(plan))
 }
 
-final case class TargetedStateUpdate(target: CellId, update: Update)
+final case class TargetedUpdate(target: CellId, source: CellId, update: Update)
 
-final case class TargetedPlan(action: TargetedStateUpdate, consequence: Option[TargetedStateUpdate], alternative: Option[TargetedStateUpdate])
+final case class TargetedPlan(action: TargetedUpdate, consequence: Option[TargetedUpdate], alternative: Option[TargetedUpdate])
