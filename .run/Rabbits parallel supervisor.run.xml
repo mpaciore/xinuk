@@ -2,7 +2,7 @@
   <configuration default="false" name="Rabbits parallel supervisor" type="Application" factoryName="Application" folderName="rabbits" singleton="false">
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.rabbits.RabbitsMain" />
     <module name="rabbits" />
-    <option name="VM_PARAMETERS" value="-Dlog.name=log/rabbits_tests -Dclustering.port=2551 -Dclustering.supervisor.port=2551 -Drabbits.config.isSupervisor=true -Dclustering.min-nr-of-members=2" />
+    <option name="VM_PARAMETERS" value="-Dlog.name=log/rabbits_supervisor -Dclustering.port=2551 -Dclustering.supervisor.port=2551 -Drabbits.config.isSupervisor=true -Dclustering.min-nr-of-members=2" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
