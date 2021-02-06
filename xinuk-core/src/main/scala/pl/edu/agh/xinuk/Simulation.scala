@@ -64,7 +64,6 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
   )
 
   def start(): Unit = {
-
     if (config.isSupervisor) {
       val workerToWorld: Map[WorkerId, WorldShard] = worldCreator.prepareWorld().build()
       val simulationId: String = UUID.randomUUID().toString
@@ -90,5 +89,5 @@ class Simulation[ConfigType <: XinukConfig : ValueReader](
     }
   }
 
-  private def logHeader: String = s"worker:iteration;${metricHeaders.mkString(";")}"
+  private def logHeader: String = s"worker:iteration;activeTime;waitingTime;${metricHeaders.mkString(";")}"
 }
