@@ -1,7 +1,7 @@
 cancelable in Global := true
 
 val Version = new {
-  val Akka = "2.5.31"
+  val Akka = "2.6.13"
   val AkkaKryo = "1.0.0"
   val Logback = "1.2.3"
   val AvsCommons = "2.0.0-M12"
