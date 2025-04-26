@@ -1,6 +1,6 @@
 # Xinuk
 
-**Xinuk** is an implementation of a highly scalable agent-based spatial simulation framework, written in Scala.
+**Xinuk** is an implementation of a highly scalable agent-based spatial simulation framework, written in Scala. It uses [sbt](https://www.scala-sbt.org/1.x/docs/) build tool.
 
 ## Models and scenarios
 
