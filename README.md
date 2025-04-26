@@ -24,3 +24,23 @@ The framework supports execution in distributed environment:
 - each instance must be provided with its own and supervisor's host by setting `clustering.ip` and `clustering.supervisor.ip` (and must be able to reach each other),
 - each instance must be provided with the desired total number of instances by setting `akka.cluster.min-nr-of-members`,
 - all other simulation parameters should be identical for all instances.
+
+## Related publications
+
+Bujas, J., Dworak, D., Turek, W., & Byrski, A. (2019).\
+High-performance computing framework with desynchronized information propagation for large-scale simulations.
+
+Renc, P., Bielech, M., Pęcak, T., Morawiecki, P., Paciorek, M., Turek, W., Byrski, A., & Wąs, J. (2020).\
+HPC large-scale pedestrian simulation based on proxemics rules.
+
+Paciorek, M., Bogacz, A., & Turek, W. (2020).\
+Scalable signal-based simulation of autonomous beings in complex environments.
+
+Paciorek, M., Bujas, J., Dworak, D., Turek, W., & Byrski, A. (2021).\
+Validation of signal propagation modeling for highly scalable simulations.
+
+Paciorek, M., & Turek, W. (2021).\
+Agent-based modeling of social phenomena for high performance distributed simulations.
+
+Paciorek, M., Poklewski-Koziełł, D., Racoń-Leja, K., Byrski, A., Gyurkovich, M., & Turek, W. (2021).\
+Microscopic simulation of pedestrian traffic in urban environment under epidemic conditions.
